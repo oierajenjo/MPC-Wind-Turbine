@@ -1,5 +1,6 @@
 close all
 clear all
+clc
 
 % Drive train model constants
 Jr = 321699000; % Rotor moment of inertia
@@ -29,24 +30,25 @@ sigma_m = sqrt(Ts*q); % Standard deviation mean wind noise
 sigma_t = ti*mu_m*sqrt((1-a^2)/(1-a)^2); % Standard deviation turbulent wind noise
 
 % Load data
-data1 = load('C:\Alvaro\AAU Master\SEMESTER 3-4\THESIS\Bladed data\DLC12_06p0_Y000_S0201');
-data2 = load('C:\Alvaro\AAU Master\SEMESTER 3-4\THESIS\Bladed data\DLC12_08p0_Y000_S0301');
-data3 = load('C:\Alvaro\AAU Master\SEMESTER 3-4\THESIS\Bladed data\DLC12_10p0_Y000_S0401');
-data4 = load('C:\Alvaro\AAU Master\SEMESTER 3-4\THESIS\Bladed data\DLC12_12p0_Y000_S0501');
-data5 = load('C:\Alvaro\AAU Master\SEMESTER 3-4\THESIS\Bladed data\DLC12_14p0_Y000_S0601');
-data6 = load('C:\Alvaro\AAU Master\SEMESTER 3-4\THESIS\Bladed data\DLC12_16p0_Y000_S0701');
-data7 = load('C:\Alvaro\AAU Master\SEMESTER 3-4\THESIS\Bladed data\DLC12_18p0_Y000_S0801');
-data8 = load('C:\Alvaro\AAU Master\SEMESTER 3-4\THESIS\Bladed data\DLC12_20p0_Y000_S0901');
-data9 = load('C:\Alvaro\AAU Master\SEMESTER 3-4\THESIS\Bladed data\DLC12_22p0_Y000_S1001');
-data10 = load('C:\Alvaro\AAU Master\SEMESTER 3-4\THESIS\Bladed data\DLC12_24p0_Y000_S1101');
+data1 = load('..\Bladed\DLC12_06p0_Y000_S0201').DLC12_06p0_Y000_S0201;
+% data2 = load('..\Bladed\DLC12_08p0_Y000_S0301').DLC12_08p0_Y000_S0301;
+% data3 = load('..\Bladed\DLC12_10p0_Y000_S0401').DLC12_10p0_Y000_S0401;
+% data4 = load('..\Bladed\DLC12_12p0_Y000_S0501').DLC12_12p0_Y000_S0501;
+% data5 = load('..\Bladed\DLC12_14p0_Y000_S0601').DLC12_14p0_Y000_S0601;
+% data6 = load('..\Bladed\DLC12_16p0_Y000_S0701').DLC12_16p0_Y000_S0701;
+% data7 = load('..\Bladed\DLC12_18p0_Y000_S0801').DLC12_18p0_Y000_S0801;
+% data8 = load('..\Bladed\DLC12_20p0_Y000_S0901').DLC12_20p0_Y000_S0901;
+% data9 = load('..\Bladed\DLC12_22p0_Y000_S1001').DLC12_22p0_Y000_S1001;
+% data10 = load('..\Bladed\DLC12_24p0_Y000_S1101').DLC12_24p0_Y000_S1101;
 % Inputs
-Pe = data1.DLC12_06p0_Y000_S0201.Data(:,20); % Electrical power
-beta = data1.DLC12_06p0_Y000_S0201.Data(:,30); % Mean pitch angle (collective pitch)
+Pe = data1.Data(:,20); % Electrical power
+beta = data1.Data(:,30); % Mean pitch angle (collective pitch)
 % Measurements
-omega_g = data1.DLC12_06p0_Y000_S0201.Data(:,13); % Generator speed
-omega_r = data1.DLC12_06p0_Y000_S0201.Data(:,10); % Rotor speed
-vr = data1.DLC12_06p0_Y000_S0201.Data(:,26); % Wind speed magnitud at the hub
-yt_ddot = data1.DLC12_06p0_Y000_S0201.Data(:,237); % Tower fore-aft acceleration
+omega_g = data1.Data(:,13); % Generator speed
+omega_r = data1.Data(:,10); % Rotor speed
+vr = data1.Data(:,26); % Wind speed magnitud at the hub
+yt_ddot = data1.Data(:,237); % Tower fore-aft acceleration
+
 % Extra available data
 % yt_dot = data1.DLC12_06p0_Y000_S0201.Data(:,231); % Tower fore-aft velocity
 % yt = data1.DLC12_06p0_Y000_S0201.Data(:,225); % Tower fore-aft deflection
@@ -54,8 +56,8 @@ yt_ddot = data1.DLC12_06p0_Y000_S0201.Data(:,237); % Tower fore-aft acceleration
 % Euler's Discretization Method
 % Initial conditions and setup
 n = 12000/Ts;
-yt(1) = data1.DLC12_06p0_Y000_S0201.Data(1,225); % Tower fore-aft velocity initial value
-yt_dot(1) = data1.DLC12_06p0_Y000_S0201.Data(1,231); % Tower fore-aft deflection initial value
+yt(1) = data1.Data(1,225); % Tower fore-aft velocity initial value
+yt_dot(1) = data1.Data(1,231); % Tower fore-aft deflection initial value
 
 % x = (enter the starting value of x here):Ts:(enter the ending value of x here);  % the range of x
 % y = zeros(size(x));  % allocate the result y
