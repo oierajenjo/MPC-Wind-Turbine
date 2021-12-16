@@ -160,28 +160,28 @@ for i = 1:Lk
     subplot(1,2,1); 
 %     plot(t,xt(i,:),'r-','LineWidth', 2);
     plot(t,x(i,:),'b-', t,xt(i,:),'r-');
-    xlabel('$Time (s)$', 'Interpreter', 'latex', 'FontSize', 14); 
-    ylabel(x_ul(i), 'Interpreter', 'latex', 'FontSize', 14); 
+    xlabel('Time (s)'); 
+    ylabel(['x_',num2str(i)]); 
     grid on; 
     legend('UKF','True');
-    title(['$Estimations $' x_vl(i)], 'Interpreter', 'latex', 'FontSize', 15);
+    title(['Estimations x' num2str(i)]);
     
     subplot(1,2,2); 
     plot(t,x(i,:)-xt(i,:),'b-');
-    xlabel('$Time (s)$', 'Interpreter', 'latex', 'FontSize', 14); 
-    ylabel(x_ul(i), 'Interpreter', 'latex', 'FontSize', 14); 
+    xlabel('Time (s)'); 
+    ylabel(['\Deltax_',num2str(i)]); 
     grid on;
     legend('UKF');
-    title(['$Error $' x_vl(i)], 'Interpreter', 'latex', 'FontSize', 15);
+    title(['Error x' num2str(i)]);
 end
 
 figure(6)
 plot(t,x(4,:)+x(5,:)-x(2,:),'b-',t,xt(4,:)+xt(5,:)-xt(2,:),'r-');
-xlabel('Time (s)', 'Interpreter', 'latex', 'FontSize', 14);
-ylabel('$Velocity [\frac{m}{s}]$', 'Interpreter', 'latex', 'FontSize', 14);
+xlabel('Time (s)');
+ylabel('m/s');
 grid on;
 legend('UKF','True');
-title('$v_r$', 'Interpreter', 'latex', 'FontSize', 15);
+title('v_r');
 
 function res = cp_ct(la,be,cl,lambdaVec,pitchVec)
     [~,i_la] = min(abs(lambdaVec-abs(la)));
