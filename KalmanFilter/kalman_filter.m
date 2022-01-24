@@ -21,8 +21,9 @@ alpha = 1; % Primary scaling parameter
 beta = 2; % Secondary scaling parameter (Gaussian assumption)
 kappa = 0; % Tertiary scaling parameter
 lambda = alpha^2*(Lk+kappa) - Lk;
-wm = ones(2*Lk + 1,1)*1/(2*(Lk+lambda));
-wc = wm;
+n_sigma_p = 2*Lk + 1; % Number of sigma points
+wm = ones(n_sigma_p,1)*1/(2*(Lk+lambda)); % Weight for transformed mean
+wc = wm; % Weight for transformed covariance
 wm(1) = lambda/(lambda+Lk);
 wc(1) = lambda/(lambda+Lk) + 1 - alpha^2 + beta;
 
@@ -32,9 +33,9 @@ a = @(x) 1-(x(5)*pi/(2*L))*Ts; % Euler
 vr = @(x) x(4)+x(5)-x(2);
 % f1 = @(x,u) ((1-mu_d)*0.5*rho*(vr(x))^3*Ar*C_p(x(1)*r/vr(x),u(1))/x(1)-u(2)/(eta_g*x(1)))/(Jr+Jg);
 % f2 = @(x,u) 0.5*rho*(vr(x))^2*Ar*C_t(x(1)*r/(vr(x)),u(1))-ct*x(2)-kt*x(3);
-f1 = @(x,u) ((1-mu_d)*0.5*rho*(vr(x))^3*Ar*cp_ct(x(1)*r/vr(x),u(1),cp_l,lambdaVec,pitchVec)/x(1)...
+f1 = @(x,u) ((1-mu_d)*0.5*rho*vr(x)^3*Ar*cp_ct(x(1)*r/vr(x),u(1),cp_l,lambdaVec,pitchVec)/x(1)...
             -u(2)/(eta_g*x(1)))/(Jr+Jg);
-f2 = @(x,u) (0.5*rho*(vr(x))^2*Ar*cp_ct(x(1)*r/vr(x),u(1),ct_l,lambdaVec,pitchVec)...
+f2 = @(x,u) (0.5*rho*vr(x)^2*Ar*cp_ct(x(1)*r/vr(x),u(1),ct_l,lambdaVec,pitchVec)...
             -ct*x(2)-kt*x(3))/mt;
 f3 = @(x) x(2);
 f4 = @(x) -x(5)*pi*x(4)/(2*L);
@@ -44,8 +45,8 @@ h = @(x,u,y_dd) [x(1); x(4)+x(5)-x(2); abs(y_dd-x(2))/Ts];
 
 sigma_t = @(x) ti*x(5)*sqrt((1-a(x)^2)/(1-a(x))^2);
 sigma_m = sqrt(Ts*q);
-Q = @(x) diag([0; 0; 0; sigma_t(x)^2*(x(5)*pi/(2*L))^2; sigma_m^2]);
-R = 0.01*eye(Yk,Yk);
+Q = @(x) diag([0; 0; 0; sigma_t(x)^2*(x(5)*pi/(2*L))^2; sigma_m^2]); % Covariance matrix of the process noise
+R = 0.1^2*eye(Yk,Yk); % Covariance matrix of measurement noise
 
 % Step 3: Initialize state and covariance
 x = zeros(Lk, N); % Initialize size of state estimate for all k
@@ -55,7 +56,7 @@ P0 = eye(Lk,Lk); % Set initial error covariance
 
 % Simulation Only: Calculate true state trajectory for comparison
 % Also calculate measurement vector
-% Var(QX)=QVar(X)Q' = sigma^4 ->Var(sqrt(Q)X)=sqrt(Q)Var(Q)sqrt(Q)'=sigma^2
+% Var(QX) = QVar(X)Q' = sigma^4 -> Var(sqrt(Q)X) = sqrt(Q)Var(X)sqrt(Q)' = sigma^2
 n = @(x) sqrt(Q(x))*randn(Lk, 1); % Generate random process noise (from assumed Q) 
 v = sqrt(R)*randn(Yk, N); % Generate random measurement noise (from assumed R)
 %w = zeros(1,N);
@@ -65,6 +66,7 @@ xt = zeros(Lk, N); % Initialize size of true state for all k
 xt(:,1) = x_i; % Set true initial state
 y = zeros(Yk, N); % Initialize size of output vector for all k
 
+% Generate the true state values
 for k = 2:N
     xt(:,k) = f(xt(:,k-1),u(:,k-1)) + Ts*n(xt(:,k-1));
     if k==2
@@ -102,23 +104,22 @@ P = P0; % Set first value of P to the initial P0
 for k = 2:N
     % Step 1: Generate the sigma-points
     sP = chol(P,'lower'); % Calculate square root of error covariance
-    % chi_p = "chi previous" = chi(k-1)
+    % chi_p = "chi previous" = chi(k-1) % Untransformed sigma points
     chi_p = [x(:,k-1), x(:,k-1)*ones(1,Lk)+sqrt(Lk+lambda)*sP, ...
-             x(:,k-1)*ones(1,Lk)-sqrt(Lk+lambda)*sP];
+             x(:,k-1)*ones(1,Lk)-sqrt(Lk+lambda)*sP]; % Untransformed sigma points
 
     % Step 2: Prediction Transformation
     % Propagate each sigma-point through prediction
     % chi_m = "chi minus" = chi(k|k-1)
-    s = 2*Lk+1;
-    chi_m = zeros(Lk,s);
-    for j=1:s
+    chi_m = zeros(Lk,n_sigma_p); % Transformed sigma points
+    for j=1:n_sigma_p
         chi_m(:,j) = f(chi_p(:,j),u(:,k-1));
     end
     
     x_m = chi_m*wm; % Calculate mean of predicted state
     % Calculate covariance of predicted state
-    P_m = Q(xt(:,k-1));
-    for i = 1:2*Lk+1
+    P_m = Q(xt(:,k-1)); % A priori covariance estimate
+    for i = 1:n_sigma_p
         P_m = P_m + wc(i)*(chi_m(:,i) - x_m)*(chi_m(:,i) - x_m)';
     end
 
@@ -126,15 +127,14 @@ for k = 2:N
     % Propagate each sigma-point through observation
     % Initial velocity will be considered as 0, as we need it for
     % obtaining the acceleration
-    psi_m = zeros(Yk,s);
-    for j=1:s
+    psi_m = zeros(Yk,n_sigma_p);
+    for j=1:n_sigma_p
         if k==2
             psi_m(:,j) = h(chi_m(:,j),u(:,k-1),0);
         else
             psi_m(:,j) = h(chi_m(:,j),u(:,k-1),x(2,k-2));
         end
     end
-    % psi_m = [h(chi_m(:,1)) h(chi_m(1,2)) h(chi_m(1,3))];
     y_m = psi_m*wm; % Calculate mean of predicted output
     
     % Calculate covariance of predicted output
@@ -142,7 +142,7 @@ for k = 2:N
     Pyy = R;
     %Pxy = zeros(L,2);
     Pxy = 0;
-    for i = 1:s
+    for i = 1:n_sigma_p
         Pyy = Pyy + wc(i)*(psi_m(:,i) - y_m)*(psi_m(:,i) - y_m)';
         Pxy = Pxy + wc(i)*(chi_m(:,i) - x_m)*(psi_m(:,i) - y_m)';
     end
@@ -160,7 +160,7 @@ for i = 1:Lk
     subplot(1,2,1); 
 %     plot(t,xt(i,:),'r-','LineWidth', 2);
     plot(t,x(i,:),'b-', t,xt(i,:),'r-');
-    xlabel('$Time (s)$', 'Interpreter', 'latex', 'FontSize', 14); 
+    xlabel('Time (s)', 'Interpreter', 'latex', 'FontSize', 14); 
     ylabel(x_ul(i), 'Interpreter', 'latex', 'FontSize', 14); 
     grid on; 
     legend('UKF','True');
@@ -177,11 +177,13 @@ end
 
 figure(6)
 plot(t,x(4,:)+x(5,:)-x(2,:),'b-',t,xt(4,:)+xt(5,:)-xt(2,:),'r-');
-xlabel('Time (s)', 'Interpreter', 'latex', 'FontSize', 14);
-ylabel('$Velocity [\frac{m}{s}]$', 'Interpreter', 'latex', 'FontSize', 14);
+xlabel('Time (s)', 'FontSize', 14);
+ylabel('Velocity m/s', 'FontSize', 14);
 grid on;
-legend('UKF','True');
-title('$v_r$', 'Interpreter', 'latex', 'FontSize', 15);
+legend('UKF', 'True');
+title('v_e', 'FontSize', 14);
+set(gcf, 'PaperOrientation','landscape');
+saveas(figure(6),'Kalman_ve.pdf');
 
 function res = cp_ct(la,be,cl,lambdaVec,pitchVec)
     [~,i_la] = min(abs(lambdaVec-abs(la)));
