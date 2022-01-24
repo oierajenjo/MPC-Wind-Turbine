@@ -177,13 +177,13 @@ end
 
 figure(6)
 plot(t,x(4,:)+x(5,:)-x(2,:),'b-',t,xt(4,:)+xt(5,:)-xt(2,:),'r-');
-xlabel('Time (s)', 'FontSize', 14);
-ylabel('Velocity m/s', 'FontSize', 14);
+xlabel('Time [s]', 'FontSize', 14);
+ylabel('Velocity [m/s]', 'FontSize', 14);
 grid on;
 legend('UKF', 'True');
 title('v_e', 'FontSize', 14);
 set(gcf, 'PaperOrientation','landscape');
-saveas(figure(6),'Kalman_ve.pdf');
+saveas(figure(6),'Figures/Kalman_ve.pdf');
 
 function res = cp_ct(la,be,cl,lambdaVec,pitchVec)
     [~,i_la] = min(abs(lambdaVec-abs(la)));
