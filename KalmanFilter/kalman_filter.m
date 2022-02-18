@@ -7,7 +7,6 @@ run("variables.m")
 
 %% Before filter execution
 % System properties
-Ts = 0.05; % Sampling time
 N = data1.Channels.Scans; % Number of time steps for filter
 %N1 = 20; % Station 1 North coordinate
 %E1 = 0; % Station 1 East coordinate
@@ -175,13 +174,14 @@ for i = 1:Lk
     title(['$Error $' x_vl(i)], 'Interpreter', 'latex', 'FontSize', 15);
 end
 
+v_r = @(x) x(4,:)+x(5,:)-x(2,:);
 figure(6)
-plot(t,x(4,:)+x(5,:)-x(2,:),'b-',t,xt(4,:)+xt(5,:)-xt(2,:),'r-');
+plot(t,v_r(x),'b-',t,v_r(xt),'r-');
 xlabel('Time [s]', 'FontSize', 14);
 ylabel('Velocity [m/s]', 'FontSize', 14);
 grid on;
 legend('UKF', 'True');
-title('v_e', 'FontSize', 14);
+title('Effective wind speed [v_r]', 'FontSize', 14);
 set(gcf, 'PaperOrientation','landscape');
 saveas(figure(6),'Figures/Kalman_ve.pdf');
 
@@ -189,5 +189,4 @@ function res = cp_ct(la,be,cl,lambdaVec,pitchVec)
     [~,i_la] = min(abs(lambdaVec-abs(la)));
     [~,i_be] = min(abs(pitchVec-be));
     res = cl(i_la,i_be);
-    
 end

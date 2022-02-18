@@ -53,13 +53,13 @@ u = [beta Pe]';
 omega_g = data1.Data(:,13); % Generator speed
 omega_r = data1.Data(:,10); % Rotor speed
 vr = data1.Data(:,26); % Wind speed magnitud at the hub
-yt_ddot = data1.Data(:,237); % Tower fore-aft acceleration
+yt_ddot = data1.Data(:,236); % Tower fore-aft acceleration
 
 y_me = [omega_r vr yt_ddot]';
 
 %% Initial state vector
-yt_dot1 = data1.Data(1,231);
-yt1 = data1.Data(1,225);
+yt_dot1 = data1.Data(1,230);
+yt1 = data1.Data(1,224);
 vm1 = data1.Data(1,59);
 
 x_i = [omega_r(1) yt_dot1 yt1 0 vm1];
