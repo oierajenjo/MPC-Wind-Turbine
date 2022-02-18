@@ -7,6 +7,7 @@ run("variables.m")
 
 %% Before filter execution
 % System properties
+N = data1.Channels.Scans; % Number of time steps for filter
 %N1 = 20; % Station 1 North coordinate
 %E1 = 0; % Station 1 East coordinate
 %N2 = 0; % Station 2 North coordinate
@@ -26,12 +27,14 @@ wm(1) = lambda/(lambda+Lk);
 wc(1) = lambda/(lambda+Lk) + 1 - alpha^2 + beta;
 
 % Step 2: Define noise assumptions
-a = @(x) 1-(x(5)*pi/(2*W.L))*Ts; % Euler
+a = @(x) 1-(x(5)*pi/(2*L))*Ts; % Euler
 % a = @(x) exp(-(x(5)*pi/(2*L))*Ts); % Zero Order Hold
 vr = @(x) x(4)+x(5)-x(2);
-f1 = @(x,u) ((1-D.mu)*0.5*A.rho*vr(x)^3*A.Ar*cp_ct(x(1)*A.Rr/vr(x),u(1),cp_l,lambdaVec,pitchVec)/x(1)...
-            -u(2)/(D.eta*x(1)))/(D.Jr+D.Jg);
-f2 = @(x,u) (0.5*A.rho*vr(x)^2*Ar*cp_ct(x(1)*Rr/vr(x),u(1),ct_l,lambdaVec,pitchVec)...
+% f1 = @(x,u) ((1-mu_d)*0.5*rho*(vr(x))^3*Ar*C_p(x(1)*r/vr(x),u(1))/x(1)-u(2)/(eta_g*x(1)))/(Jr+Jg);
+% f2 = @(x,u) 0.5*rho*(vr(x))^2*Ar*C_t(x(1)*r/(vr(x)),u(1))-ct*x(2)-kt*x(3);
+f1 = @(x,u) ((1-mu_d)*0.5*rho*vr(x)^3*Ar*cp_ct(x(1)*r/vr(x),u(1),cp_l,lambdaVec,pitchVec)/x(1)...
+            -u(2)/(eta_g*x(1)))/(Jr+Jg);
+f2 = @(x,u) (0.5*rho*vr(x)^2*Ar*cp_ct(x(1)*r/vr(x),u(1),ct_l,lambdaVec,pitchVec)...
             -ct*x(2)-kt*x(3))/mt;
 f3 = @(x) x(2);
 f4 = @(x) -x(5)*pi*x(4)/(2*L);
