@@ -8,26 +8,30 @@ D.eta = 0.93; % Generator efficiency
 
 %% Blades model constants
 B.m = 65566; % Blade mass
-B.cx = 13372; % Blade damping x direction
-B.kx = 757588; % Blade stiffness x direction
-B.cy = 15721; % Blade damping y direction
-B.ky = 1047014; % Blade stiffness y direction
+B.d = 0.03; % Blade damping ratio
+B.fx = 0.541; % Blade freq. flapwise
+B.fy = 0.636; % Blade freq. edgewise
+B.cx = B.d*2*B.m*2*pi*B.fx; % Blade damping x direction
+B.kx = (2*pi*B.fx)^2*B.m; % Blade stiffness x direction
+B.cy = B.d*2*B.m*2*pi*B.fy; % Blade damping y direction
+B.ky = (2*pi*B.fy)^2*B.m; % Blade stiffness y direction
 B.l = 117.1836; % Blade length
 
 %% Tower model constants
 T.m = 2475680; % Tower mass
 T.c = 0.005; % Tower damping
 T.k = 1086002; % Tower stiffness
-T.h = 144.582; % Tower height at nace center
+T.h = 144.582; % Tower height
 T.r_top = 3.25; % Tower top radius
 T.r_base = 5; % Tower base radius
 T.H = T.h + 4.34799; % Hub height
 T.r = (T.r_top-T.r_base)*(T.H-B.l)/T.H + T.r_base; % Tower radius
+T.xh = 10.93; % Tower overhang
 
 %% Aerodynamic model constants
-A.rho = 1.225; % Density of the air
-A.Rr = 241.996/2; % Rotor radius
-A.Ar = pi*A.Rr^2; % Rotor area
+Ae.rho = 1.225; % Density of the air
+Ae.Rr = 241.996/2; % Rotor radius
+Ae.Ar = pi*Ae.Rr^2; % Rotor area
 
 %% Wind model constants
 Ts = 0.05; % Sampling time
@@ -35,16 +39,28 @@ ti = 0.1; % Turbulence intensity
 W.q = 2^2/600; % Incremental variance mean wind speed
 W.mu_m = 6; % Fixed mean wind speed: 10 m/s
 W.L = 340.2;
-W.alpha_w = 0.15; % Wind shear exponent for smooth terrain
+W.alpha = 0.15; % Wind shear exponent for smooth terrain
 w_p = (W.mu_m*pi)/(2*W.L); % Kaimal spectrum peak freq.
 %W.a = exp(-W.w_p*Ts); % Discretizing filter with zoh
 % a = 1-w_p*Ts; %Discretizing filter with Fordward Euler
 % sigma_m = sqrt(Ts*W.q); % Standard deviation mean wind noise
 % sigma_t = ti*W.mu_m*sqrt((1-a^2)/(1-a)^2); % Standard deviation turbulent wind noise
 
+%% Actuator constants
+Ac.omega = 2.4*pi; % Natural frequency of pitch actuator model
+Ac.xi = 0.8; % Damping factor of pitch actuator model
+Ac.tau = 0.1; % Generator time constant
+
+%% Measurement constants
+M.sigma_enc = 0.01;
+M.sigma_acc = 0.02;
+M.sigma_root = 0.01; % ¿?
+M.sigma_pow = 0.01; % ¿?
+M.sigma_vane = 1;
+M.sigma_azim = 0.01;
+
 %% Load measured data
 data1 = load('..\Bladed\DLC12_06p0_Y000_S0201').DLC12_06p0_Y000_S0201;
-load('..\Bladed\performancemap_data.mat')
 % data2 = load('..\Bladed\DLC12_08p0_Y000_S0301').DLC12_08p0_Y000_S0301;
 % data3 = load('..\Bladed\DLC12_10p0_Y000_S0401').DLC12_10p0_Y000_S0401;
 % data4 = load('..\Bladed\DLC12_12p0_Y000_S0501').DLC12_12p0_Y000_S0501;
@@ -93,8 +109,9 @@ vm = data1.Data(1,59);
 x_i = [omega_r(1) xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta theta_dot Tg vt vm psi(1)];
 
 N = data1.Channels.Scans; % Number of time steps for filter
-clearvars -except D T B A Ts ti W w_p x_i y_me u N % a sigma_m sigma_t
+clearvars -except D T B Ae Ac M Ts ti W w_p x_i y_me u N % a sigma_m sigma_t
 
+load('..\Bladed\performancemap_data.mat')
 %% Plotting variables
 x_vl = {'$\omega_r$', '$\dot{x}_t$', '$x_t$', '$\dot{y}_t$', '$y_t$', ...
     '$\dot{x}_{b_1}$', '$\dot{x}_{b_2}$', '$\dot{x}_{b_3}$',...
