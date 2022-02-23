@@ -44,26 +44,26 @@ f4 = @(x) x(5); % Tower edgewise velocity
 f5 = @(x,u) (B.B*B.ky*(x(8)-x(4)) + B.B*B.cy*(x(9)-x(5)) - T.k*x(4) - T.c*x(5))/T.m; % Tower edgewise acceleration
 
 %% Blades
-f6 = @(x) x(7);
-f7 = @(x,u) (Fr(x,u) - B.B*B.kx*(x(6)-x(2)) - B.B*B.cx*(x(7)-x(3)))/(B.B*B.m);
-f8 = @(x) x(9);
-f9 = @(x,u) (3*x(12)/(2*T.H) - B.B*B.ky*(x(8)-x(4)) - B.B*B.cy*(x(9)-x(5)))/(B.B*B.m);
+f6 = @(x) x(7); % Blade foreafter velocity
+f7 = @(x,u) (Fr(x,u) - B.B*B.kx*(x(6)-x(2)) - B.B*B.cx*(x(7)-x(3)))/(B.B*B.m); % Blade foreafter acceleration
+f8 = @(x) x(9); % Blade edgewise velocity
+f9 = @(x,u) (3*x(12)/(2*T.H) - B.B*B.ky*(x(8)-x(4)) - B.B*B.cy*(x(9)-x(5)))/(B.B*B.m);% Blade edgewise acceleration
 
 %% Actuators
-f10 = @(x) x(11);
-f11 = @(x,u) Ac.omega^2*u(1) - 2*Ac.omega*Ac.xi*x(11) - Ac.omega^2*x(10);
-f12 = @(x,u) (u(2)-x(12))/Ac.tau;
+f10 = @(x) x(11); % Pitch velocity
+f11 = @(x,u) Ac.omega^2*u(1) - 2*Ac.omega*Ac.xi*x(11) - Ac.omega^2*x(10); % Pitch acceleration
+f12 = @(x,u) (u(2)-x(12))/Ac.tau; % Torque change in time
 
 %% Wind
-f13 = @(x) -x(14)*pi*x(13)/(2*W.L);
-f14 = 0;
+f13 = @(x) -x(14)*pi*x(13)/(2*W.L); % Wind turbulence acceleration
+f14 = 0; % Mean wind acceleration
 
 f = @(x,u) x + Ts*[f1(x,u); f2(x); f3(x,u); f4(x); f5(x,u); f6(x); f7(x,u);...
     f8(x); f9(x,u); f10(x); f11(x,u); f12(x,u); f13(x); f14]; % Nonlinear prediction
 
 % h = @(x) (x);
 h = @(x,u) [x(1); f3(x,u); f5(x,u); B.l*B.m*f7(x,u); B.l*B.m*f9(x,u);...
-    D.eta*x(12)*x(1); ve(x)+x(3)];
+    D.eta*x(12)*x(1); ve(x)-x(3)];
 
 sigma_t = @(x) ti*x(14)*sqrt((1-a(x)^2)/(1-a(x))^2);
 sigma_m = sqrt(Ts*W.q);
