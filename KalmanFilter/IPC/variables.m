@@ -10,7 +10,7 @@ D.eta = 0.93; % Generator efficiency
 B.m = 65566; % Blade mass
 B.d = 0.03; % Blade damping ratio
 B.fx = 0.541; % Blade freq. flapwise
-B.fy = 0.636; % Blade freq. edgewise
+B.fy = 0.636; % Bladclce freq. edgewise
 B.cx = B.d*2*B.m*2*pi*B.fx; % Blade damping x direction
 B.kx = (2*pi*B.fx)^2*B.m; % Blade stiffness x direction
 B.cy = B.d*2*B.m*2*pi*B.fy; % Blade damping y direction
@@ -19,8 +19,10 @@ B.l = 117.1836; % Blade length
 
 %% Tower model constants
 T.m = 2475680; % Tower mass
-T.c = 0.005; % Tower damping
-T.k = 1086002; % Tower stiffness
+T.d = 0.005; % Tower damping ratio
+T.f = 0.18; % Tower freq. flapwise
+T.c = T.d*2*T.m*2*pi*T.f; 
+T.k = (2*pi*T.f)^2*T.m; % Tower stiffness
 T.h = 144.582; % Tower height
 T.r_top = 3.25; % Tower top radius
 T.r_base = 5; % Tower base radius
@@ -60,7 +62,7 @@ M.sigma_vane = 1;
 M.sigma_azim = 0.01;
 
 %% Load measured data
-data1 = load('..\Bladed\DLC12_06p0_Y000_S0201').DLC12_06p0_Y000_S0201;
+data1 = load('DLC12_06p0_Y000_S0201').DLC12_06p0_Y000_S0201;
 % data2 = load('..\Bladed\DLC12_08p0_Y000_S0301').DLC12_08p0_Y000_S0301;
 % data3 = load('..\Bladed\DLC12_10p0_Y000_S0401').DLC12_10p0_Y000_S0401;
 % data4 = load('..\Bladed\DLC12_12p0_Y000_S0501').DLC12_12p0_Y000_S0501;
@@ -85,11 +87,13 @@ xt_ddot = data1.Data(:,236); % Tower fore-aft acceleration
 yt_ddot = data1.Data(:,237); % Tower edgewise acceleration
 Mx = [data1.Data(:,111) data1.Data(:,119) data1.Data(:,127)];
 My = [data1.Data(:,112) data1.Data(:,120) data1.Data(:,128)];
+% Mx = [data1.Data(:,61) data1.Data(:,69) data1.Data(:,77)]; % Mx in the principal axis
+% My = [data1.Data(:,62) data1.Data(:,70) data1.Data(:,78)]; % My in the principal axis
 Pe = data1.Data(:,28);
 vr = data1.Data(:,26); % Wind speed magnitud at the hub
 psi = data1.Data(:,11);
 
-y_me = [omega_r xt_ddot yt_ddot Mx My Pe vr psi]';
+y_me = [omega_r xt_ddot yt_ddot My Mx Pe vr psi]';
 
 %% Initial state vector
 xt_dot = data1.Data(1,230);
@@ -111,7 +115,7 @@ x_i = [omega_r(1) xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta theta_dot Tg vt 
 N = data1.Channels.Scans; % Number of time steps for filter
 clearvars -except D T B Ae Ac M Ts ti W w_p x_i y_me u N % a sigma_m sigma_t
 
-load('..\Bladed\performancemap_data.mat')
+load('performancemap_data.mat')
 %% Plotting variables
 x_vl = {'$\omega_r$', '$\dot{x}_t$', '$x_t$', '$\dot{y}_t$', '$y_t$', ...
     '$\dot{x}_{b_1}$', '$\dot{x}_{b_2}$', '$\dot{x}_{b_3}$',...
