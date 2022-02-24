@@ -63,7 +63,7 @@ M.sigma_vane = 1;
 M.sigma_azim = 0.01;
 
 %% Load measured data
-data1 = load('DLC12_06p0_Y000_S0201').DLC12_06p0_Y000_S0201;
+data1 = load('Bladed\DLC12_06p0_Y000_S0201').DLC12_06p0_Y000_S0201;
 % data2 = load('..\Bladed\DLC12_08p0_Y000_S0301').DLC12_08p0_Y000_S0301;
 % data3 = load('..\Bladed\DLC12_10p0_Y000_S0401').DLC12_10p0_Y000_S0401;
 % data4 = load('..\Bladed\DLC12_12p0_Y000_S0501').DLC12_12p0_Y000_S0501;

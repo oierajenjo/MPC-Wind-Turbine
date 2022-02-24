@@ -30,22 +30,23 @@ wc(1) = lambda/(lambda+Lk) + 1 - alpha^2 + beta;
 a = @(x) 1-(x(5)*pi/(2*L))*Ts; % Euler
 % a = @(x) exp(-(x(5)*pi/(2*L))*Ts); % Zero Order Hold
 vr = @(x) x(4)+x(5)-x(2);
-% f1 = @(x,u) ((1-mu_d)*0.5*rho*(vr(x))^3*Ar*C_p(x(1)*r/vr(x),u(1))/x(1)-u(2)/(eta_g*x(1)))/(Jr+Jg);
-% f2 = @(x,u) 0.5*rho*(vr(x))^2*Ar*C_t(x(1)*r/(vr(x)),u(1))-ct*x(2)-kt*x(3);
-f1 = @(x,u) ((1-mu_d)*0.5*rho*vr(x)^3*Ar*cp_ct(x(1)*r/vr(x),u(1),cp_l,lambdaVec,pitchVec)/x(1)...
-            -u(2)/(eta_g*x(1)))/(Jr+Jg);
-f2 = @(x,u) (0.5*rho*vr(x)^2*Ar*cp_ct(x(1)*r/vr(x),u(1),ct_l,lambdaVec,pitchVec)...
-            -ct*x(2)-kt*x(3))/mt;
+Tr = @(x,u) 0.5*rho*vr(x)^3*Ar*cp_ct(x(1)*r/vr(x),u(1),cp_l,lambdaVec,pitchVec)/x(1);
+Fr = @(x,u) 0.5*rho*vr(x)^2*Ar*cp_ct(x(1)*r/vr(x),u(1),ct_l,lambdaVec,pitchVec);
+
+f1 = @(x,u) ((1-mu_d)*Tr(x,u) - u(2)/(eta_g*x(1)))/(Jr+Jg);
+f2 = @(x,u) (Fr(x,u)-ct*x(2)-kt*x(3))/mt;
 f3 = @(x) x(2);
 f4 = @(x) -x(5)*pi*x(4)/(2*L);
-f = @(x,u) x + Ts*[f1(x,u); f2(x,u); f3(x); f4(x); 0]; % Nonlinear prediction
+f5 = 0;
+f = @(x,u) x + Ts*[f1(x,u); f2(x,u); f3(x); f4(x); f5]; % Nonlinear prediction
 % h = @(x) (x);
-h = @(x,u,y_dd) [x(1); x(4)+x(5)-x(2); abs(y_dd-x(2))/Ts];
+h = @(x,u,y_dd) [x(1); x(4)+x(5)-x(2); f2(x,u)];
 
 sigma_t = @(x) ti*x(5)*sqrt((1-a(x)^2)/(1-a(x))^2);
 sigma_m = sqrt(Ts*q);
-Q = @(x) diag([0; 0; 0; sigma_t(x)^2*(x(5)*pi/(2*L))^2; sigma_m^2]); % Covariance matrix of the process noise
-R = 0.1^2*eye(Yk,Yk); % Covariance matrix of measurement noise
+Q = @(x) diag([zeros(Lk-2,1); sigma_t(x)^2*(x(5)*pi/(2*L))^2; sigma_m^2]); % Covariance matrix of the process noise
+temp = [M.sigma_enc; M.sigma_vane; M.sigma_acc].^2;
+R = diag(temp); % Covariance matrix of measurement noise
 
 % Step 3: Initialize state and covariance
 x = zeros(Lk, N); % Initialize size of state estimate for all k
@@ -64,17 +65,12 @@ xt = zeros(Lk, N); % Initialize size of true state for all k
 % xt(:,1) = zeros(Lk,1) + sqrt(P0)*randn(Lk,1); % Set true initial state
 xt(:,1) = x_i; % Set true initial state
 y = zeros(Yk, N); % Initialize size of output vector for all k
-
+% y(:,1) = h(xt(:,1),u(:,1)) + v(:,1);
 % Generate the true state values
 for k = 2:N
     xt(:,k) = f(xt(:,k-1),u(:,k-1)) + Ts*n(xt(:,k-1));
-    if k==2
-        y(:,k) = h(xt(:,k),u(:,k-1),0) + v(:,k-1);
-    else
-        y(:,k) = h(xt(:,k),u(:,k-1),xt(2,k-2)) + v(:,k-1);
-    end
+    y(:,k-1) = h(xt(:,k-1),u(:,k-1)) + v(:,k-1);
 end
-
 % %% Initialize and run EKF for comparison
 % xe = zeros(Lk,N);
 % xe(:,1) = x(:,1);
@@ -128,11 +124,7 @@ for k = 2:N
     % obtaining the acceleration
     psi_m = zeros(Yk,n_sigma_p);
     for j=1:n_sigma_p
-        if k==2
-            psi_m(:,j) = h(chi_m(:,j),u(:,k-1),0);
-        else
-            psi_m(:,j) = h(chi_m(:,j),u(:,k-1),x(2,k-2));
-        end
+        psi_m(:,j) = h(chi_m(:,j),u(:,k-1));
     end
     y_m = psi_m*wm; % Calculate mean of predicted output
     

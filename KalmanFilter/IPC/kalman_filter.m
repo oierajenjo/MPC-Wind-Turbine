@@ -28,43 +28,54 @@ wc(1) = lambda/(lambda+Lk) + 1 - alpha^2 + beta;
 % Step 2: Define noise assumptions
 a = @(x) 1-(x(26)*pi/(2*W.L))*Ts; % Euler
 % a = @(x) exp(-(x(5)*pi/(2*L))*Ts); % Zero Order Hold
-vr = @(x) x(26)+x(25);
-vri = @(x,i) x(26)*(T.r^2*(Ae.Rr^2*(sin(x(27)+2*pi*(i-1)/3))^2-T.xh^2)/(T.xh^2+Ae.Rr^2*(sin(x(27)+2*pi*(i-1)/3))^2)^2 +...
+ve = @(x) x(26) + x(25);
+vei = @(x,i) x(26)*(T.r^2*(Ae.Rr^2*(sin(x(27)+2*pi*(i-1)/3))^2-T.xh^2)/(T.xh^2+Ae.Rr^2*(sin(x(27)+2*pi*(i-1)/3))^2)^2 +...
     ((Ae.Rr*cos(x(27)+2*pi*(i-1)/3)+T.H)/T.H)^W.alpha) + x(25);
 
-f1 = @(x,u) (1-D.mu)*0.5*Ae.rho*(vr(x)-x(3))^3*Ae.Ar*cp_ct(x(1)*Ae.Rr/(vr(x)-x(3)),mean(u(1:3)),cp_l,lambdaVec,pitchVec)/(x(1)*(D.Jr+D.Jg))...
-    - x(24)/(D.Jr+D.Jg);
-f2 = @(x) x(3);
-f3 = @(x,u) (B.kx*(sum(x(6:8)-x(2))) + B.cx*(sum(x(9:11)-x(3))) - T.k*x(2) - T.c*x(3))/T.m;
-% f3 = @(x,u) (B.kx*(x(6)+x(7)+x(8)-3*x(2)) + B.cx*(x(9)+x(10)+x(11)-3*x(3)) - T.k*x(2) - T.c*x(3))/T.m;
-f4 = @(x) x(5);
-f5 = @(x,u) (B.ky*(sum(x(12:14)-x(4))) + B.cy*(sum(x(15:17)-x(5))) - T.k*x(4) - T.c*x(5))/T.m;
-% f5 = @(x,u) (B.ky*(x(12)+x(13)+x(14)-3*x(4)) + B.cy*(x(15)+x(16)+x(17)-3*x(5)) - T.k*x(4) - T.c*x(5))/T.m;
-f6 = @(x) x(9);
-f7 = @(x) x(10);
-f8 = @(x) x(11);
-f9 = @(x,u) (0.5*Ae.rho*(vri(x,1)-x(3))^2*Ae.Ar*cp_ct(x(1)*Ae.Rr/(vri(x,1)-x(3)),u(1),ct_l,lambdaVec,pitchVec)/3 -...
-    B.kx*(x(6)-x(2)) - B.cx*(x(9)-x(3)))/B.m;
-f10 = @(x,u) (0.5*Ae.rho*(vri(x,2)-x(3))^2*Ae.Ar*cp_ct(x(1)*Ae.Rr/(vri(x,2)-x(3)),u(2),ct_l,lambdaVec,pitchVec)/3 -...
-    B.kx*(x(7)-x(2)) - B.cx*(x(10)-x(3)))/B.m;
-f11 = @(x,u) (0.5*Ae.rho*(vri(x,3)-x(3))^2*Ae.Ar*cp_ct(x(1)*Ae.Rr/(vri(x,3)-x(3)),u(3),ct_l,lambdaVec,pitchVec)/3 -...
-    B.kx*(x(8)-x(2)) - B.cx*(x(11)-x(3)))/B.m;
-f12 = @(x) x(15);
-f13 = @(x) x(16);
-f14 = @(x) x(17);
-f15 = @(x,u) (x(24)/(2*T.H) - B.ky*(x(12)-x(4)) - B.cy*(x(15)-x(5)))/B.m;
-f16 = @(x,u) (x(24)/(2*T.H) - B.ky*(x(13)-x(4)) - B.cy*(x(16)-x(5)))/B.m;
-f17 = @(x,u) (x(24)/(2*T.H) - B.ky*(x(14)-x(4)) - B.cy*(x(17)-x(5)))/B.m;
-f18 = @(x) x(21);
-f19 = @(x) x(22);
-f20 = @(x) x(23);
-f21 = @(x,u) Ac.omega^2*u(1) - 2*Ac.omega*Ac.xi*x(21) - Ac.omega^2*x(18);
-f22 = @(x,u) Ac.omega^2*u(2) - 2*Ac.omega*Ac.xi*x(22) - Ac.omega^2*x(19);
-f23 = @(x,u) Ac.omega^2*u(3) - 2*Ac.omega*Ac.xi*x(23) - Ac.omega^2*x(20);
-f24 = @(x,u) (u(4)-x(24))/Ac.tau;
-f25 = @(x) -x(26)*pi*x(25)/(2*W.L);
-f26 = 0;
-f27 = @(x) x(1);
+Tr = @(x,u) 0.5*Ae.rho*Ae.Ar*(ve(x)-x(3))^3*cp_ct(x(1)*Ae.Rr/(ve(x)-x(3)),mean(u(1:3)),cp_l,lambdaVec,pitchVec)/x(1);
+Fri = @(x,u,i) 0.5*Ae.rho*(vei(x,i)-x(3)-x(9+i-1))^2*Ae.Ar*cp_ct(x(1)*Ae.Rr/(vei(x,i)-x(3)),u(1),ct_l,lambdaVec,pitchVec)/3; % Thrust coefficient
+
+%% Drive train
+f1 = @(x,u) ((1-D.mu)*Tr(x,u) - x(24))/(D.Jr+D.Jg);
+
+%% Tower
+f2 = @(x) x(3); % Tower foreafter velocity
+f3 = @(x,u) (B.kx*(sum(x(6:8)-x(2))) + B.cx*(sum(x(9:11)-x(3))) - T.k*x(2) - T.c*x(3))/T.m; % Tower foreafter acceleration
+
+f4 = @(x) x(5); % Tower edgewise velocity
+f5 = @(x,u) (3*x(24)/(2*T.H) + B.ky*(sum(x(12:14)-x(4))) + B.cy*(sum(x(15:17)-x(5))) - T.k*x(4) - T.c*x(5))/T.m; % Tower edgewise acceleration
+
+%% Blades
+f6 = @(x) x(9); % Blade 1 foreafter velocity
+f7 = @(x) x(10); % Blade 2 foreafter velocity
+f8 = @(x) x(11); % Blade 3 foreafter velocity
+f9 = @(x,u) (Fri(x,u,1) - B.kx*(x(6)-x(2)) - B.cx*(x(9)-x(3)))/B.m; % Blade 1 foreafter acceleration
+f10 = @(x,u) (Fri(x,u,2) - B.kx*(x(7)-x(2)) - B.cx*(x(10)-x(3)))/B.m; % Blade 2 foreafter acceleration
+f11 = @(x,u) (Fri(x,u,3) - B.kx*(x(8)-x(2)) - B.cx*(x(11)-x(3)))/B.m; % Blade 3 foreafter acceleration
+
+f12 = @(x) x(15); % Blade 1 edgewise velocity
+f13 = @(x) x(16); % Blade 2 edgewise velocity
+f14 = @(x) x(17); % Blade 3 edgewise velocity
+f15 = @(x,u) (- B.ky*(x(12)-x(4)) - B.cy*(x(15)-x(5)))/B.m; % Blade 1 edgewise acceleration
+f16 = @(x,u) (- B.ky*(x(13)-x(4)) - B.cy*(x(16)-x(5)))/B.m; % Blade 2 edgewise acceleration
+f17 = @(x,u) (- B.ky*(x(14)-x(4)) - B.cy*(x(17)-x(5)))/B.m; % Blade 3 edgewise acceleration
+
+%% Actuators
+f18 = @(x) x(21); % Pitch 1 acceleration
+f19 = @(x) x(22); % Pitch 2 acceleration
+f20 = @(x) x(23); % Pitch 3 acceleration
+f21 = @(x,u) Ac.omega^2*u(1) - 2*Ac.omega*Ac.xi*x(21) - Ac.omega^2*x(18); % Pitch 1 acceleration
+f22 = @(x,u) Ac.omega^2*u(2) - 2*Ac.omega*Ac.xi*x(22) - Ac.omega^2*x(19); % Pitch 2 acceleration
+f23 = @(x,u) Ac.omega^2*u(3) - 2*Ac.omega*Ac.xi*x(23) - Ac.omega^2*x(20); % Pitch 3 acceleration
+
+f24 = @(x,u) (u(4)-x(24))/Ac.tau; % Torque change in time
+
+%% Wind
+f25 = @(x) -x(26)*pi*x(25)/(2*W.L); % Wind turbulence acceleration
+f26 = 0; % Mean wind acceleration
+
+%% Azimuth
+f27 = @(x) x(1); % Azimuth velocity
 
 f = @(x,u) x + Ts*[f1(x,u); f2(x); f3(x,u); f4(x); f5(x,u); f6(x); f7(x);...
     f8(x); f9(x,u); f10(x,u); f11(x,u); f12(x); f13(x); f14(x); f15(x,u);...
@@ -74,7 +85,7 @@ f = @(x,u) x + Ts*[f1(x,u); f2(x); f3(x,u); f4(x); f5(x,u); f6(x); f7(x);...
 % h = @(x) (x);
 h = @(x,u) [x(1); f3(x,u); f5(x,u); B.l*B.m*f9(x,u); B.l*B.m*f10(x,u);...
     B.l*B.m*f11(x,u); B.l*B.m*f15(x,u); B.l*B.m*f16(x,u); B.l*B.m*f17(x,u);...
-    D.eta*x(24)*x(1); vr(x); x(27)];
+    D.eta*x(24)*x(1); ve(x); x(27)];
 
 sigma_t = @(x) ti*x(26)*sqrt((1-a(x)^2)/(1-a(x))^2);
 sigma_m = sqrt(Ts*W.q);
@@ -109,15 +120,48 @@ for k = 2:N
     y(:,k-1) = h(xt(:,k-1),u(:,k-1)) + v(:,k-1);
 end
 for k=1:N
-    p(k) = vr(xt(:,k));
-    pi(k) = vri(xt(:,k),1);
+    p(k) = ve(xt(:,k));
+    pi(k) = vei(xt(:,k),1);
 end
 figure
-plot(xt(3,1:500));
+plot(xt(1,1:4500));
+title("wr")
+figure
+plot(xt(2,1:4500));
+title("xt")
+figure
+plot(xt(3,1:4500));
+title("xtdot")
+figure
+plot(xt(6,1:4500));
+title("xb1")
 % figure
-% plot(pi(1:900))
+% plot(xt(4,1:500));
+% title("yt")
 % figure
-% plot(p(1:900))
+% plot(xt(5,1:500));
+% title("ytdot")
+% figure
+% plot(xt(12,1:500));
+% title("yb1")
+% figure
+% plot(xt(24,:));
+% title("Tg")
+% figure
+% plot(y(3,:));
+% title("yt me")
+% figure
+% plot(y(7,:)/(B.l*B.m));
+% title("yb1ddot me")
+% figure
+% plot(y(10,:));
+% title("Pe")
+% figure
+% plot(pi(:))
+% title("ve")
+% figure
+% plot(p(:))
+% title("ve1")
 
 % %% Initialize and run EKF for comparison
 % xe = zeros(Lk,N);

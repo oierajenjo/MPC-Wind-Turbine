@@ -29,10 +29,8 @@ wc(1) = lambda/(lambda+Lk) + 1 - alpha^2 + beta;
 a = @(x) 1-(x(14)*pi/(2*W.L))*Ts; % Euler
 % a = @(x) exp(-(x(14)*pi/(2*L))*Ts); % Zero Order Hold
 ve = @(x) x(13)+x(14);
-Tr = @(x,u) 0.5*Ae.rho*(ve(x)-x(3))^3*Ae.Ar*cp_ct(x(1)*Ae.Rr/(ve(x)-x(3)),u(1),cp_l,lambdaVec,pitchVec)/x(1);
-Fr = @(x,u) 0.5*Ae.rho*(ve(x)-x(3))^2*Ae.Ar*cp_ct(x(1)*Ae.Rr/(ve(x)-x(3)),u(1),ct_l,lambdaVec,pitchVec);
-% vri = @(x,i) x(14)*(T.r^2*(Ae.Rr^2*(sin(x(27)+2*pi*(i-1)/3))^2-T.xh^2)/(T.xh^2+Ae.Rr^2*(sin(x(27)+2*pi*(i-1)/3))^2)^2 +...
-%     ((Ae.Rr*cos(x(27)+2*pi*(i-1)/3)+T.H)/T.H)^W.alpha) + x(13);
+Tr = @(x,u) 0.5*Ae.rho*(ve(x)-x(3))^2*Ae.Rr*Ae.Ar*cp_ct(x(1)*Ae.Rr/(ve(x)-x(3)),u(1),cp_l,lambdaVec,pitchVec);
+Fr = @(x,u) 0.5*Ae.rho*(ve(x)-x(3)-x(7))^2*Ae.Ar*cp_ct(x(1)*Ae.Rr/(ve(x)-x(3)),u(1),ct_l,lambdaVec,pitchVec);
 
 %% Drive train
 f1 = @(x,u) (1-D.mu)*Tr(x,u)/(D.Jr+D.Jg) - x(12)/(D.Jr+D.Jg);
@@ -41,13 +39,13 @@ f1 = @(x,u) (1-D.mu)*Tr(x,u)/(D.Jr+D.Jg) - x(12)/(D.Jr+D.Jg);
 f2 = @(x) x(3); % Tower foreafter velocity
 f3 = @(x,u) (B.B*B.kx*(x(6)-x(2)) + B.B*B.cx*(x(7)-x(3)) - T.k*x(2) - T.c*x(3))/T.m; % Tower foreafter acceleration
 f4 = @(x) x(5); % Tower edgewise velocity
-f5 = @(x,u) (B.B*B.ky*(x(8)-x(4)) + B.B*B.cy*(x(9)-x(5)) - T.k*x(4) - T.c*x(5))/T.m; % Tower edgewise acceleration
+f5 = @(x,u) (3*x(12)/(2*T.H) + B.B*B.ky*(x(8)-x(4)) + B.B*B.cy*(x(9)-x(5)) - T.k*x(4) - T.c*x(5))/T.m; % Tower edgewise acceleration
 
 %% Blades
 f6 = @(x) x(7); % Blade foreafter velocity
 f7 = @(x,u) (Fr(x,u) - B.B*B.kx*(x(6)-x(2)) - B.B*B.cx*(x(7)-x(3)))/(B.B*B.m); % Blade foreafter acceleration
 f8 = @(x) x(9); % Blade edgewise velocity
-f9 = @(x,u) (3*x(12)/(2*T.H) - B.B*B.ky*(x(8)-x(4)) - B.B*B.cy*(x(9)-x(5)))/(B.B*B.m);% Blade edgewise acceleration
+f9 = @(x,u) (- B.B*B.ky*(x(8)-x(4)) - B.B*B.cy*(x(9)-x(5)))/(B.B*B.m); % Blade edgewise acceleration
 
 %% Actuators
 f10 = @(x) x(11); % Pitch velocity
@@ -102,7 +100,26 @@ for k=1:N
 %     pi(k) = vri(xt(:,k),1);
 end
 % figure
-% plot(xt(3,1:500));
+% plot(xt(1,:));
+% title("wr")
+% figure
+% plot(xt(2,:));
+% title("xt")
+% figure
+% plot(xt(3,:));
+% title("xtdot")
+% figure
+% plot(xt(6,:));
+% title("xb")
+figure
+plot(xt(4,1:500));
+title("yt")
+figure
+plot(xt(5,1:500));
+title("ytdot")
+figure
+plot(xt(8,1:500));
+title("yb")
 % figure
 % plot(pi(1:900))
 % figure
