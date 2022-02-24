@@ -26,14 +26,15 @@ wm(1) = lambda/(lambda+Lk);
 wc(1) = lambda/(lambda+Lk) + 1 - alpha^2 + beta;
 
 % Step 2: Define noise assumptions
-a = @(x) 1-(x(26)*pi/(2*W.L))*Ts; % Euler
+wp = @(x) x(26)*pi/(2*W.L);
+a = @(x) 1-wp(x)*Ts; % Euler
 % a = @(x) exp(-(x(5)*pi/(2*L))*Ts); % Zero Order Hold
 ve = @(x) x(26) + x(25);
 vei = @(x,i) x(26)*(T.r^2*(Ae.Rr^2*(sin(x(27)+2*pi*(i-1)/3))^2-T.xh^2)/(T.xh^2+Ae.Rr^2*(sin(x(27)+2*pi*(i-1)/3))^2)^2 +...
     ((Ae.Rr*cos(x(27)+2*pi*(i-1)/3)+T.H)/T.H)^W.alpha) + x(25);
 
-Tr = @(x,u) 0.5*Ae.rho*Ae.Ar*(ve(x)-x(3))^3*cp_ct(x(1)*Ae.Rr/(ve(x)-x(3)),mean(u(1:3)),cp_l,lambdaVec,pitchVec)/x(1);
-Fri = @(x,u,i) 0.5*Ae.rho*(vei(x,i)-x(3)-x(9+i-1))^2*Ae.Ar*cp_ct(x(1)*Ae.Rr/(vei(x,i)-x(3)),u(1),ct_l,lambdaVec,pitchVec)/3; % Thrust coefficient
+Tr = @(x,u) 0.5*Ae.rho*Ae.Ar*(ve(x)-x(3))^3*cp_ct(x(1)*Ae.Rr/(ve(x)-x(3)),mean(x(18:20)),cp_l,lambdaVec,pitchVec)/x(1);
+Fri = @(x,u,i) 0.5*Ae.rho*Ae.Ar*(vei(x,i)-x(3)-x(9+i-1))^2*cp_ct(x(1)*Ae.Rr/(vei(x,i)-x(3)),x(18+i-1),ct_l,lambdaVec,pitchVec)/3; % Thrust coefficient
 
 %% Drive train
 f1 = @(x,u) ((1-D.mu)*Tr(x,u) - x(24))/(D.Jr+D.Jg);
@@ -61,9 +62,9 @@ f16 = @(x,u) (- B.ky*(x(13)-x(4)) - B.cy*(x(16)-x(5)))/B.m; % Blade 2 edgewise a
 f17 = @(x,u) (- B.ky*(x(14)-x(4)) - B.cy*(x(17)-x(5)))/B.m; % Blade 3 edgewise acceleration
 
 %% Actuators
-f18 = @(x) x(21); % Pitch 1 acceleration
-f19 = @(x) x(22); % Pitch 2 acceleration
-f20 = @(x) x(23); % Pitch 3 acceleration
+f18 = @(x) x(21); % Pitch 1 velocity
+f19 = @(x) x(22); % Pitch 2 velocity
+f20 = @(x) x(23); % Pitch 3 velocity
 f21 = @(x,u) Ac.omega^2*u(1) - 2*Ac.omega*Ac.xi*x(21) - Ac.omega^2*x(18); % Pitch 1 acceleration
 f22 = @(x,u) Ac.omega^2*u(2) - 2*Ac.omega*Ac.xi*x(22) - Ac.omega^2*x(19); % Pitch 2 acceleration
 f23 = @(x,u) Ac.omega^2*u(3) - 2*Ac.omega*Ac.xi*x(23) - Ac.omega^2*x(20); % Pitch 3 acceleration
@@ -89,7 +90,7 @@ h = @(x,u) [x(1); f3(x,u); f5(x,u); B.l*B.m*f9(x,u); B.l*B.m*f10(x,u);...
 
 sigma_t = @(x) ti*x(26)*sqrt((1-a(x)^2)/(1-a(x))^2);
 sigma_m = sqrt(Ts*W.q);
-Q = @(x) diag([zeros(Lk-3,1); sigma_t(x)^2*(x(26)*pi/(2*W.L))^2; sigma_m^2; 0]); % Covariance matrix of the process noise
+Q = @(x) diag([zeros(Lk-3,1); sigma_t(x)^2*wp(x)^2; sigma_m^2; 0]); % Covariance matrix of the process noise
 
 temp = [M.sigma_enc; M.sigma_acc; M.sigma_acc; M.sigma_root; M.sigma_root;...
     M.sigma_root; M.sigma_root; M.sigma_root; M.sigma_root; M.sigma_pow;...
@@ -120,20 +121,23 @@ for k = 2:N
     y(:,k-1) = h(xt(:,k-1),u(:,k-1)) + v(:,k-1);
 end
 for k=1:N
-    p(k) = ve(xt(:,k));
-    pi(k) = vei(xt(:,k),1);
+    p(k) = ve(xt(:,k))-xt(3,k);
+    p1(k) = vei(xt(:,k),1);
+    p2(k) = vei(xt(:,k),2);
+    p3(k) = vei(xt(:,k),3);
+    tr(k) = (1-D.mu)*Tr(xt(:,k),u(:,k));
 end
 figure
-plot(xt(1,1:4500));
+plot(xt(1,1:5000));
 title("wr")
 figure
-plot(xt(2,1:4500));
+plot(xt(2,1:5000));
 title("xt")
 figure
-plot(xt(3,1:4500));
+plot(xt(3,1:5000));
 title("xtdot")
 figure
-plot(xt(6,1:4500));
+plot(xt(6,1:5000));
 title("xb1")
 % figure
 % plot(xt(4,1:500));
@@ -147,21 +151,20 @@ title("xb1")
 % figure
 % plot(xt(24,:));
 % title("Tg")
-% figure
-% plot(y(3,:));
-% title("yt me")
-% figure
-% plot(y(7,:)/(B.l*B.m));
-% title("yb1ddot me")
-% figure
-% plot(y(10,:));
-% title("Pe")
-% figure
-% plot(pi(:))
-% title("ve")
-% figure
-% plot(p(:))
-% title("ve1")
+figure
+plot(p(1:5000))
+title("vr")
+figure
+plot(1:5000,tr(1:5000),1:5000,xt(24,1:5000))
+title("tr & tg")
+legend("tr", "tg")
+figure
+plot(tr(1:5000)-xt(24,1:5000))
+title("Tr-Tg")
+legend("err")
+figure
+plot(1:N,p1(:),1:N,p2(:),1:N,p3(:))
+title("ve1, ve2, ve3")
 
 % %% Initialize and run EKF for comparison
 % xe = zeros(Lk,N);

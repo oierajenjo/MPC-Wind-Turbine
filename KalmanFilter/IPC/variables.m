@@ -19,6 +19,7 @@ B.l = 117.1836; % Blade length
 
 %% Tower model constants
 T.m = 2475680; % Tower mass
+% T.m = 1389678; % Nacelle mass
 T.d = 0.005; % Tower damping ratio
 T.f = 0.18; % Tower freq. flapwise
 T.c = T.d*2*T.m*2*pi*T.f; 
@@ -76,8 +77,8 @@ data1 = load('DLC12_06p0_Y000_S0201').DLC12_06p0_Y000_S0201;
 % time = data1.Data(:,1);
 
 %% Inputs
-tg_ref = data1.Data(:,20); % Generator Torque
 theta_ref = data1.Data(:,34:36); % Mean pitch angle (collective pitch)
+tg_ref = data1.Data(:,20); % Generator Torque
 
 u = [theta_ref tg_ref]';
 
@@ -113,7 +114,7 @@ vm = data1.Data(1,59);
 x_i = [omega_r(1) xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta theta_dot Tg vt vm psi(1)];
 
 N = data1.Channels.Scans; % Number of time steps for filter
-clearvars -except D T B Ae Ac M Ts ti W w_p x_i y_me u N % a sigma_m sigma_t
+clearvars -except D T B Ae Ac M Ts ti W w_p x_i y_me u N data1% a sigma_m sigma_t
 
 load('performancemap_data.mat')
 %% Plotting variables
