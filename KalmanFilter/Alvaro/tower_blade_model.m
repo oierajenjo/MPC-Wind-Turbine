@@ -132,7 +132,7 @@ legend('yt','yt_{dot}')
 A5 = [0 1 0 0 0 0 0 0;
     (-B*k_bx-k_t)/m_t (-B*c_bx-c_t)/m_t 0 0 B*k_bx/m_t B*c_bx/m_t 0 0;
     0 0 0 1 0 0 0 0;
-    (-B*k_by-k_t)/m_t (-B*c_by-c_t)/m_t 0 0 B*k_by/m_t B*c_by/m_t 0 0;
+    0 0 (-B*k_by-k_t)/m_t (-B*c_by-c_t)/m_t 0 0 B*k_by/m_t B*c_by/m_t;
     0 0 0 0 0 1 0 0;
     k_bx/m_b c_bx/m_b 0 0 -k_bx/m_b -c_bx/m_b 0 0;
     0 0 0 0 0 0 0 1;
