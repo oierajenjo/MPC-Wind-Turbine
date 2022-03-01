@@ -277,5 +277,3 @@ for k = 1:length(tsim)-1
     path.update_curve(X(1,1:k), X(2,1:k));
     pause(0.001)
 end
-
-

@@ -19,4 +19,4 @@ x_offset = -0.8;
 y_offset = -0.4;
 
 %Define the limit for the state constraint
-y_constraint=-0.6;
+y_constraint = -0.6;
