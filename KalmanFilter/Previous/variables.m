@@ -8,10 +8,12 @@ eta_g = 0.93; % Generator efficiency
 
 %% Tower model constants
 mt = 2475680-65566*3; % Tower mass
-dt = 0.005; % Tower damping
-ft =  0.18; % Tower stiffness
+dt = 0.005; % Tower damping ratio
+ft =  0.18; % Tower freq. flapwise
 ct = dt*2*mt*2*pi*ft; % Tower damping
 kt = (2*pi*ft)^2*mt; % Tower stiffness
+h = 144.582; % Tower height
+H = h + 4.34799; % Hub height
 
 %% Aerodynamic model constants
 rho = 1.225; % Density of the air
@@ -44,7 +46,7 @@ M.sigma_vane = 1;
 M.sigma_azim = 0.01;
 
 %% Load measured data
-data1 = load('Bladed\DLC12_06p0_Y000_S0201').DLC12_06p0_Y000_S0201;
+data = load('Bladed\DLC12_06p0_Y000_S0201').DLC12_06p0_Y000_S0201;
 load('Bladed\performancemap_data.mat')
 % data2 = load('..\Bladed\DLC12_08p0_Y000_S0301').DLC12_08p0_Y000_S0301;
 % data3 = load('..\Bladed\DLC12_10p0_Y000_S0401').DLC12_10p0_Y000_S0401;
@@ -59,29 +61,50 @@ load('Bladed\performancemap_data.mat')
 % time = data1.Data(:,1);
 
 %% Inputs
-Pe = data1.Data(:,28); % Electrical power
-beta = data1.Data(:,30); % Mean pitch angle (collective pitch)
-
-u = [beta Pe]';
-% theta_ref = data1.Data(:,30); % Mean pitch angle (collective pitch)
-% tg_ref = data1.Data(:,20); % Generator Torque
+% Pe = data1.Data(:,28); % Electrical power
+% beta = data1.Data(:,30); % Mean pitch angle (collective pitch)
 % 
-% u = [theta_ref tg_ref]';
+% u = [beta Pe]';
+theta_ref = data.Data(:,30); % Mean pitch angle (collective pitch)
+tg_ref = data.Data(:,20); % Generator Torque
+
+u = [theta_ref tg_ref]';
+
+%% Disturbances
+vm = data.Data(:,59); % Wind mean speed
+
+d = vm';
 
 %% Measurements
-omega_r = data1.Data(:,10); % Rotor speed
-vr = data1.Data(:,26); % Wind speed magnitud at the hub
-xt_ddot = data1.Data(:,236); % Tower fore-aft acceleration
+omega_r = data.Data(:,10); % Rotor speed
+xt_ddot = data.Data(:,236); % Tower fore-aft acceleration
+yt_ddot = data.Data(:,237); % Tower edgewise acceleration
+% Mx = mean([data1.Data(:,111) data1.Data(:,119) data1.Data(:,127)], 2);
+% My = mean([data1.Data(:,112) data1.Data(:,120) data1.Data(:,128)], 2);
+Mx = mean([data.Data(:,61) data.Data(:,69) data.Data(:,77)], 2); % Mx in the principal axis
+My = mean([data.Data(:,62) data.Data(:,70) data.Data(:,78)], 2); % My in the principal axis
+Pe = data.Data(:,28);
+vr = data.Data(:,26); % Wind speed magnitud at the hub
+psi = data.Data(:,11);
 
 y_me = [omega_r vr xt_ddot]';
 
 %% Initial state vector
-xt_dot1 = data1.Data(1,230);
-xt1 = data1.Data(1,224);
-vt1 = 0;
-vm1 = data1.Data(1,59);
+xt_dot = data.Data(1,230);
+xt = data.Data(1,224);
+yt_dot = data.Data(1,231);
+yt = data.Data(1,225);
+xb = mean([data.Data(1,85) data.Data(1,91) data.Data(1,97)], 2);
+xb_dot = 0;
+yb = mean([data.Data(1,86) data.Data(1,92) data.Data(1,98)], 2);
+yb_dot = 0;
+theta = theta_ref(1);
+theta_dot = mean(data.Data(1,37:39), 2);
+Tg = tg_ref(1);
+vt = 0;
+% vm = data1.Data(1,59);
 
-x_i = [omega_r(1) xt_dot1 xt1 vt1 vm1];
+x_i = [omega_r(1) xt xt_dot yt yt_dot theta theta_dot Tg vt];
 
 x_vl = {'$\omega_r$', '$\dot{y}_t$', '$y_t$', '$v_t$', '$v_m$'};
 y_vl = {'$\omega_r$', '$v_r$', '$\ddot{y}_t$'};
