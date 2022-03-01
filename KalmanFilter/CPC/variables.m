@@ -84,8 +84,9 @@ u = [theta_ref tg_ref]';
 
 %% Disturbances
 vm = data.Data(:,59); % Wind mean speed
+Fy = mean([data.Data(:,66) data.Data(:,74) data.Data(:,82)], 2); % My in the principal axis
 
-d = vm';
+d = [vm Fy]';
 
 %% Measurements
 omega_r = data.Data(:,10); % Rotor speed

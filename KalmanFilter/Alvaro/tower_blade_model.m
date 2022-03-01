@@ -1,5 +1,6 @@
 close all
 clear all
+clc
 
 data = load('Bladed\DLC12_06p0_Y000_S0201').DLC12_06p0_Y000_S0201;
 load('Bladed\performancemap_data.mat')
@@ -23,17 +24,20 @@ rho = 1.225; % Density of the air
 Rr = 241.996/2; % Rotor radius
 Ar = pi*Rr^2; % Rotor area
 
-for j=1:2
-    for i=1:length(ts)
-        u(i,j) = 1;
-    end
-end
+% for j=1:2
+%     for i=1:length(ts)
+%         u(i,j) = 1;
+%     end
+% end
+u = [tg_ref theta_ref];
 % u = u';
 
 for i=1:length(ts)
     Fr(i) = 0.5*rho*Ar*vm(i)^2*cp_ct(omega_r(i)*Rr/(vm(i)),theta_ref(i),ct_l,lambdaVec,pitchVec);
 end
+u = [Fr' theta_ref];
 Fr = Fr';
+
 
 figure(20)
 plot(Fr/(B*m_b))
@@ -132,7 +136,7 @@ legend('yt','yt_{dot}')
 A5 = [0 1 0 0 0 0 0 0;
     (-B*k_bx-k_t)/m_t (-B*c_bx-c_t)/m_t 0 0 B*k_bx/m_t B*c_bx/m_t 0 0;
     0 0 0 1 0 0 0 0;
-    (-B*k_by-k_t)/m_t (-B*c_by-c_t)/m_t 0 0 B*k_by/m_t B*c_by/m_t 0 0;
+    0 0 (-B*k_by-k_t)/m_t (-B*c_by-c_t)/m_t 0 0 B*k_by/m_t B*c_by/m_t;
     0 0 0 0 0 1 0 0;
     k_bx/m_b c_bx/m_b 0 0 -k_bx/m_b -c_bx/m_b 0 0;
     0 0 0 0 0 0 0 1;
