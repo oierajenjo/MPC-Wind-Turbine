@@ -26,27 +26,27 @@ wm(1) = lambda/(lambda+Lk);
 wc(1) = lambda/(lambda+Lk) + 1 - alpha^2 + beta;
 
 % Step 2: Define noise assumptions
-wp = @(d) d(1)*pi/(2*W.L);
+w_p = @(d) d(1)*pi/(2*W.L);
 ve = @(x,d) x(13) + d(1);
 Tr = @(x,d) 0.5*Ae.rho*Ae.Ar*(ve(x,d)-x(3))^3*cp_ct(x(1)*Ae.Rr/(ve(x,d)-x(3)),x(10),cp_l,lambdaVec,pitchVec)/x(1);
 Fr = @(x,d) 0.5*Ae.rho*Ae.Ar*(ve(x,d)-x(3)-x(7))^2*cp_ct(x(1)*Ae.Rr/(ve(x,d)-x(3)),x(10),ct_l,lambdaVec,pitchVec);
 
 %% Drive train
-f1 = @(x,d) ((1-D.mu)*Tr(x,d) - x(12))/(D.Jr+D.Jg);
+f1 = @(x,d) (1-D.mu)*Tr(x,d)/(D.Jr+D.Jg) - x(12)/(D.Jr+D.Jg);
 
 %% Tower
 f2 = @(x) x(3); % Tower foreafter velocity
-f3 = @(x) (B.B*B.kx*(x(6)-x(2)) + B.B*B.cx*(x(7)-x(3)) - T.k*x(2) - T.c*x(3))/T.m; % Tower foreafter acceleration
+f3 = @(x) -(B.B*B.kx + T.k)*x(2)/T.m - (B.B*B.cx + T.c)*x(3)/T.m + B.B*B.kx*x(6)/T.m + B.B*B.cx*x(7)/T.m; % Tower foreafter acceleration
 
 f4 = @(x) x(5); % Tower edgewise velocity
-f5 = @(x) (3*x(12)/(2*T.H) + B.B*B.ky*(x(8)-x(4)) + B.B*B.cy*(x(9)-x(5)) - T.k*x(4) - T.c*x(5))/T.m; % Tower edgewise acceleration
+f5 = @(x) 3*x(12)/(2*T.H*T.m) - (B.B*B.ky + T.k)*x(4)/T.m - (B.B*B.cy + T.c)*x(5)/T.m + B.B*B.ky*x(8)/T.m + B.B*B.cy*x(9)/T.m; % Tower edgewise acceleration
 
 %% Blades
 f6 = @(x) x(7); % Blade foreafter velocity
-f7 = @(x,d) (Fr(x,d) - B.B*B.kx*(x(6)-x(2)) - B.B*B.cx*(x(7)-x(3)))/(B.B*B.m); % Blade foreafter acceleration
+f7 = @(x,d) Fr(x,d)/(B.B*B.m) + B.kx*x(2)/B.m + B.cx*x(3)/B.m - B.kx*x(6)/B.m - B.cx*x(7)/B.m; % Blade foreafter acceleration
 
 f8 = @(x) x(9); % Blade edgewise velocity
-f9 = @(x) (- B.B*B.ky*(x(8)-x(4)) - B.B*B.cy*(x(9)-x(5)))/(B.B*B.m); % Blade edgewise acceleration
+f9 = @(x) B.ky*x(4)/B.m + B.cy*x(5)/B.m - B.ky*x(8)/B.m - B.cy*x(9)/B.m; % Blade edgewise acceleration
 
 %% Actuators
 f10 = @(x) x(11); % Pitch velocity
@@ -54,7 +54,7 @@ f11 = @(x,u) Ac.omega^2*u(1) - 2*Ac.omega*Ac.xi*x(11) - Ac.omega^2*x(10); % Pitc
 f12 = @(x,u) (u(2)-x(12))/Ac.tau; % Torque change in time
 
 %% Wind
-f13 = @(x,d) -wp(d)*x(13); % Wind turbulence acceleration
+f13 = @(x,d) -w_p(d)*x(13); % Wind turbulence acceleration
 % f14 = 0; % Mean wind acceleration
 
 
@@ -65,11 +65,11 @@ h = @(x,d) [x(1); f3(x); f5(x); B.l*B.m*f7(x,d); B.l*B.m*f9(x); ...
     D.eta*x(12)*x(1); ve(x,d)-x(3)];
 
 
-a = @(d) 1- wp(d)*Ts; % Euler
-% a = @(x) exp(-(x(14)*pi/(2*L))*Ts); % Zero Order Hold
+a = @(d) 1 - w_p(d)*Ts; % Euler
+% a = @(d) exp(-w_p(d)*Ts); % Zero Order Hold
 sigma_t = @(d) ti*d(1)*sqrt((1-a(d)^2)/(1-a(d))^2);
 sigma_m = sqrt(Ts*W.q);
-Q = @(d) diag([zeros(Lk-1,1); sigma_t(d)^2*wp(d)^2]); % Covariance matrix of the process noise
+Q = @(d) diag([zeros(Lk-1,1); sigma_t(d)^2*w_p(d)^2]); % Covariance matrix of the process noise
 
 temp = [M.sigma_enc; M.sigma_acc; M.sigma_acc; M.sigma_root; M.sigma_root;...
     M.sigma_pow; M.sigma_vane].^2;
@@ -100,22 +100,22 @@ for k = 2:N
 end
 for k=1:N
     p(k) = ve(xt(:,k),d(:,k));
-    fr(k) = Fr(xt(:,k),d(:,k));
+    fr(k) = Fr(xt(:,k),d(:,k))/(B.B*B.m);
     tr(k) = (1-D.mu)*Tr(xt(:,k),d(:,k));
-%     pi(k) = vri(xt(:,k),1);
+    %     pi(k) = vri(xt(:,k),1);
 end
 figure
 plot(xt(1,:));
 title("wr")
-figure
-plot(xt(2,:));
-title("xt")
-figure
-plot(xt(3,:));
-title("xtdot")
-figure
-plot(xt(6,:));
-title("xb")
+% figure
+% plot(xt(2,:));
+% title("xt")
+% figure
+% plot(xt(3,:));
+% title("xtdot")
+% figure
+% plot(xt(6,:));
+% title("xb")
 figure
 plot(xt(4,1:500));
 title("yt")
@@ -125,40 +125,20 @@ title("ytdot")
 figure
 plot(xt(8,1:500));
 title("yb")
-figure
-plot(p(:))
-title("ve")
-figure
-plot(1:N,xt(12,:),1:N,tr(:))
-title("Tg & Tr")
 
 figure
-plot(3*xt(12,:)/(2*T.H))
-title("Tg Applied")
-
-
-% %% Initialize and run EKF for comparison
-% xe = zeros(Lk,N);
-% xe(:,1) = x(:,1);
-% P = P0;
-% for k = 2:N
-%     % Prediction
-%     x_m = f(xe(:,k-1),u(:,k-1));
-%     F = 1-Ts^2*sin(Ts*k);
-%     % F = -T*sin(T*k);
-%     P_m = F*P*F' + Q;
-%
-%     % Observation
-%     y_m = x_m(1);
-%
-%     H = 1;
-%     %H = -T*(sin(T*x_m(1)) + T*cos(T*x_m(1)));
-%
-%     % Measurement Update
-%     K = P_m*H'/(H*P_m*H' + R); % Calculate Kalman gain
-%     xe(:,k) = x_m + K*(yt(:,k) - y_m); % Update state estimate
-%     P = (eye(Lk)-K*H)*P_m; % Update covariance estimate
-% end
+plot(1:N,y(2,:),1:N,y_me(2,:));
+title("xb")
+% figure
+% plot(p(:))
+% title("ve")
+figure
+plot(1:N,3*xt(12,:)/(2*T.H*T.m),1:N,fr)
+title("Tg & Fr")
+% figure
+% plot(1:N,3*xt(12,:)/(2*T.H*T.m),1:N,-(B.B*B.ky + T.k)*xt(4,:)/T.m - (B.B*B.cy + T.c)*xt(5,:)/T.m + B.B*B.ky*xt(8,:)/T.m + B.B*B.cy*xt(9,:)/T.m)
+% title("Tg Applied")
+% xlim([1 500])
 
 %% Execute Unscented Kalman Filter
 P = P0; % Set first value of P to the initial P0
