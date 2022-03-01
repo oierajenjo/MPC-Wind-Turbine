@@ -9,24 +9,22 @@ ti = 0.1; % Turbulence intensity
 q = 2^2/600; % Incremental variance mean wind speed
 mu_m = 10; % Fixed mean wind speed: 10 m/s
 L = 340.2;
-w_p = (mu_m*pi)/(2*L); % Kaimal spectrum peak freq.
-%a = exp(-w_p*Ts); % Discretizing filter with zoh
-a = 1-w_p*Ts; %Discretizing filter with Fordward Euler
 sigma_m = sqrt(Ts*q); % Standard deviation mean wind noise
-sigma_t = ti*mu_m*sqrt((1-a^2)/(1-a)^2); % Standard deviation turbulent wind noise
-%sigma_t = ti*mu_m*sqrt(1-a^2);
+
 
 v_m(1) = mu_m;
+v_t(1) = 0;
 for i = 2:N
-  v_m(i) = v_m(i-1)+normrnd(0,sigma_m); 
+  w_p = (v_m(i-1)*pi)/(2*L); % Kaimal spectrum peak freq.
+  %a = exp(-w_p*Ts); % Discretizing filter with zoh
+  a = 1-w_p*Ts; %Discretizing filter with Fordward Euler
+  sigma_t = ti*v_m(i-1)*sqrt((1-a^2)/(1-a)^2); % Standard deviation turbulent wind noise
+  %sigma_t = ti*mu_m*sqrt(1-a^2);
+  v_m(i) = v_m(i-1)+normrnd(0,sigma_m);
+  v_t(i) = a*v_t(i-1)+(1-a)*normrnd(0,sigma_t);
 end
 plot(v_m)
 hold on
-
-v_t(1) = 0;
-for i = 2:N
-  v_t(i) = a*v_t(i-1)+(1-a)*normrnd(0,sigma_t);
-end
 plot(v_t)
 
 v_e = v_m + v_t;
