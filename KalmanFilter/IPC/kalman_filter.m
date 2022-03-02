@@ -3,7 +3,7 @@ clear all
 close all
 
 %% Obtain all variables
-run("variables.m")
+variables_IPC
 
 %% Before filter execution
 % System properties
@@ -13,8 +13,9 @@ run("variables.m")
 %E2 = 20; % Station 2 East coordinate
 
 % Step 1: Define UT Scaling parameters and weight vectors
-Lk = 27; % Size of state vector
-Yk = 12; % Size of measured vector
+Lk = size(x_i,1); % Size of state vector
+Yk = size(y_me,1); % Size of measured vector
+Uk = size(u,1); % Size of imput vector
 alpha = 1; % Primary scaling parameter
 beta = 2; % Secondary scaling parameter (Gaussian assumption)
 kappa = 0; % Tertiary scaling parameter
@@ -30,8 +31,8 @@ wp = @(x) x(26)*pi/(2*W.L);
 a = @(x) 1-wp(x)*Ts; % Euler
 % a = @(x) exp(-(x(5)*pi/(2*L))*Ts); % Zero Order Hold
 ve = @(x) x(26) + x(25);
-vei = @(x,i) x(26)*(T.r^2*(Ae.Rr^2*(sin(x(27)+2*pi*(i-1)/3))^2-T.xh^2)/(T.xh^2+Ae.Rr^2*(sin(x(27)+2*pi*(i-1)/3))^2)^2 +...
-    ((Ae.Rr*cos(x(27)+2*pi*(i-1)/3)+T.H)/T.H)^W.alpha) + x(25);
+vei = @(x,i) x(26)*(To.r^2*(Ae.Rr^2*(sin(x(27)+2*pi*(i-1)/3))^2-To.xh^2)/(To.xh^2+Ae.Rr^2*(sin(x(27)+2*pi*(i-1)/3))^2)^2 +...
+    ((Ae.Rr*cos(x(27)+2*pi*(i-1)/3)+To.H)/To.H)^W.alpha) + x(25);
 
 Tr = @(x,u) 0.5*Ae.rho*Ae.Ar*(ve(x)-x(3))^3*cp_ct(x(1)*Ae.Rr/(ve(x)-x(3)),mean(x(18:20)),cp_l,lambdaVec,pitchVec)/x(1);
 Fri = @(x,u,i) 0.5*Ae.rho*Ae.Ar*(vei(x,i)-x(3)-x(9+i-1))^2*cp_ct(x(1)*Ae.Rr/(vei(x,i)-x(3)),x(18+i-1),ct_l,lambdaVec,pitchVec)/3; % Thrust coefficient
@@ -41,10 +42,10 @@ f1 = @(x,u) ((1-D.mu)*Tr(x,u) - x(24))/(D.Jr+D.Jg);
 
 %% Tower
 f2 = @(x) x(3); % Tower foreafter velocity
-f3 = @(x,u) (B.kx*(sum(x(6:8)-x(2))) + B.cx*(sum(x(9:11)-x(3))) - T.k*x(2) - T.c*x(3))/T.m; % Tower foreafter acceleration
+f3 = @(x,u) (B.kx*(sum(x(6:8)-x(2))) + B.cx*(sum(x(9:11)-x(3))) - To.k*x(2) - To.c*x(3))/To.m; % Tower foreafter acceleration
 
 f4 = @(x) x(5); % Tower edgewise velocity
-f5 = @(x,u) (3*x(24)/(2*T.H) + B.ky*(sum(x(12:14)-x(4))) + B.cy*(sum(x(15:17)-x(5))) - T.k*x(4) - T.c*x(5))/T.m; % Tower edgewise acceleration
+f5 = @(x,u) (3*x(24)/(2*To.H) + B.ky*(sum(x(12:14)-x(4))) + B.cy*(sum(x(15:17)-x(5))) - To.k*x(4) - To.c*x(5))/To.m; % Tower edgewise acceleration
 
 %% Blades
 f6 = @(x) x(9); % Blade 1 foreafter velocity

@@ -18,18 +18,18 @@ B.ky = (2*pi*B.fy)^2*B.m; % Blade stiffness y direction
 B.l = 117.1836; % Blade length
 
 %% Tower model constants
-T.m = 2475680; % Tower mass
+To.m = 2475680; % Tower mass
 % T.m = 1389678; % Nacelle mass
-T.d = 0.005; % Tower damping ratio
-T.f = 0.18; % Tower freq. flapwise
-T.c = T.d*2*T.m*2*pi*T.f; 
-T.k = (2*pi*T.f)^2*T.m; % Tower stiffness
-T.h = 144.582; % Tower height
-T.r_top = 3.25; % Tower top radius
-T.r_base = 5; % Tower base radius
-T.H = T.h + 4.34799; % Hub height
-T.r = (T.r_top-T.r_base)*(T.H-B.l)/T.H + T.r_base; % Tower radius
-T.xh = 10.93; % Tower overhang
+To.d = 0.005; % Tower damping ratio
+To.f = 0.18; % Tower freq. flapwise
+To.c = To.d*2*To.m*2*pi*To.f; 
+To.k = (2*pi*To.f)^2*To.m; % Tower stiffness
+To.h = 144.582; % Tower height
+To.r_top = 3.25; % Tower top radius
+To.r_base = 5; % Tower base radius
+To.H = To.h + 4.34799; % Hub height
+To.r = (To.r_top-To.r_base)*(To.H-B.l)/To.H + To.r_base; % Tower radius
+To.xh = 10.93; % Tower overhang
 
 %% Aerodynamic model constants
 Ae.rho = 1.225; % Density of the air
@@ -63,58 +63,58 @@ M.sigma_vane = 1;
 M.sigma_azim = 0.01;
 
 %% Load measured data
-data1 = load('DLC12_06p0_Y000_S0201').DLC12_06p0_Y000_S0201;
-% data2 = load('..\Bladed\DLC12_08p0_Y000_S0301').DLC12_08p0_Y000_S0301;
-% data3 = load('..\Bladed\DLC12_10p0_Y000_S0401').DLC12_10p0_Y000_S0401;
-% data4 = load('..\Bladed\DLC12_12p0_Y000_S0501').DLC12_12p0_Y000_S0501;
-% data5 = load('..\Bladed\DLC12_14p0_Y000_S0601').DLC12_14p0_Y000_S0601;
-% data6 = load('..\Bladed\DLC12_16p0_Y000_S0701').DLC12_16p0_Y000_S0701;
-% data7 = load('..\Bladed\DLC12_18p0_Y000_S0801').DLC12_18p0_Y000_S0801;
-% data8 = load('..\Bladed\DLC12_20p0_Y000_S0901').DLC12_20p0_Y000_S0901;
-% data9 = load('..\Bladed\DLC12_22p0_Y000_S1001').DLC12_22p0_Y000_S1001;
-% data10 = load('..\Bladed\DLC12_24p0_Y000_S1101').DLC12_24p0_Y000_S1101;ç
+data = load('DLC12_06p0_Y000_S0201').DLC12_06p0_Y000_S0201;
+% data = load('..\Bladed\DLC12_08p0_Y000_S0301').DLC12_08p0_Y000_S0301;
+% data = load('..\Bladed\DLC12_10p0_Y000_S0401').DLC12_10p0_Y000_S0401;
+% data = load('..\Bladed\DLC12_12p0_Y000_S0501').DLC12_12p0_Y000_S0501;
+% data = load('..\Bladed\DLC12_14p0_Y000_S0601').DLC12_14p0_Y000_S0601;
+% data = load('..\Bladed\DLC12_16p0_Y000_S0701').DLC12_16p0_Y000_S0701;
+% data = load('..\Bladed\DLC12_18p0_Y000_S0801').DLC12_18p0_Y000_S0801;
+% data = load('..\Bladed\DLC12_20p0_Y000_S0901').DLC12_20p0_Y000_S0901;
+% data = load('..\Bladed\DLC12_22p0_Y000_S1001').DLC12_22p0_Y000_S1001;
+% data = load('..\Bladed\DLC12_24p0_Y000_S1101').DLC12_24p0_Y000_S1101;ç
 
-% time = data1.Data(:,1);
+% time = data.Data(:,1);
 
 %% Inputs
-theta_ref = data1.Data(:,34:36); % Mean pitch angle (collective pitch)
-tg_ref = data1.Data(:,20); % Generator Torque
+theta_ref = data.Data(:,34:36); % Mean pitch angle (collective pitch)
+tg_ref = data.Data(:,20); % Generator Torque
 
 u = [theta_ref tg_ref]';
 
 %% Measurements
-omega_r = data1.Data(:,10); % Rotor speed
-xt_ddot = data1.Data(:,236); % Tower fore-aft acceleration
-yt_ddot = data1.Data(:,237); % Tower edgewise acceleration
-Mx = [data1.Data(:,111) data1.Data(:,119) data1.Data(:,127)];
-My = [data1.Data(:,112) data1.Data(:,120) data1.Data(:,128)];
-% Mx = [data1.Data(:,61) data1.Data(:,69) data1.Data(:,77)]; % Mx in the principal axis
-% My = [data1.Data(:,62) data1.Data(:,70) data1.Data(:,78)]; % My in the principal axis
-Pe = data1.Data(:,28);
-vr = data1.Data(:,26); % Wind speed magnitud at the hub
-psi = data1.Data(:,11);
+omega_r = data.Data(:,10); % Rotor speed
+xt_ddot = data.Data(:,236); % Tower fore-aft acceleration
+yt_ddot = data.Data(:,237); % Tower edgewise acceleration
+Mx = [data.Data(:,111) data.Data(:,119) data.Data(:,127)];
+My = [data.Data(:,112) data.Data(:,120) data.Data(:,128)];
+% Mx = [data.Data(:,61) data.Data(:,69) data.Data(:,77)]; % Mx in the principal axis
+% My = [data.Data(:,62) data.Data(:,70) data.Data(:,78)]; % My in the principal axis
+Pe = data.Data(:,28);
+vr = data.Data(:,26); % Wind speed magnitud at the hub
+psi = data.Data(:,11);
 
 y_me = [omega_r xt_ddot yt_ddot My Mx Pe vr psi]';
 
 %% Initial state vector
-xt_dot = data1.Data(1,230);
-xt = data1.Data(1,224);
-yt_dot = data1.Data(1,231);
-yt = data1.Data(1,225);
-xb = [data1.Data(1,85) data1.Data(1,91) data1.Data(1,97)];
-yb = [data1.Data(1,86) data1.Data(1,92) data1.Data(1,98)];
+xt_dot = data.Data(1,230);
+xt = data.Data(1,224);
+yt_dot = data.Data(1,231);
+yt = data.Data(1,225);
+xb = [data.Data(1,85) data.Data(1,91) data.Data(1,97)];
+yb = [data.Data(1,86) data.Data(1,92) data.Data(1,98)];
 xb_dot = zeros(1,3);
 yb_dot = zeros(1,3);
 theta = theta_ref(1,:);
-theta_dot = data1.Data(1,37:39);
+theta_dot = data.Data(1,37:39);
 Tg = tg_ref(1);
 vt = 0;
-vm = data1.Data(1,59);
+vm = data.Data(1,59);
 
-x_i = [omega_r(1) xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta theta_dot Tg vt vm psi(1)];
+x_i = [omega_r(1) xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta theta_dot Tg vt vm psi(1)]';
 
-N = data1.Channels.Scans; % Number of time steps for filter
-clearvars -except D T B Ae Ac M Ts ti W w_p x_i y_me u N data1% a sigma_m sigma_t
+N = data.Channels.Scans; % Number of time steps for filter
+clearvars -except D To B Ae Ac M Ts ti W w_p x_i y_me u N % a sigma_m sigma_t
 
 load('performancemap_data.mat')
 %% Plotting variables

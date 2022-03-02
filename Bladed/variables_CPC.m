@@ -72,7 +72,7 @@ data = load('Bladed\DLC12_06p0_Y000_S0201').DLC12_06p0_Y000_S0201;
 % data = load('Bladed\DLC12_18p0_Y000_S0801').DLC12_18p0_Y000_S0801;
 % data = load('Bladed\DLC12_20p0_Y000_S0901').DLC12_20p0_Y000_S0901;
 % data = load('Bladed\DLC12_22p0_Y000_S1001').DLC12_22p0_Y000_S1001;
-% data = load('Bladed\DLC12_24p0_Y000_S1101').DLC12_24p0_Y000_S1101;ç
+% data = load('Bladed\DLC12_24p0_Y000_S1101').DLC12_24p0_Y000_S1101;
 
 % time = data1.Data(:,1);
 
@@ -117,7 +117,7 @@ Tg = tg_ref(1);
 vt = 0;
 % vm = data1.Data(1,59);
 
-x_i = [omega_r(1) xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta theta_dot Tg vt];
+x_i = [omega_r(1) xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta theta_dot Tg vt]';
 
 N = data.Channels.Scans; % Number of time steps for filter
 clearvars -except D T B Ae Ac M Ts ti W w_p x_i y_me d u N data % a sigma_m sigma_t

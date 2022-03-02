@@ -3,7 +3,7 @@ clear all
 close all
 
 %% Obtain all variables
-run("variables.m")
+variables_CPC
 
 %% Before filter execution
 % System properties
@@ -13,8 +13,9 @@ run("variables.m")
 %E2 = 20; % Station 2 East coordinate
 
 % Step 1: Define UT Scaling parameters and weight vectors
-Lk = 13; % Size of state vector
-Yk = 7; % Size of measured vector
+Lk = size(x_i,1); % Size of state vector
+Yk = size(y_me,1); % Size of measured vector
+Uk = size(u,1); % Size of imput vector
 alpha = 1; % Primary scaling parameter
 beta = 2; % Secondary scaling parameter (Gaussian assumption)
 kappa = 0; % Tertiary scaling parameter
