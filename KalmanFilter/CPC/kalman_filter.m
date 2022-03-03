@@ -27,10 +27,14 @@ wm(1) = lambda/(lambda+Lk);
 wc(1) = lambda/(lambda+Lk) + 1 - alpha^2 + beta;
 
 % Step 2: Define noise assumptions
-w_p = @(d) d(1)*pi/(2*W.L);
-ve = @(x,d) x(13) + d(1);
-Tr = @(x,d) 0.5*Ae.rho*Ae.Ar*(ve(x,d)-x(3))^3*cp_ct(x(1)*Ae.Rr/(ve(x,d)-x(3)),x(10),cp_l,lambdaVec,pitchVec)/x(1);
-Fr = @(x,d) 0.5*Ae.rho*Ae.Ar*(ve(x,d)-x(3)-x(7))^2*cp_ct(x(1)*Ae.Rr/(ve(x,d)-x(3)),x(10),ct_l,lambdaVec,pitchVec);
+% w_p = @(d) d(1)*pi/(2*W.L);
+% ve = @(x,d) x(13) + d(1);
+lamb = @(x,d) x(1)*Ae.Rr/d(1);
+cp = @(x,d) cp_ct(lamb(x,d),x(10),cp_l,lambdaVec,pitchVec);
+ct = @(x,d) cp_ct(lamb(x,d),x(10),ct_l,lambdaVec,pitchVec);
+
+Tr = @(x,d) 0.5*Ae.rho*Ae.Ar*(d(1))^3*cp(x,d)/x(1);
+Fr = @(x,d) 0.5*Ae.rho*Ae.Ar*(d(1)-x(7))^2*ct(x,d);
 
 %% Drive train
 f1 = @(x,d) (1-D.mu)*Tr(x,d)/(D.Jr+D.Jg) - x(12)/(D.Jr+D.Jg);
@@ -55,22 +59,22 @@ f11 = @(x,u) Ac.omega^2*u(1) - 2*Ac.omega*Ac.xi*x(11) - Ac.omega^2*x(10); % Pitc
 f12 = @(x,u) (u(2)-x(12))/Ac.tau; % Torque change in time
 
 %% Wind
-f13 = @(x,d) -w_p(d)*x(13); % Wind turbulence acceleration
+% f13 = @(x,d) -w_p(d)*x(13); % Wind turbulence acceleration
 % f14 = 0; % Mean wind acceleration
 
 
 f = @(x,u,d) x + Ts*[f1(x,d); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x,d);...
-    f8(x); f9(x); f10(x); f11(x,u); f12(x,u); f13(x,d)]; % Nonlinear prediction
+    f8(x); f9(x); f10(x); f11(x,u); f12(x,u)]; % Nonlinear prediction
 
 h = @(x,d) [x(1); f3(x); f5(x); B.l*B.m*f7(x,d); B.l*B.m*f9(x); ...
-    D.eta*x(12)*x(1); ve(x,d)-x(3)];
+    D.eta*x(12)*x(1); d(1)];
 
 
-a = @(d) 1 - w_p(d)*Ts; % Euler
+% a = @(d) 1 - w_p(d)*Ts; % Euler
 % a = @(d) exp(-w_p(d)*Ts); % Zero Order Hold
-sigma_t = @(d) W.ti*d(1)*sqrt((1-a(d)^2)/(1-a(d))^2);
-sigma_m = sqrt(Ts*W.q);
-Q = @(d) diag([zeros(Lk-1,1); sigma_t(d)^2*w_p(d)^2]); % Covariance matrix of the process noise
+% sigma_t = @(d) W.ti*d(1)*sqrt((1-a(d)^2)/(1-a(d))^2);
+% sigma_m = sqrt(Ts*W.q);
+Q = @(d) diag([zeros(Lk-1,1); 0]); % Covariance matrix of the process noise
 
 temp = [M.sigma_enc; M.sigma_acc; M.sigma_acc; M.sigma_root; M.sigma_root;...
     M.sigma_pow; M.sigma_vane].^2;
@@ -100,9 +104,12 @@ for k = 2:N
     y(:,k-1) = h(xt(:,k-1),d(:,k-1)) + v(:,k-1);
 end
 for k=1:N
-    p(k) = ve(xt(:,k),d(:,k))-xt(3,k);
+%     p(k) = ve(xt(:,k),d(:,k))-xt(3,k);
     fr(k) = Fr(xt(:,k),d(:,k))/(B.B*B.m);
-    tr(k) = (1-D.mu)*Tr(xt(:,k),d(:,k));
+    tr(k) = (1-D.mu)*Tr(xt(:,k),d(:,k))/(D.Jr+D.Jg);
+    cpl(k) = cp(xt(:,k),d(:,k));
+    ctl(k) = ct(xt(:,k),d(:,k));
+    la(k) = lamb(xt(:,k),d(:,k));
     %     pi(k) = vri(xt(:,k),1);
 end
 figure
@@ -129,13 +136,17 @@ title("yb")
 
 figure
 plot(1:N,y(2,:),1:N,y_me(2,:));
-title("xb")
+title("xbdd")
 figure
-plot(p(:))
+plot(d)
 title("vr")
 figure
 plot(1:N,3*xt(12,:)/(2*T.H*T.m),1:N,fr)
 title("Tg & Fr")
+figure
+plot(1:N,cpl,1:N,ctl,1:N,xt(1,:),1:N,la)
+title("Cp & Ct")
+
 % figure
 % plot(1:N,3*xt(12,:)/(2*T.H*T.m),1:N,-(B.B*B.ky + T.k)*xt(4,:)/T.m - (B.B*B.cy + T.c)*xt(5,:)/T.m + B.B*B.ky*xt(8,:)/T.m + B.B*B.cy*xt(9,:)/T.m)
 % title("Tg Applied")

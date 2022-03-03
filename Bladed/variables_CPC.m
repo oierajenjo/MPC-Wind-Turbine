@@ -3,7 +3,7 @@ D.Jr = 321699000; % Rotor moment of inertia
 D.Jg = 3.223e6; % Generator moment of inertia
 % D.c = 0.005; % Drive train damping
 % D.k = 1.409e10; % Drive train torsion stiffness
-D.mu = 0.05; % Drive train mechanical losses (friction)
+D.mu = 0; % Drive train mechanical losses (friction)
 D.eta = 0.93; % Generator efficiency
 
 %% Blades model constants
@@ -83,9 +83,10 @@ tg_ref = data.Data(:,20); % Generator Torque
 u = [theta_ref tg_ref]';
 
 %% Disturbances
-vm = data.Data(:,59); % Wind mean speed
+% vm = data.Data(:,59); % Wind mean speed
+vr = data.Data(:,54); % Wind speed
 % Fy = mean([data.Data(:,66) data.Data(:,74) data.Data(:,82)], 2); % My in the principal axis
-d = vm';
+d = vr';
 % d = [vm Fy]';
 
 %% Measurements
@@ -117,7 +118,7 @@ Tg = tg_ref(1);
 vt = 0;
 % vm = data1.Data(1,59);
 
-x_i = [omega_r(1) xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta theta_dot Tg vt]';
+x_i = [omega_r(1) xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta theta_dot Tg]';
 
 N = data.Channels.Scans; % Number of time steps for filter
 clearvars -except D T B Ae Ac M Ts W w_p x_i y_me d u N data % a sigma_m sigma_t
