@@ -38,7 +38,7 @@ Ae.Ar = pi*Ae.Rr^2; % Rotor area
 
 %% Wind model constants
 Ts = 0.05; % Sampling time
-ti = 0.1; % Turbulence intensity
+W.ti = 0.1; % Turbulence intensity
 W.q = 2^2/600; % Incremental variance mean wind speed
 W.mu_m = 6; % Fixed mean wind speed: 10 m/s
 W.L = 340.2;
@@ -84,13 +84,13 @@ u = [theta_ref tg_ref]';
 
 %% Disturbances
 vm = data.Data(:,59); % Wind mean speed
-Fy = mean([data.Data(:,66) data.Data(:,74) data.Data(:,82)], 2); % My in the principal axis
-
-d = [vm Fy]';
+% Fy = mean([data.Data(:,66) data.Data(:,74) data.Data(:,82)], 2); % My in the principal axis
+d = vm';
+% d = [vm Fy]';
 
 %% Measurements
 omega_r = data.Data(:,10); % Rotor speed
-xt_ddot = data.Data(:,236); % Tower fore-aft acceleration
+xt_ddot = -data.Data(:,236); % Tower fore-aft acceleration
 yt_ddot = data.Data(:,237); % Tower edgewise acceleration
 % Mx = mean([data1.Data(:,111) data1.Data(:,119) data1.Data(:,127)], 2);
 % My = mean([data1.Data(:,112) data1.Data(:,120) data1.Data(:,128)], 2);
@@ -103,8 +103,8 @@ psi = data.Data(:,11);
 y_me = [omega_r xt_ddot yt_ddot My Mx Pe vr]';
 
 %% Initial state vector
-xt_dot = data.Data(1,230);
-xt = data.Data(1,224);
+xt_dot = -data.Data(1,230);
+xt = -data.Data(1,224);
 yt_dot = data.Data(1,231);
 yt = data.Data(1,225);
 xb = mean([data.Data(1,85) data.Data(1,91) data.Data(1,97)], 2);
@@ -120,7 +120,7 @@ vt = 0;
 x_i = [omega_r(1) xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta theta_dot Tg vt]';
 
 N = data.Channels.Scans; % Number of time steps for filter
-clearvars -except D T B Ae Ac M Ts ti W w_p x_i y_me d u N data % a sigma_m sigma_t
+clearvars -except D T B Ae Ac M Ts W w_p x_i y_me d u N data % a sigma_m sigma_t
 
 load('performancemap_data.mat')
 %% Plotting variables

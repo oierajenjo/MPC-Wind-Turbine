@@ -49,7 +49,7 @@ f7 = @(x,d) Fr(x,d)/(B.B*B.m) + B.kx*x(2)/B.m + B.cx*x(3)/B.m - B.kx*x(6)/B.m - 
 f8 = @(x) x(9); % Blade edgewise velocity
 f9 = @(x) B.ky*x(4)/B.m + B.cy*x(5)/B.m - B.ky*x(8)/B.m - B.cy*x(9)/B.m; % Blade edgewise acceleration
 
-%% Actuators
+%% Actuators BIEN
 f10 = @(x) x(11); % Pitch velocity
 f11 = @(x,u) Ac.omega^2*u(1) - 2*Ac.omega*Ac.xi*x(11) - Ac.omega^2*x(10); % Pitch acceleration
 f12 = @(x,u) (u(2)-x(12))/Ac.tau; % Torque change in time
@@ -68,7 +68,7 @@ h = @(x,d) [x(1); f3(x); f5(x); B.l*B.m*f7(x,d); B.l*B.m*f9(x); ...
 
 a = @(d) 1 - w_p(d)*Ts; % Euler
 % a = @(d) exp(-w_p(d)*Ts); % Zero Order Hold
-sigma_t = @(d) ti*d(1)*sqrt((1-a(d)^2)/(1-a(d))^2);
+sigma_t = @(d) W.ti*d(1)*sqrt((1-a(d)^2)/(1-a(d))^2);
 sigma_m = sqrt(Ts*W.q);
 Q = @(d) diag([zeros(Lk-1,1); sigma_t(d)^2*w_p(d)^2]); % Covariance matrix of the process noise
 
@@ -100,7 +100,7 @@ for k = 2:N
     y(:,k-1) = h(xt(:,k-1),d(:,k-1)) + v(:,k-1);
 end
 for k=1:N
-    p(k) = ve(xt(:,k),d(:,k));
+    p(k) = ve(xt(:,k),d(:,k))-xt(3,k);
     fr(k) = Fr(xt(:,k),d(:,k))/(B.B*B.m);
     tr(k) = (1-D.mu)*Tr(xt(:,k),d(:,k));
     %     pi(k) = vri(xt(:,k),1);
@@ -130,9 +130,9 @@ title("yb")
 figure
 plot(1:N,y(2,:),1:N,y_me(2,:));
 title("xb")
-% figure
-% plot(p(:))
-% title("ve")
+figure
+plot(p(:))
+title("vr")
 figure
 plot(1:N,3*xt(12,:)/(2*T.H*T.m),1:N,fr)
 title("Tg & Fr")

@@ -23,6 +23,9 @@ H = 148.93;
 rho = 1.225; % Density of the air
 Rr = 241.996/2; % Rotor radius
 Ar = pi*Rr^2; % Rotor area
+mu = 0.05;
+Jr = 321699000; % Rotor moment of inertia
+Jg = 3.223e6; % Generator moment of inertia
 
 % for j=1:2
 %     for i=1:length(ts)
@@ -34,9 +37,10 @@ u = [tg_ref theta_ref];
 
 for i=1:length(ts)
     Fr(i) = 0.5*rho*Ar*vm(i)^2*cp_ct(omega_r(i)*Rr/(vm(i)),theta_ref(i),ct_l,lambdaVec,pitchVec);
+    Tr(i) = 0.5*rho*Ar*vm(i)^3*cp_ct(omega_r(i)*Rr/(vm(i)),theta_ref(i),cp_l,lambdaVec,pitchVec)/omega_r(i);
 end
-u = [Fr' theta_ref];
 Fr = Fr';
+Tr = Tr';
 
 
 figure(20)
@@ -56,83 +60,84 @@ yt_i = data.Data(1,225);
 yb_i = mean([data.Data(1,86) data.Data(1,92) data.Data(1,98)], 2);
 yb_dot_i = 0;
 
-% Tower and blades flapwise
-A1 = [0 1 0 0;
-    (-B*k_bx-k_t)/m_t (-B*c_bx-c_t)/m_t B*k_bx/m_t B*c_bx/m_t;
-    0 0 0 1;
-    k_bx/m_b c_bx/m_b -k_bx/m_b -c_bx/m_b];
-B1 = [0 0 0 1/(B*m_b)]';
-C1 = eye(4);
-D1 = zeros(4,1);
-
-sys1=ss(A1,B1,C1,D1);
-
-x_i_1 = [xt_i xt_dot_i xb_i xb_dot_i];
-
-figure(1)
-[y_1,ts_1,x_1] = lsim(sys1,Fr,ts,x_i_1);
-plot(ts_1,y_1)
-xlabel('Time (sec)')
-ylabel('System response')
-legend('xt','xt_{dot}','xb','xb_{dot}')
-
-% Tower and blades edgewise
-A2 = [0 1 0 0;
-    (-B*k_by-k_t)/m_t (-B*c_by-c_t)/m_t B*k_by/m_t B*c_by/m_t;
-    0 0 0 1;
-    k_by/m_b c_by/m_b -k_by/m_b -c_by/m_b];
-B2 = [0 3/(2*H*m_t) 0 0]';
-C2 = eye(4);
-D2 = zeros(4,1);
-
-sys2=ss(A2,B2,C2,D2);
-
-x_i_2 = [yt_i yt_dot_i yb_i yb_dot_i];
-
-figure(2)
-[y_2,ts_2,x_2] = lsim(sys2,tg_ref,ts,x_i_2);
-plot(ts_2,y_2)
-xlabel('Time (sec)')
-ylabel('System response')
-legend('yt','yt_{dot}','yb','yb_{dot}')
-
-% Tower fore-aft
-A3 = [0 1;
-    -k_t/m_t -c_t/m_t];
-B3 = [0 1/m_t]';
-C3 = eye(2);
-D3 = zeros(2,1);
-
-sys3=ss(A3,B3,C3,D3);
-
-x_i_3 = [xt_i xt_dot_i];
-
-figure(3)
-[y_3,ts_3,x_3] = lsim(sys3,Fr,ts,x_i_3);
-plot(ts_3,y_3)
-xlabel('Time (sec)')
-ylabel('System response')
-legend('xt','xt_{dot}')
-
-% Tower sidewards
-A4 = [0 1;
-    -k_t/m_t -c_t/m_t];
-B4 = [0 3/(2*H*m_t)]';
-C4 = eye(2);
-D4 = zeros(2,1);
-
-sys4=ss(A4,B4,C4,D4);
-
-x_i_4 = [yt_i yt_dot_i];
-
-figure(4)
-[y_4,ts_4,x_4] = lsim(sys4,tg_ref,ts,x_i_4);
-plot(ts_4,y_4)
-xlabel('Time (sec)')
-ylabel('System response')
-legend('yt','yt_{dot}')
+% % Tower and blades flapwise
+% A1 = [0 1 0 0;
+%     (-B*k_bx-k_t)/m_t (-B*c_bx-c_t)/m_t B*k_bx/m_t B*c_bx/m_t;
+%     0 0 0 1;
+%     k_bx/m_b c_bx/m_b -k_bx/m_b -c_bx/m_b];
+% B1 = [0 0 0 1/(B*m_b)]';
+% C1 = eye(4);
+% D1 = zeros(4,1);
+% 
+% sys1=ss(A1,B1,C1,D1);
+% 
+% x_i_1 = [xt_i xt_dot_i xb_i xb_dot_i];
+% 
+% figure(1)
+% [y_1,ts_1,x_1] = lsim(sys1,Fr,ts,x_i_1);
+% plot(ts_1,y_1)
+% xlabel('Time (sec)')
+% ylabel('System response')
+% legend('xt','xt_{dot}','xb','xb_{dot}')
+% 
+% % Tower and blades edgewise
+% A2 = [0 1 0 0;
+%     (-B*k_by-k_t)/m_t (-B*c_by-c_t)/m_t B*k_by/m_t B*c_by/m_t;
+%     0 0 0 1;
+%     k_by/m_b c_by/m_b -k_by/m_b -c_by/m_b];
+% B2 = [0 3/(2*H*m_t) 0 0]';
+% C2 = eye(4);
+% D2 = zeros(4,1);
+% 
+% sys2=ss(A2,B2,C2,D2);
+% 
+% x_i_2 = [yt_i yt_dot_i yb_i yb_dot_i];
+% 
+% figure(2)
+% [y_2,ts_2,x_2] = lsim(sys2,tg_ref,ts,x_i_2);
+% plot(ts_2,y_2)
+% xlabel('Time (sec)')
+% ylabel('System response')
+% legend('yt','yt_{dot}','yb','yb_{dot}')
+% 
+% % Tower fore-aft
+% A3 = [0 1;
+%     -k_t/m_t -c_t/m_t];
+% B3 = [0 1/m_t]';
+% C3 = eye(2);
+% D3 = zeros(2,1);
+% 
+% sys3=ss(A3,B3,C3,D3);
+% 
+% x_i_3 = [xt_i xt_dot_i];
+% 
+% figure(3)
+% [y_3,ts_3,x_3] = lsim(sys3,Fr,ts,x_i_3);
+% plot(ts_3,y_3)
+% xlabel('Time (sec)')
+% ylabel('System response')
+% legend('xt','xt_{dot}')
+% 
+% % Tower sidewards
+% A4 = [0 1;
+%     -k_t/m_t -c_t/m_t];
+% B4 = [0 3/(2*H*m_t)]';
+% C4 = eye(2);
+% D4 = zeros(2,1);
+% 
+% sys4=ss(A4,B4,C4,D4);
+% 
+% x_i_4 = [yt_i yt_dot_i];
+% 
+% figure(4)
+% [y_4,ts_4,x_4] = lsim(sys4,tg_ref,ts,x_i_4);
+% plot(ts_4,y_4)
+% xlabel('Time (sec)')
+% ylabel('System response')
+% legend('yt','yt_{dot}')
 
 % Tower and bldes flapwise and sideways
+u5 = [Fr tg_ref];
 A5 = [0 1 0 0 0 0 0 0;
     (-B*k_bx-k_t)/m_t (-B*c_bx-c_t)/m_t 0 0 B*k_bx/m_t B*c_bx/m_t 0 0;
     0 0 0 1 0 0 0 0;
@@ -151,12 +156,39 @@ sys5=ss(A5,B5,C5,D5);
 x_i_5 = [xt_i xt_dot_i yt_i yt_dot_i xb_i xb_dot_i yb_i yb_dot_i];
 
 figure(5)
-[y_5,ts_5,x_5] = lsim(sys5,u',ts,x_i_5);
+[y_5,ts_5,x_5] = lsim(sys5,u5',ts,x_i_5);
 plot(ts_5,y_5,'Linewidth',2)
 xlabel('Time (sec)')
 ylabel('System response')
 legend('xt','xt_{dot}','yt','yt_{dot}','xb','xb_{dot}','yb','yb_{dot}')
 
+% Tower and bldes flapwise and sideways + omega_r
+u = [Fr tg_ref Tr];
+A6 = [0 0 0 0 0 0 0 0 0;
+    0 0 1 0 0 0 0 0 0;
+    0 (-B*k_bx-k_t)/m_t (-B*c_bx-c_t)/m_t 0 0 B*k_bx/m_t B*c_bx/m_t 0 0;
+    0 0 0 0 1 0 0 0 0;
+    0 0 0 (-B*k_by-k_t)/m_t (-B*c_by-c_t)/m_t 0 0 B*k_by/m_t B*c_by/m_t;
+    0 0 0 0 0 0 1 0 0;
+    0 k_bx/m_b c_bx/m_b 0 0 -k_bx/m_b -c_bx/m_b 0 0;
+    0 0 0 0 0 0 0 0 1;
+    0 0 0 k_by/m_b c_by/m_b 0 0 -k_by/m_b -c_by/m_b];
+B6 = [0 0 0 0 0 0 1/(B*m_b) 0 0;
+    -1/(Jr+Jg) 0 0 0 3/(2*H*m_t) 0 0 0 0;
+    (1-mu)/(Jr+Jg) 0 0 0 0 0 0 0 0]';
+C6 = eye(9);
+D6 = zeros(9,3);
+
+sys6=ss(A6,B6,C6,D6);
+
+x_i_6 = [omega_r(1) xt_i xt_dot_i yt_i yt_dot_i xb_i xb_dot_i yb_i yb_dot_i];
+
+figure(6)
+[y_6,ts_6,x_6] = lsim(sys6,u',ts,x_i_6);
+plot(ts_6,y_6,'Linewidth',2)
+xlabel('Time (sec)')
+ylabel('System response')
+legend('omega_r','xt','xt_{dot}','yt','yt_{dot}','xb','xb_{dot}','yb','yb_{dot}')
 
 function res = cp_ct(la,be,cl,lambdaVec,pitchVec)
 [~,i_la] = min(abs(lambdaVec-abs(la)));
