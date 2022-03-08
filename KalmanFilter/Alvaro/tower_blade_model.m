@@ -26,13 +26,16 @@ Ar = pi*Rr^2; % Rotor area
 mu = 0.05;
 Jr = 321699000; % Rotor moment of inertia
 Jg = 3.223e6; % Generator moment of inertia
+omega_theta = 2.4*pi; % Natural frequency of pitch actuator model
+xi_theta = 0.8; % Damping factor of pitch actuator model
+tau = 0.001; % Generator time constant
 
 % for j=1:2
 %     for i=1:length(ts)
 %         u(i,j) = 1;
 %     end
 % end
-u = [tg_ref theta_ref];
+% u = [tg_ref theta_ref];
 % u = u';
 
 for i=1:length(ts)
@@ -43,12 +46,12 @@ Fr = Fr';
 Tr = Tr';
 
 
-figure(20)
-plot(Fr/(B*m_b))
-legend('Fr/(B*m_b)')
-figure(21)
-plot((3*tg_ref)/(2*H*m_t))
-legend('(3*tg_{ref})/(2*H*m_t)')
+% figure(20)
+% plot(Fr/(B*m_b))
+% legend('Fr/(B*m_b)')
+% figure(21)
+% plot((3*tg_ref)/(2*H*m_t))
+% legend('(3*tg_{ref})/(2*H*m_t)')
 
 % Initial conditions
 xt_dot_i = data.Data(1,230);
@@ -59,6 +62,9 @@ yt_dot_i = data.Data(1,231);
 yt_i = data.Data(1,225);
 yb_i = mean([data.Data(1,86) data.Data(1,92) data.Data(1,98)], 2);
 yb_dot_i = 0;
+theta_i = theta_ref(1);
+theta_dot_i = mean(data.Data(1,37:39), 2);
+Tg_i = tg_ref(1);
 
 % % Tower and blades flapwise
 % A1 = [0 1 0 0;
@@ -136,31 +142,31 @@ yb_dot_i = 0;
 % ylabel('System response')
 % legend('yt','yt_{dot}')
 
-% Tower and bldes flapwise and sideways
-u5 = [Fr tg_ref];
-A5 = [0 1 0 0 0 0 0 0;
-    (-B*k_bx-k_t)/m_t (-B*c_bx-c_t)/m_t 0 0 B*k_bx/m_t B*c_bx/m_t 0 0;
-    0 0 0 1 0 0 0 0;
-    0 0 (-B*k_by-k_t)/m_t (-B*c_by-c_t)/m_t 0 0 B*k_by/m_t B*c_by/m_t;
-    0 0 0 0 0 1 0 0;
-    k_bx/m_b c_bx/m_b 0 0 -k_bx/m_b -c_bx/m_b 0 0;
-    0 0 0 0 0 0 0 1;
-    0 0 k_by/m_b c_by/m_b 0 0 -k_by/m_b -c_by/m_b];
-B5 = [0 0 0 0 0 1/(B*m_b) 0 0;
-    0 0 0 3/(2*H*m_t) 0 0 0 0]';
-C5 = eye(8);
-D5 = zeros(8,2);
-
-sys5=ss(A5,B5,C5,D5);
-
-x_i_5 = [xt_i xt_dot_i yt_i yt_dot_i xb_i xb_dot_i yb_i yb_dot_i];
-
-figure(5)
-[y_5,ts_5,x_5] = lsim(sys5,u5',ts,x_i_5);
-plot(ts_5,y_5,'Linewidth',2)
-xlabel('Time (sec)')
-ylabel('System response')
-legend('xt','xt_{dot}','yt','yt_{dot}','xb','xb_{dot}','yb','yb_{dot}')
+% % Tower and bldes flapwise and sideways
+% u5 = [Fr tg_ref];
+% A5 = [0 1 0 0 0 0 0 0;
+%     (-B*k_bx-k_t)/m_t (-B*c_bx-c_t)/m_t 0 0 B*k_bx/m_t B*c_bx/m_t 0 0;
+%     0 0 0 1 0 0 0 0;
+%     0 0 (-B*k_by-k_t)/m_t (-B*c_by-c_t)/m_t 0 0 B*k_by/m_t B*c_by/m_t;
+%     0 0 0 0 0 1 0 0;
+%     k_bx/m_b c_bx/m_b 0 0 -k_bx/m_b -c_bx/m_b 0 0;
+%     0 0 0 0 0 0 0 1;
+%     0 0 k_by/m_b c_by/m_b 0 0 -k_by/m_b -c_by/m_b];
+% B5 = [0 0 0 0 0 1/(B*m_b) 0 0;
+%     0 0 0 3/(2*H*m_t) 0 0 0 0]';
+% C5 = eye(8);
+% D5 = zeros(8,2);
+% 
+% sys5=ss(A5,B5,C5,D5);
+% 
+% x_i_5 = [xt_i xt_dot_i yt_i yt_dot_i xb_i xb_dot_i yb_i yb_dot_i];
+% 
+% figure(5)
+% [y_5,ts_5,x_5] = lsim(sys5,u5',ts,x_i_5);
+% plot(ts_5,y_5,'Linewidth',2)
+% xlabel('Time (sec)')
+% ylabel('System response')
+% legend('xt','xt_{dot}','yt','yt_{dot}','xb','xb_{dot}','yb','yb_{dot}')
 
 % Tower and bldes flapwise and sideways + omega_r
 u = [Fr tg_ref Tr];
@@ -189,6 +195,39 @@ plot(ts_6,y_6,'Linewidth',2)
 xlabel('Time (sec)')
 ylabel('System response')
 legend('omega_r','xt','xt_{dot}','yt','yt_{dot}','xb','xb_{dot}','yb','yb_{dot}')
+
+% Tower and bldes flapwise and sideways + omega_r
+u = [Fr Tr tg_ref theta_ref];
+A7 = [0 0 0 0 0 0 0 0 0 0 0 -1/(Jr+Jg);
+    0 0 1 0 0 0 0 0 0 0 0 0;
+    0 (-B*k_bx-k_t)/m_t (-B*c_bx-c_t)/m_t 0 0 B*k_bx/m_t B*c_bx/m_t 0 0 0 0 0;
+    0 0 0 0 1 0 0 0 0 0 0 0;
+    0 0 0 (-B*k_by-k_t)/m_t (-B*c_by-c_t)/m_t 0 0 B*k_by/m_t B*c_by/m_t 0 0 3/(2*H*m_t);
+    0 0 0 0 0 0 1 0 0 0 0 0;
+    0 k_bx/m_b c_bx/m_b 0 0 -k_bx/m_b -c_bx/m_b 0 0 0 0 0;
+    0 0 0 0 0 0 0 0 1 0 0 0;
+    0 0 0 k_by/m_b c_by/m_b 0 0 -k_by/m_b -c_by/m_b 0 0 0;
+    0 0 0 0 0 0 0 0 0 0 1 0;
+    0 0 0 0 0 0 0 0 0 -omega_theta^2 -2*omega_theta*xi_theta 0;
+    0 0 0 0 0 0 0 0 0 0 0 -1/tau];
+
+B7 = [0 0 0 0 0 0 1/(B*m_b) 0 0 0 0 0;
+    (1-mu)/(Jr+Jg) 0 0 0 0 0 0 0 0 0 0 0;
+    0 0 0 0 0 0 0 0 0 0 0 1/tau;
+    0 0 0 0 0 0 0 0 0 0 omega_theta^2 0]';
+C7 = eye(12);
+D7 = zeros(12,4);
+
+sys7 = ss(A7,B7,C7,D7);
+
+x_i_7 = [omega_r(1) xt_i xt_dot_i yt_i yt_dot_i xb_i xb_dot_i yb_i yb_dot_i theta_i theta_dot_i Tg_i];
+
+figure(7)
+[y_7,ts_7,x_7] = lsim(sys7,u',ts,x_i_7);
+plot(ts_7,y_7(:,1:end-1),'Linewidth',2)
+xlabel('Time (sec)')
+ylabel('System response')
+legend('omega_r','xt','xt_{dot}','yt','yt_{dot}','xb','xb_{dot}','yb','yb_{dot}', 'theta', 'theta_{dot}', 'Tg')
 
 function res = cp_ct(la,be,cl,lambdaVec,pitchVec)
 [~,i_la] = min(abs(lambdaVec-abs(la)));

@@ -19,17 +19,17 @@ B.l = 117.1836; % Blade length
 B.B = 3; % Blade amount
 
 %% Tower model constants
-T.m = 2475680-B.m*B.B; % Tower mass
-T.d = 0.005; % Tower damping ratio
-T.f = 0.18; % Tower freq. flapwise
-T.c = T.d*2*T.m*2*pi*T.f; % Tower damping
-T.k = (2*pi*T.f)^2*T.m; % Tower stiffness
-T.h = 144.582; % Tower height
-T.r_top = 3.25; % Tower top radius
-T.r_base = 5; % Tower base radius
-T.H = T.h + 4.34799; % Hub height
-T.r = (T.r_top-T.r_base)*(T.H-B.l)/T.H + T.r_base; % Tower radius
-T.xh = 10.93; % Hub overhang
+To.m = 2475680-B.m*B.B; % Tower mass
+To.d = 0.005; % Tower damping ratio
+To.f = 0.18; % Tower freq. flapwise
+To.c = To.d*2*To.m*2*pi*To.f; % Tower damping
+To.k = (2*pi*To.f)^2*To.m; % Tower stiffness
+To.h = 144.582; % Tower height
+To.r_top = 3.25; % Tower top radius
+To.r_base = 5; % Tower base radius
+To.H = To.h + 4.34799; % Hub height
+To.r = (To.r_top-To.r_base)*(To.H-B.l)/To.H + To.r_base; % Tower radius
+To.xh = 10.93; % Hub overhang
 
 %% Aerodynamic model constants
 Ae.rho = 1.225; % Density of the air
@@ -80,14 +80,15 @@ data = load('Bladed\DLC12_06p0_Y000_S0201').DLC12_06p0_Y000_S0201;
 theta_ref = data.Data(:,30); % Mean pitch angle (collective pitch)
 tg_ref = data.Data(:,20); % Generator Torque
 
-u = [theta_ref tg_ref]';
+u_b = [theta_ref tg_ref]';
 
 %% Disturbances
 % vm = data.Data(:,59); % Wind mean speed
 vr = data.Data(:,54); % Wind speed
-% Fy = mean([data.Data(:,66) data.Data(:,74) data.Data(:,82)], 2); % My in the principal axis
-d = vr';
-% d = [vm Fy]';
+Fy = sum([data.Data(:,66) data.Data(:,74) data.Data(:,82)], 2); % Fy in the principal axis
+wr = data.Data(:,10); % Rotor speed
+% d_b = vr';
+d_b = [vr wr Fy]';
 
 %% Measurements
 omega_r = data.Data(:,10); % Rotor speed
@@ -116,12 +117,13 @@ theta = theta_ref(1);
 theta_dot = mean(data.Data(1,37:39), 2);
 Tg = tg_ref(1);
 vt = 0;
-% vm = data1.Data(1,59);
+vm = data.Data(1,59);
 
-x_i = [omega_r(1) xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta theta_dot Tg]';
+% x_i = [omega_r(1) xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta theta_dot Tg]';
+x_i = [omega_r(1) xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta theta_dot Tg vt vm]';
 
 N = data.Channels.Scans; % Number of time steps for filter
-clearvars -except D T B Ae Ac M Ts W w_p x_i y_me d u N data % a sigma_m sigma_t
+clearvars -except D To B Ae Ac M Ts W w_p x_i y_me d_b u_b N data % a sigma_m sigma_t
 
 load('performancemap_data.mat')
 %% Plotting variables
