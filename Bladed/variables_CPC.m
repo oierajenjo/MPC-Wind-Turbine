@@ -119,8 +119,8 @@ Tg = tg_ref(1);
 vt = 0;
 vm = data.Data(1,59);
 
-% x_i = [omega_r(1) xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta theta_dot Tg]';
-x_i = [omega_r(1) xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta theta_dot Tg vt vm]';
+x_i = [omega_r(1) xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta theta_dot Tg]';
+% x_i = [omega_r(1) xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta theta_dot Tg vt vm]';
 
 N = data.Channels.Scans; % Number of time steps for filter
 clearvars -except D To B Ae Ac M Ts W w_p x_i y_me d_b u_b N data % a sigma_m sigma_t

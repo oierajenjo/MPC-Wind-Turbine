@@ -31,14 +31,14 @@ w_p = @(x) x(14)*pi/(2*W.L);
 ve = @(x) x(14) + x(13);
 vr = @(x) ve(x) - x(3);
 
-lamb = @(x) (x(1)*Ae.Rr-x(9))/(vr(x)-x(7));
+lamb = @(x) (x(1)*Ae.Rr-x(9))/(vr(x));
 % lamb = @(x) (x(1)*Ae.Rr)/(vr(x));
 cp = @(x) cp_ct(lamb(x),x(10),cp_l,lambdaVec,pitchVec);
 ct = @(x) cp_ct(lamb(x),x(10),ct_l,lambdaVec,pitchVec);
 
-Tr = @(x) 0.5*Ae.rho*Ae.Ar*(vr(x)-x(7))^3*cp(x)/x(1);
-Fx = @(x) 0.5*Ae.rho*Ae.Ar*(vr(x)-x(7))^2*ct(x);
-Fy = @(x) (0.5*Ae.rho*Ae.Ar*(vr(x)-x(7))^3*cp(x)/x(1))/(2*Ae.Rr/3);
+Tr = @(x) 0.5*Ae.rho*Ae.Ar*(vr(x))^3*cp(x)/x(1);
+Fx = @(x) 0.5*Ae.rho*Ae.Ar*(vr(x))^2*ct(x);
+Fy = @(x) (0.5*Ae.rho*Ae.Ar*(vr(x))^3*cp(x)/x(1))/(2*Ae.Rr/3);
 
 %% Drive train
 f1 = @(x) (1-D.mu)*Tr(x)/(D.Jr+D.Jg) - x(12)/(D.Jr+D.Jg);

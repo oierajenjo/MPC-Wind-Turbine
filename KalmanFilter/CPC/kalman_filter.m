@@ -29,15 +29,15 @@ wc(1) = lambda/(lambda+Lk) + 1 - alpha^2 + beta;
 % Step 2: Define noise assumptions
 % w_p = @(d) d(1)*pi/(2*W.L);
 % ve = @(x,d) x(13) + d(1);
-lamby = @(x,d) (x(1)*Ae.Rr-x(9))/(d(1)-x(7));
-lamb = @(x,d) (x(1)*Ae.Rr)/(d(1));
+% lamb = @(x,d) (x(1)*Ae.Rr)/(d(1));
+lamb = @(x,d) (abs(x(1))*Ae.Rr-x(9))/(d(1));
 cp = @(x,d) cp_ct(lamb(x,d),x(10),cp_l,lambdaVec,pitchVec);
-cpy = @(x,d) cp_ct(lamby(x,d),x(10),cp_l,lambdaVec,pitchVec);
+cpy = @(x,d) cp_ct(lamb(x,d),x(10),cp_l,lambdaVec,pitchVec);
 ct = @(x,d) cp_ct(lamb(x,d),x(10),ct_l,lambdaVec,pitchVec);
 
 Tr = @(x,d) 0.5*Ae.rho*Ae.Ar*(d(1))^3*cp(x,d)/x(1);
 Fx = @(x,d) 0.5*Ae.rho*Ae.Ar*(d(1)-x(7))^2*ct(x,d);
-Fy = @(x,d) (0.5*Ae.rho*Ae.Ar*(d(1)-x(9))^2*cpy(x,d)*Ae.Rr/lamby(x,d));
+Fy = @(x,d) (0.5*Ae.rho*Ae.Ar*(d(1))^3*cpy(x,d)/x(1))/(2*Ae.Rr/3);
 
 %% Drive train
 f1 = @(x,d) (1-D.mu)*Tr(x,d)/(D.Jr+D.Jg) - x(12)/(D.Jr+D.Jg);
@@ -107,7 +107,7 @@ for k = 2:N
     yt(:,k-1) = h(xt(:,k-1),d_b(:,k-1)) + v(:,k-1);
 end
 for k=1:N
-%     p(k) = ve(xt(:,k),d(:,k))-xt(3,k);
+%     p(k) = vr(xt(:,k),d(:,k));
     frx(k) = Fx(xt(:,k),d_b(:,k))/(B.B*B.m);
     fry(k) = Fy(xt(:,k),d_b(:,k))/(B.B*B.m);
     tr(k) = (1-D.mu)*Tr(xt(:,k),d_b(:,k))/(D.Jr+D.Jg);
@@ -119,37 +119,42 @@ end
 figure
 plot(xt(1,:));
 title("wr")
-% figure
-% plot(xt(2,:));
-% title("xt")
+figure
+plot(xt(2,:));
+title("xt")
 % figure
 % plot(xt(3,:));
 % title("xtdot")
-% figure
-% plot(xt(6,:));
-% title("xb")
+figure
+plot(xt(6,:));
+title("xb")
 figure
 plot(xt(4,:));
 title("yt")
-figure
-plot(xt(5,:));
-title("ytdot")
+% figure
+% plot(xt(5,:));
+% title("ytdot")
 figure
 plot(xt(8,:));
 title("yb")
 
-figure
-plot(1:N,yt(2,:),1:N,y_me(2,:));
-title("Mx")
-figure
-plot(d_b(1,:))
-title("vr")
+% figure
+% plot(1:N,yt(2,:),1:N,y_me(2,:));
+% title("Mx")
+% figure
+% plot(d_b(1,:))
+% title("vr")
 figure
 plot(1:N,frx,1:N,fry)
 title("Frx & Fry")
+xlim([1 500])
 figure
-plot(1:N,cpl,1:N,ctl,1:N,xt(1,:),1:N,la)
+plot(1:N,cpl,1:N,ctl)
 title("Cp & Ct")
+figure
+plot(la)
+title("Lambda")
+xlim([1 2000])
 
 % figure
 % plot(1:N,3*xt(12,:)/(2*To.H*To.m),1:N,-(B.B*B.ky + To.k)*xt(4,:)/To.m - (B.B*B.cy + To.c)*xt(5,:)/To.m + B.B*B.ky*xt(8,:)/To.m + B.B*B.cy*xt(9,:)/To.m)
