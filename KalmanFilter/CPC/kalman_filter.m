@@ -30,14 +30,14 @@ wc(1) = lambda/(lambda+Lk) + 1 - alpha^2 + beta;
 % w_p = @(d) d(1)*pi/(2*W.L);
 % ve = @(x,d) x(13) + d(1);
 % lamb = @(x,d) (x(1)*Ae.Rr)/(d(1));
-lamb = @(x,d) (abs(x(1))*Ae.Rr-x(9))/(d(1));
+lamb = @(x,d) (x(1)*Ae.Rr-x(9))/(d(1)-x(7));
 cp = @(x,d) cp_ct(lamb(x,d),x(10),cp_l,lambdaVec,pitchVec);
-cpy = @(x,d) cp_ct(lamb(x,d),x(10),cp_l,lambdaVec,pitchVec);
+% cpy = @(x,d) cp_ct(lamb(x,d),x(10),cp_l,lambdaVec,pitchVec);
 ct = @(x,d) cp_ct(lamb(x,d),x(10),ct_l,lambdaVec,pitchVec);
 
-Tr = @(x,d) 0.5*Ae.rho*Ae.Ar*(d(1))^3*cp(x,d)/x(1);
+Tr = @(x,d) 0.5*Ae.rho*Ae.Ar*(d(1)-x(7))^3*cp(x,d)/x(1);
 Fx = @(x,d) 0.5*Ae.rho*Ae.Ar*(d(1)-x(7))^2*ct(x,d);
-Fy = @(x,d) (0.5*Ae.rho*Ae.Ar*(d(1))^3*cpy(x,d)/x(1))/(2*Ae.Rr/3);
+Fy = @(x,d) (0.5*Ae.rho*Ae.Ar*(d(1)-x(7))^3*cp(x,d)/x(1))/(2*Ae.Rr/3);
 
 %% Drive train
 f1 = @(x,d) (1-D.mu)*Tr(x,d)/(D.Jr+D.Jg) - x(12)/(D.Jr+D.Jg);
@@ -56,10 +56,10 @@ f7 = @(x,d) Fx(x,d)/(B.B*B.m) + B.kx*x(2)/B.m + B.cx*x(3)/B.m - B.kx*x(6)/B.m - 
 f8 = @(x) x(9); % Blade edgewise velocity
 f9 = @(x,d) Fy(x,d)/(B.B*B.m) + B.ky*x(4)/B.m + B.cy*x(5)/B.m - B.ky*x(8)/B.m - B.cy*x(9)/B.m; % Blade edgewise acceleration
 
-%% Actuators BIEN
+%% Actuators
 f10 = @(x) x(11); % Pitch velocity
 f11 = @(x,u) Ac.omega^2*u(1) - 2*Ac.omega*Ac.xi*x(11) - Ac.omega^2*x(10); % Pitch acceleration
-f12 = @(x,u) (u(2)-x(12))/Ac.tau; % Torque change in time
+f12 = @(x,u) (u(2)*x(1)^2-x(12))/Ac.tau; % Torque change in time
 
 %% Wind
 % f13 = @(x,d) -w_p(d)*x(13); % Wind turbulence acceleration
@@ -116,134 +116,128 @@ for k=1:N
     la(k) = lamb(xt(:,k),d_b(:,k));
     %     pi(k) = vri(xt(:,k),1);
 end
+
+t = Ts*(1:N);
+
 figure
-plot(xt(1,:));
+plot(t,xt(1,:),t,d_b(3,:));
 title("wr")
+% xlim([1 50])
 figure
-plot(xt(2,:));
+plot(t,xt(2,:),t, -data.Data(:,224));
 title("xt")
+% xlim([1 50])
 % figure
 % plot(xt(3,:));
 % title("xtdot")
 figure
-plot(xt(6,:));
+plot(t,xt(6,:));
 title("xb")
+% xlim([1 50])
+
 figure
-plot(xt(4,:));
+plot(t,xt(4,:),t, data.Data(:,225));
 title("yt")
+% xlim([1 50])
 % figure
 % plot(xt(5,:));
 % title("ytdot")
 figure
-plot(xt(8,:));
+plot(t,xt(8,:));
 title("yb")
+% xlim([1 50])
 
-% figure
-% plot(1:N,yt(2,:),1:N,y_me(2,:));
-% title("Mx")
-% figure
-% plot(d_b(1,:))
-% title("vr")
 figure
-plot(1:N,frx,1:N,fry)
+plot(t,d_b(1,:))
+title("vr")
+% xlim([1 50])
+figure
+plot(t,frx,t,fry)
 title("Frx & Fry")
-xlim([1 500])
-figure
-plot(1:N,cpl,1:N,ctl)
-title("Cp & Ct")
-figure
-plot(la)
-title("Lambda")
-xlim([1 2000])
 
-% figure
-% plot(1:N,3*xt(12,:)/(2*To.H*To.m),1:N,-(B.B*B.ky + To.k)*xt(4,:)/To.m - (B.B*B.cy + To.c)*xt(5,:)/To.m + B.B*B.ky*xt(8,:)/To.m + B.B*B.cy*xt(9,:)/To.m)
-% title("Tg Applied")
-% xlim([1 500])
 
-% %% Execute Unscented Kalman Filter
-% P = P0; % Set first value of P to the initial P0
-% for k = 2:N
-%     % Step 1: Generate the sigma-points
-%     sP = chol(P,'lower'); % Calculate square root of error covariance
-%     % chi_p = "chi previous" = chi(k-1) % Untransformed sigma points
-%     chi_p = [x(:,k-1), x(:,k-1)*ones(1,Lk)+sqrt(Lk+lambda)*sP, ...
-%         x(:,k-1)*ones(1,Lk)-sqrt(Lk+lambda)*sP]; % Untransformed sigma points
-%     
-%     % Step 2: Prediction Transformation
-%     % Propagate each sigma-point through prediction
-%     % chi_m = "chi minus" = chi(k|k-1)
-%     chi_m = zeros(Lk,n_sigma_p); % Transformed sigma points
-%     for j=1:n_sigma_p
-%         chi_m(:,j) = f(chi_p(:,j),u_b(:,k-1),d_b(:,k-1));
-%     end
-%     
-%     x_m = chi_m*wm; % Calculate mean of predicted state
-%     % Calculate covariance of predicted state
-%     P_m = Q(d_b(:,k-1)); % A priori covariance estimate
-%     for i = 1:n_sigma_p
-%         P_m = P_m + wc(i)*(chi_m(:,i) - x_m)*(chi_m(:,i) - x_m)';
-%     end
-%     
-%     % Step 3: Observation Transformation
-%     % Propagate each sigma-point through observation
-%     % Initial velocity will be considered as 0, as we need it for
-%     % obtaining the acceleration
-%     psi_m = zeros(Yk,n_sigma_p);
-%     for j=1:n_sigma_p
-%         psi_m(:,j) = h(chi_m(:,j),d_b(:,k-1));
-%     end
-%     y_m = psi_m*wm; % Calculate mean of predicted output
-%     
-%     % Calculate covariance of predicted output
-%     % and cross-covariance between state and output
-%     Pyy = R;
-%     %Pxy = zeros(L,2);
-%     Pxy = 0;
-%     for i = 1:n_sigma_p
-%         Pyy = Pyy + wc(i)*(psi_m(:,i) - y_m)*(psi_m(:,i) - y_m)';
-%         Pxy = Pxy + wc(i)*(chi_m(:,i) - x_m)*(psi_m(:,i) - y_m)';
-%     end
-%     
-%     % Step 4: Measurement Update
-%     K = Pxy/Pyy; % Calculate Kalman gain
-%     x(:,k) = x_m + K*(yt(:,k) - y_m); % Update state estimate
-%     P = P_m - K*Pyy*K'; % Update covariance estimate
-% end
+%% Execute Unscented Kalman Filter
+P = P0; % Set first value of P to the initial P0
+for k = 2:N
+    % Step 1: Generate the sigma-points
+    sP = chol(P,'lower'); % Calculate square root of error covariance
+    % chi_p = "chi previous" = chi(k-1) % Untransformed sigma points
+    chi_p = [x(:,k-1), x(:,k-1)*ones(1,Lk)+sqrt(Lk+lambda)*sP, ...
+        x(:,k-1)*ones(1,Lk)-sqrt(Lk+lambda)*sP]; % Untransformed sigma points
+    
+    % Step 2: Prediction Transformation
+    % Propagate each sigma-point through prediction
+    % chi_m = "chi minus" = chi(k|k-1)
+    chi_m = zeros(Lk,n_sigma_p); % Transformed sigma points
+    for j=1:n_sigma_p
+        chi_m(:,j) = f(chi_p(:,j),u_b(:,k-1),d_b(:,k-1));
+    end
+    
+    x_m = chi_m*wm; % Calculate mean of predicted state
+    % Calculate covariance of predicted state
+    P_m = Q(d_b(:,k-1)); % A priori covariance estimate
+    for i = 1:n_sigma_p
+        P_m = P_m + wc(i)*(chi_m(:,i) - x_m)*(chi_m(:,i) - x_m)';
+    end
+    
+    % Step 3: Observation Transformation
+    % Propagate each sigma-point through observation
+    % Initial velocity will be considered as 0, as we need it for
+    % obtaining the acceleration
+    psi_m = zeros(Yk,n_sigma_p);
+    for j=1:n_sigma_p
+        psi_m(:,j) = h(chi_m(:,j),d_b(:,k-1));
+    end
+    y_m = psi_m*wm; % Calculate mean of predicted output
+    
+    % Calculate covariance of predicted output
+    % and cross-covariance between state and output
+    Pyy = R;
+    %Pxy = zeros(L,2);
+    Pxy = 0;
+    for i = 1:n_sigma_p
+        Pyy = Pyy + wc(i)*(psi_m(:,i) - y_m)*(psi_m(:,i) - y_m)';
+        Pxy = Pxy + wc(i)*(chi_m(:,i) - x_m)*(psi_m(:,i) - y_m)';
+    end
+    
+    % Step 4: Measurement Update
+    K = Pxy/Pyy; % Calculate Kalman gain
+    x(:,k) = x_m + K*(yt(:,k) - y_m); % Update state estimate
+    P = P_m - K*Pyy*K'; % Update covariance estimate
+end
 
-% %% Display results
-% t = Ts*(1:N);
-% for i = 1:Lk
-%     figure(i)
-%     subplot(1,2,1);
-%     %     plot(t,xt(i,:),'r-','LineWidth', 2);
-%     plot(t,x(i,:),'b-', t,xt(i,:),'r-');
-%     xlabel('Time (s)', 'Interpreter', 'latex', 'FontSize', 14);
-%     ylabel(x_ul(i), 'Interpreter', 'latex', 'FontSize', 14);
-%     grid on;
-%     legend('UKF','True');
-%     title(['$Estimations $' x_vl(i)], 'Interpreter', 'latex', 'FontSize', 15);
-%     
-%     subplot(1,2,2);
-%     plot(t,x(i,:)-xt(i,:),'b-');
-%     xlabel('$Time (s)$', 'Interpreter', 'latex', 'FontSize', 14);
-%     ylabel(x_ul(i), 'Interpreter', 'latex', 'FontSize', 14);
-%     grid on;
-%     legend('UKF');
-%     title(['$Error $' x_vl(i)], 'Interpreter', 'latex', 'FontSize', 15);
-% end
-% 
-% v_r = @(x,d) d(1,:)+x(13,:)-x(3,:);
-% figure(6)
-% plot(t,v_r(x,d),'b-',t,v_r(xt,d),'r-');
-% xlabel('Time [s]', 'FontSize', 14);
-% ylabel('Velocity [m/s]', 'FontSize', 14);
-% grid on;
-% legend('UKF', 'True');
-% title('Effective wind speed [v_r]', 'FontSize', 14);
-% set(gcf, 'PaperOrientation','landscape');
-% saveas(figure(6),'Figures/Kalman_ve.pdf');
+%% Display results
+t = Ts*(1:N);
+for i = 1:Lk
+    figure(i)
+    subplot(1,2,1);
+    %     plot(t,xt(i,:),'r-','LineWidth', 2);
+    plot(t,x(i,:),'b-', t,xt(i,:),'r-');
+    xlabel('Time (s)', 'Interpreter', 'latex', 'FontSize', 14);
+    ylabel(x_ul(i), 'Interpreter', 'latex', 'FontSize', 14);
+    grid on;
+    legend('UKF','True');
+    title(['$Estimations $' x_vl(i)], 'Interpreter', 'latex', 'FontSize', 15);
+    
+    subplot(1,2,2);
+    plot(t,x(i,:)-xt(i,:),'b-');
+    xlabel('$Time (s)$', 'Interpreter', 'latex', 'FontSize', 14);
+    ylabel(x_ul(i), 'Interpreter', 'latex', 'FontSize', 14);
+    grid on;
+    legend('UKF');
+    title(['$Error $' x_vl(i)], 'Interpreter', 'latex', 'FontSize', 15);
+end
 
+v_r = @(x,d) d(1,:)+x(13,:)-x(3,:);
+figure(6)
+plot(t,v_r(x,d),'b-',t,v_r(xt,d),'r-');
+xlabel('Time [s]', 'FontSize', 14);
+ylabel('Velocity [m/s]', 'FontSize', 14);
+grid on;
+legend('UKF', 'True');
+title('Effective wind speed [v_r]', 'FontSize', 14);
+set(gcf, 'PaperOrientation','landscape');
+saveas(figure(6),'Figures/Kalman_ve.pdf');
 
 function res = cp_ct(la,be,cl,lambdaVec,pitchVec)
 [~,i_la] = min(abs(lambdaVec-abs(la)));

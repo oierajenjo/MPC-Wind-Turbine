@@ -31,14 +31,14 @@ w_p = @(x) x(14)*pi/(2*W.L);
 ve = @(x) x(14) + x(13);
 vr = @(x) ve(x) - x(3);
 
-lamb = @(x) (x(1)*Ae.Rr-x(9))/(vr(x));
+lamb = @(x) (x(1)*Ae.Rr-x(9))/(vr(x)-x(7));
 % lamb = @(x) (x(1)*Ae.Rr)/(vr(x));
 cp = @(x) cp_ct(lamb(x),x(10),cp_l,lambdaVec,pitchVec);
 ct = @(x) cp_ct(lamb(x),x(10),ct_l,lambdaVec,pitchVec);
 
-Tr = @(x) 0.5*Ae.rho*Ae.Ar*(vr(x))^3*cp(x)/x(1);
-Fx = @(x) 0.5*Ae.rho*Ae.Ar*(vr(x))^2*ct(x);
-Fy = @(x) (0.5*Ae.rho*Ae.Ar*(vr(x))^3*cp(x)/x(1))/(2*Ae.Rr/3);
+Tr = @(x) 0.5*Ae.rho*Ae.Ar*(vr(x)-x(7))^3*cp(x)/x(1);
+Fx = @(x) 0.5*Ae.rho*Ae.Ar*(vr(x)-x(7))^2*ct(x);
+Fy = @(x) (0.5*Ae.rho*Ae.Ar*(vr(x)-x(7))^3*cp(x)/x(1))/(2*Ae.Rr/3);
 
 %% Drive train
 f1 = @(x) (1-D.mu)*Tr(x)/(D.Jr+D.Jg) - x(12)/(D.Jr+D.Jg);
@@ -60,7 +60,7 @@ f9 = @(x) Fy(x)/(B.B*B.m) + B.ky*x(4)/B.m + B.cy*x(5)/B.m - B.ky*x(8)/B.m - B.cy
 %% Actuators BIEN
 f10 = @(x) x(11); % Pitch velocity
 f11 = @(x,u) Ac.omega^2*u(1) - 2*Ac.omega*Ac.xi*x(11) - Ac.omega^2*x(10); % Pitch acceleration
-f12 = @(x,u) (u(2)-x(12))/Ac.tau; % Torque change in time
+f12 = @(x,u) (u(2)*x(1)^2-x(12))/Ac.tau; % Torque change in time
 
 %% Wind
 f13 = @(x) -w_p(x)*x(13); % Wind turbulence acceleration
@@ -117,48 +117,45 @@ for k=1:N
     la(k) = lamb(xt(:,k));
     %     pi(k) = vri(xt(:,k),1);
 end
-figure
-plot(xt(1,:));
-title("wr")
-figure
-plot(xt(2,:));
-title("xt")
-figure
-plot(xt(3,:));
-title("xtdot")
-figure
-plot(xt(6,:));
-title("xb")
-figure
-plot(xt(4,:));
-title("yt")
-figure
-plot(xt(5,:));
-title("ytdot")
-figure
-plot(xt(8,:));
-title("yb")
+t = Ts*(1:N);
 
 figure
-plot(1:N,yt(2,:),1:N,y_me(2,:));
-title("xbdd")
+plot(t,xt(1,:),t,d_b(3,:));
+title("wr")
+% xlim([1 50])
+figure
+plot(t,xt(2,:),t, -data.Data(:,224));
+title("xt")
+% xlim([1 50])
+% figure
+% plot(xt(3,:));
+% title("xtdot")
+figure
+plot(t,xt(6,:));
+title("xb")
+% xlim([1 50])
+
+figure
+plot(t,xt(4,:),t, data.Data(:,225));
+title("yt")
+% xlim([1 50])
+% figure
+% plot(xt(5,:));
+% title("ytdot")
+figure
+plot(t,xt(8,:));
+title("yb")
+% xlim([1 50])
+
 figure
 plot(yt(7,:))
 title("vr")
+% xlim([1 50])
+
 figure
 plot(1:N,fx,1:N,fy)
 title("Fx & Fy")
-figure
-plot(fy)
-title("Fy")
-% figure
-% plot(1:N,cpl,1:N,ctl,1:N,xt(1,:),1:N,la)
-% title("Cp & Ct")
-
-% figure
-% plot(1:N,3*xt(12,:)/(2*To.H*To.m),1:N,-(B.B*B.ky + To.k)*xt(4,:)/To.m - (B.B*B.cy + To.c)*xt(5,:)/To.m + B.B*B.ky*xt(8,:)/To.m + B.B*B.cy*xt(9,:)/To.m)
-% title("Tg Applied")
-% xlim([1 500])
+% xlim([1 50])
 
 % Execute Unscented Kalman Filter
 P = P0; % Set first value of P to the initial P0
