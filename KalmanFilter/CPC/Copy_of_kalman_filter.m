@@ -3,7 +3,7 @@ clear all
 close all
 
 %% Obtain all variables
-variables_CPC
+Copy_of_variables_CPC
 
 %% Before filter execution
 % System properties
