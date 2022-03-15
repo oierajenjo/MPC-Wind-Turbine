@@ -11,11 +11,6 @@ u_b = [theta_f; K].*u_b;
 
 
 %% Before filter execution
-% System properties
-%N1 = 20; % Station 1 North coordinate
-%E1 = 0; % Station 1 East coordinate
-%N2 = 0; % Station 2 North coordinate
-%E2 = 20; % Station 2 East coordinate
 
 % Step 1: Define UT Scaling parameters and weight vectors
 Lk = size(x_i,1); % Size of state vector
@@ -34,8 +29,8 @@ wc(1) = lambda/(lambda+Lk) + 1 - alpha^2 + beta;
 % Step 2: Define noise assumptions
 % w_p = @(d) d(1)*pi/(2*W.L);
 % ve = @(x,d) x(13) + d(1);
-% lamb = @(x,d) (x(1)*Ae.Rr)/(d(1));
-lamb = @(x,d) (x(1)*Ae.Rr-x(9))/(d(1)-x(7));
+lamb = @(x,d) (x(1)*Ae.Rr)/(d(1));
+% lamb = @(x,d) (x(1)*Ae.Rr-x(9))/(d(1)-x(7));
 cp = @(x,d) cp_ct(lamb(x,d),x(10),cp_l,lambdaVec,pitchVec);
 % cpy = @(x,d) cp_ct(lamb(x,d),x(10),cp_l,lambdaVec,pitchVec);
 ct = @(x,d) cp_ct(lamb(x,d),x(10),ct_l,lambdaVec,pitchVec);
@@ -243,6 +238,13 @@ legend('UKF', 'True');
 title('Effective wind speed [v_r]', 'FontSize', 14);
 set(gcf, 'PaperOrientation','landscape');
 saveas(figure(6),'Figures/Kalman_ve.pdf');
+
+function [la,res] = cp_max(be,cl,lambdaVec,pitchVec)
+[~,i_be] = min(abs(pitchVec-be));
+l_c = cl(:,i_be);
+[res,i_la] = max(l_c);
+la = lambdaVec(i_la);
+end
 
 function res = cp_ct(la,be,cl,lambdaVec,pitchVec)
 [~,i_la] = min(abs(lambdaVec-abs(la)));
