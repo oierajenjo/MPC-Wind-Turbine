@@ -3,13 +3,7 @@ clear all
 close all
 
 %% Obtain all variables
-Copy_of_variables_CPC
-u_b = ones(2,N);
-
-theta_f = 0;
-[lamb_opt, cp_opt] = cp_max(theta_f,cp_l,lambdaVec,pitchVec);
-K = 0.5*Ae.rho*Ae.Rr^5*pi*cp_opt/lamb_opt^3;
-u_b = [theta_f; K].*u_b;
+Bladed_variables_CPC
 
 %% Before filter execution
 % System properties
@@ -37,15 +31,15 @@ w_p = @(x) x(14)*pi/(2*W.L);
 ve = @(x) x(14) + x(13);
 vr = @(x) ve(x) - x(3);
 
-lamb = @(x) (x(1)*Ae.Rr-x(9))/(vr(x)-x(7));
-% lamb = @(x) (x(1)*Ae.Rr)/(vr(x));
+% lamb = @(x) (x(1)*Ae.Rr-x(9))/(vr(x)-x(7));
+lamb = @(x) (x(1)*Ae.Rr)/(vr(x));
 cp = @(x) cp_ct(lamb(x),x(10),cp_l,lambdaVec,pitchVec);
 % cpy = @(x) cp_ct(lamby(x),x(10),cp_l,lambdaVec,pitchVec);
 ct = @(x) cp_ct(lamb(x),x(10),ct_l,lambdaVec,pitchVec);
 
-Tr = @(x) 0.5*Ae.rho*Ae.Ar*(vr(x)-x(7))^3*cp(x)/x(1);
+Tr = @(x) 0.5*Ae.rho*Ae.Ar*(vr(x))^3*cp(x)/x(1);
 Fx = @(x) 0.5*Ae.rho*Ae.Ar*(vr(x)-x(7))^2*ct(x);
-Fy = @(x) (0.5*Ae.rho*Ae.Ar*(vr(x)-x(9))^3*cp(x)*3)/(2*x(1)*Ae.Rr);
+Fy = @(x) (0.5*Ae.rho*Ae.Ar*(vr(x)-x(7))^3*cp(x)*3)/(2*x(1)*Ae.Rr);
 
 %% Drive train
 f1 = @(x) (1-D.mu)*Tr(x)/(D.Jr+D.Jg) - x(12)/(D.Jr+D.Jg);
@@ -62,12 +56,12 @@ f6 = @(x) x(7); % Blade foreafter velocity
 f7 = @(x) Fx(x)/(B.B*B.m) + B.kx*x(2)/B.m + B.cx*x(3)/B.m - B.kx*x(6)/B.m - B.cx*x(7)/B.m; % Blade foreafter acceleration
 
 f8 = @(x) x(9); % Blade edgewise velocity
-f9 = @(x) B.ky*x(4)/B.m + B.cy*x(5)/B.m - B.ky*x(8)/B.m - B.cy*x(9)/B.m; % Blade edgewise acceleration
+f9 = @(x) Fy(x)/(B.B*B.m) + B.ky*x(4)/B.m + B.cy*x(5)/B.m - B.ky*x(8)/B.m - B.cy*x(9)/B.m; % Blade edgewise acceleration
 
 %% Actuators BIEN
 f10 = @(x) x(11); % Pitch velocity
 f11 = @(x,u) Ac.omega^2*u(1) - 2*Ac.omega*Ac.xi*x(11) - Ac.omega^2*x(10); % Pitch acceleration
-f12 = @(x,u) (u(2)*x(1)^2-x(12))/Ac.tau; % Torque change in time
+f12 = @(x,u) (u(2)-x(12))/Ac.tau; % Torque change in time
 
 %% Wind
 f13 = @(x) -w_p(x)*x(13); % Wind turbulence acceleration
@@ -77,12 +71,12 @@ f14 = 0; % Mean wind acceleration
 f = @(x,u) x + Ts*[f1(x); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x);...
     f8(x); f9(x); f10(x); f11(x,u); f12(x,u); f13(x);  f14]; % Nonlinear prediction
 
-h = @(x) [x(1); f3(x); f5(x); B.l*B.m*f7(x); B.l*B.m*f9(x); ...
+h = @(x) [x(1); f3(x); f5(x); B.B*B.l*B.m*f7(x); B.B*B.l*B.m*f9(x); ...
     D.eta*x(12)*x(1); vr(x)];
 
 
 a = @(x) 1 - w_p(x)*Ts; % Euler
-% a = @(d) exp(-w_p(x)*Ts); % Zero Order Hold
+% a = @(x) exp(-w_p(x)*Ts); % Zero Order Hold
 sigma_t = @(x) W.ti*x(14)*sqrt((1-a(x)^2)/(1-a(x))^2);
 sigma_m = sqrt(Ts*W.q);
 Q = @(x) diag([zeros(Lk-2,1); sigma_t(x)*w_p(x)^2; sigma_m]); % Covariance matrix of the process noise
@@ -115,23 +109,21 @@ for k = 2:N
     yt(:,k-1) = h(xt(:,k-1)) + v(:,k-1);
 end
 for k=1:N
-%     p(k) = ve(xt(:,k),d(:,k))-xt(3,k);
     fx(k) = Fx(xt(:,k))/(B.B*B.m);
     fy(k) = Fy(xt(:,k))/(B.B*B.m);
     tr(k) = (1-D.mu)*Tr(xt(:,k))/(D.Jr+D.Jg);
-    cpl(k) = cp(xt(:,k));
-    ctl(k) = ct(xt(:,k));
-    la(k) = lamb(xt(:,k));
-    %     pi(k) = vri(xt(:,k),1);
+%     cpl(k) = cp(xt(:,k));
+%     ctl(k) = ct(xt(:,k));
+%     la(k) = lamb(xt(:,k));
 end
-t = Ts*(1:N);
 
+t = Ts*(1:N);
 figure
 plot(t,xt(1,:),t,d_b(3,:));
 title("wr")
 % xlim([1 50])
 figure
-plot(t,xt(2,:),t, -data.Data(:,224));
+plot(t,xt(2,:),t,-data.Data(:,224));
 title("xt")
 % xlim([1 50])
 % figure
@@ -155,12 +147,12 @@ title("yb")
 % xlim([1 50])
 
 figure
-plot(yt(7,:))
+plot(t,yt(7,:))
 title("vr")
 % xlim([1 50])
 
 figure
-plot(1:N,fx,1:N,fy)
+plot(t,fx,t,fy)
 title("Fx & Fy")
 % xlim([1 50])
 
@@ -247,12 +239,6 @@ title('Effective wind speed [v_r]', 'FontSize', 14);
 set(gcf, 'PaperOrientation','landscape');
 saveas(figure(6),'Figures/Kalman_ve.pdf');
 
-function [la,res] = cp_max(be,cl,lambdaVec,pitchVec)
-[~,i_be] = min(abs(pitchVec-be));
-l_c = cl(:,i_be);
-[res,i_la] = max(l_c);
-la = lambdaVec(i_la);
-end
 
 function res = cp_ct(la,be,cl,lambdaVec,pitchVec)
 [~,i_la] = min(abs(lambdaVec-abs(la)));
