@@ -19,7 +19,10 @@ B.l = 117.1836; % Blade length
 B.B = 3; % Blade amount
 
 %% Tower model constants
-To.m = 2475680-B.m*B.B; % Tower mass
+Mn = 630888; % Nacelle mass
+Mt = 1086002; % Tower mass
+To.m = Mn + Mt/3; % Tower mass
+% To.m = 2475680-B.m*B.B; % Tower mass
 To.d = 0.005; % Tower damping ratio
 To.f = 0.18; % Tower freq. flapwise
 To.c = To.d*2*To.m*2*pi*To.f; % Tower damping
@@ -43,11 +46,6 @@ W.q = 2^2/600; % Incremental variance mean wind speed
 W.mu_m = 6; % Fixed mean wind speed: 10 m/s
 W.L = 340.2;
 W.alpha = 0.15; % Wind shear exponent for smooth terrain
-% w_p = (W.mu_m*pi)/(2*W.L); % Kaimal spectrum peak freq.
-% W.a = exp(-W.w_p*Ts); % Discretizing filter with zoh
-% a = 1-w_p*Ts; %Discretizing filter with Fordward Euler
-% sigma_m = sqrt(Ts*W.q); % Standard deviation mean wind noise
-% sigma_t = ti*W.mu_m*sqrt((1-a^2)/(1-a)^2); % Standard deviation turbulent wind noise
 
 %% Actuator constants
 Ac.omega = 2.4*pi; % Natural frequency of pitch actuator model
@@ -63,18 +61,17 @@ M.sigma_vane = 1;
 M.sigma_azim = 0.01;
 
 %% Load measured data
-data = load('Bladed\DLC12_06p0_Y000_S0201').DLC12_06p0_Y000_S0201;
-% data = load('Bladed\DLC12_08p0_Y000_S0301').DLC12_08p0_Y000_S0301;
-% data = load('Bladed\DLC12_10p0_Y000_S0401').DLC12_10p0_Y000_S0401;
-% data = load('Bladed\DLC12_12p0_Y000_S0501').DLC12_12p0_Y000_S0501;
-% data = load('Bladed\DLC12_14p0_Y000_S0601').DLC12_14p0_Y000_S0601;
-% data = load('Bladed\DLC12_16p0_Y000_S0701').DLC12_16p0_Y000_S0701;
-% data = load('Bladed\DLC12_18p0_Y000_S0801').DLC12_18p0_Y000_S0801;
-% data = load('Bladed\DLC12_20p0_Y000_S0901').DLC12_20p0_Y000_S0901;
-% data = load('Bladed\DLC12_22p0_Y000_S1001').DLC12_22p0_Y000_S1001;
-% data = load('Bladed\DLC12_24p0_Y000_S1101').DLC12_24p0_Y000_S1101;
+data = load('BladedFiles\DLC12_06p0_Y000_S0201').DLC12_06p0_Y000_S0201;
+% data = load('BladedFiles\DLC12_08p0_Y000_S0301').DLC12_08p0_Y000_S0301;
+% data = load('BladedFiles\DLC12_10p0_Y000_S0401').DLC12_10p0_Y000_S0401;
+% data = load('BladedFiles\DLC12_12p0_Y000_S0501').DLC12_12p0_Y000_S0501;
+% data = load('BladedFiles\DLC12_14p0_Y000_S0601').DLC12_14p0_Y000_S0601;
+% data = load('BladedFiles\DLC12_16p0_Y000_S0701').DLC12_16p0_Y000_S0701;
+% data = load('BladedFiles\DLC12_18p0_Y000_S0801').DLC12_18p0_Y000_S0801;
+% data = load('BladedFiles\DLC12_20p0_Y000_S0901').DLC12_20p0_Y000_S0901;
+% data = load('BladedFiles\DLC12_22p0_Y000_S1001').DLC12_22p0_Y000_S1001;
+% data = load('BladedFiles\DLC12_24p0_Y000_S1101').DLC12_24p0_Y000_S1101;
 
-% time = data1.Data(:,1);
 N = data.Channels.Scans; % Number of time steps for filter
 
 %% Inputs
@@ -96,8 +93,8 @@ d_b = [vr vry wr Fy]';
 omega_r = data.Data(:,10); % Rotor speed
 xt_ddot = -data.Data(:,236); % Tower fore-aft acceleration
 yt_ddot = data.Data(:,237); % Tower edgewise acceleration
-% Mx = mean([data1.Data(:,111) data1.Data(:,119) data1.Data(:,127)], 2);
-% My = mean([data1.Data(:,112) data1.Data(:,120) data1.Data(:,128)], 2);
+% Mx = sum([data1.Data(:,111) data1.Data(:,119) data1.Data(:,127)], 2); % Mx in the principal axis
+% My = sum([data1.Data(:,112) data1.Data(:,120) data1.Data(:,128)], 2); % My in the principal axis
 Mx = sum([data.Data(:,61) data.Data(:,69) data.Data(:,77)], 2); % Mx in the principal axis
 My = sum([data.Data(:,62) data.Data(:,70) data.Data(:,78)], 2); % My in the principal axis
 Pe = data.Data(:,28);
@@ -123,12 +120,11 @@ Tg = tg_ref(1);
 vt = 0;
 vm = data.Data(1,59);
 
-x_i = [omega_r(1) xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta theta_dot Tg]';
-% x_i = [omega_r(1) xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta theta_dot Tg vt vm]';
+x_i = [omega_r(1) xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta theta_dot Tg vt vm]';
 
-clearvars -except D To B Ae Ac M Ts W w_p x_i y_me d_b u_b N data % a sigma_m sigma_t
+clearvars -except D To B Ae Ac M Ts W w_p x_i y_me d_b u_b N data
 
-load('performancemap_data.mat')
+load('BladedFiles\performancemap_data.mat')
 %% Plotting variables
 x_vl = {'$\omega_r$', '$\dot{x}_t$', '$x_t$', '$\dot{y}_t$', '$y_t$', ...
     '$\dot{x}_{b}$', '$x_{b}$', '$\dot{y}_{b}$', '$y_{b}$',...

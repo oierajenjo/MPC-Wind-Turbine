@@ -3,7 +3,7 @@ D.Jr = 321699000; % Rotor moment of inertia
 D.Jg = 3.223e6; % Generator moment of inertia
 % D.c = 0.005; % Drive train damping
 % D.k = 1.409e10; % Drive train torsion stiffness
-D.mu = 0.05; % Drive train mechanical losses (friction)
+D.mu = 0; % Drive train mechanical losses (friction)
 D.eta = 0.93; % Generator efficiency
 
 %% Blades model constants
@@ -17,10 +17,6 @@ B.cy = B.d*2*B.m*2*pi*B.fy; % Blade damping y direction
 B.ky = (2*pi*B.fy)^2*B.m; % Blade stiffness y direction
 B.l = 117.1836; % Blade length
 B.B = 3; % Blade amount
-B.xdd_min = 0;
-B.xdd_max = 0;
-B.ydd_min = 0;
-B.ydd_max = 0;
 
 %% Tower model constants
 Mn = 630888; % Nacelle mass
@@ -45,7 +41,7 @@ Ae.Ar = pi*Ae.Rr^2; % Rotor area
 
 %% Wind model constants
 Ts = 0.05; % Sampling time
-ti = 0.1; % Turbulence intensity
+W.ti = 0.1; % Turbulence intensity
 W.q = 2^2/600; % Incremental variance mean wind speed
 W.mu_m = 6; % Fixed mean wind speed: 10 m/s
 W.L = 340.2;
@@ -79,32 +75,19 @@ data = load('BladedFiles\DLC12_06p0_Y000_S0201').DLC12_06p0_Y000_S0201;
 N = data.Channels.Scans; % Number of time steps for filter
 
 %% Inputs
-theta_ref = data.Data(:,34:36); % Mean pitch angle (collective pitch)
+theta_ref = data.Data(:,30); % Mean pitch angle (collective pitch)
 tg_ref = data.Data(:,20); % Generator Torque
 
-u = [theta_ref tg_ref]';
-
-%% Disturbances
-% % vm = data.Data(:,59); % Wind mean speed
-% vr = data.Data(:,54); % Wind speed
-% Fy = sum([data.Data(:,66) data.Data(:,74) data.Data(:,82)], 2); % Fy in the principal axis
-% wr = data.Data(:,10); % Rotor speed
-% % d_b = vr';
-% d_b = [vr wr Fy]';
+u_b = [theta_ref tg_ref]';
 
 %% Measurements
 omega_r = data.Data(:,10); % Rotor speed
-xt_ddot = data.Data(:,236); % Tower fore-aft acceleration
+xt_ddot = -data.Data(:,236); % Tower fore-aft acceleration
 yt_ddot = data.Data(:,237); % Tower edgewise acceleration
-% Mx = [data.Data(:,111) data.Data(:,119) data.Data(:,127)];
-% My = [data.Data(:,112) data.Data(:,120) data.Data(:,128)];
-Mx = [data.Data(:,61) data.Data(:,69) data.Data(:,77)]; % Mx in the principal axis
-My = [data.Data(:,62) data.Data(:,70) data.Data(:,78)]; % My in the principal axis
 Pe = data.Data(:,28);
 vr = data.Data(:,26); % Wind speed magnitud at the hub
-psi = data.Data(:,11);
 
-y_me = [omega_r xt_ddot yt_ddot My Mx Pe vr psi]';
+y_me = [omega_r xt_ddot yt_ddot Pe vr]';
 
 %% Initial state vector
 xt_dot = -data.Data(1,230);
@@ -112,47 +95,29 @@ xt = -data.Data(1,224);
 yt_dot = data.Data(1,231);
 yt = data.Data(1,225);
 
-xb = [data.Data(1,85) data.Data(1,91) data.Data(1,97)];
-xb_dot = zeros(1,3);
-yb = [data.Data(1,86) data.Data(1,92) data.Data(1,98)];
-yb_dot = zeros(1,3);
-
-theta = theta_ref(1,:);
-theta_dot = data.Data(1,37:39);
-tg = tg_ref(1);
+theta = theta_ref(1);
+theta_dot = mean(data.Data(1,37:39), 2);
+Tg = tg_ref(1);
 vt = 0;
 vm = data.Data(1,59);
 
-x_i = [omega_r(1) xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta theta_dot...
-    tg vt vm psi(1)]';
+x_i = [omega_r(1) xt xt_dot yt yt_dot theta theta_dot Tg vt vm]';
 
-clearvars -except D To B Ae Ac M Ts ti W w_p x_i y_me u N data
+clearvars -except D To B Ae Ac M Ts W w_p x_i y_me u_b N data
 
 load('BladedFiles\performancemap_data.mat')
 %% Plotting variables
 x_vl = {'$\omega_r$', '$\dot{x}_t$', '$x_t$', '$\dot{y}_t$', '$y_t$', ...
-    '$\dot{x}_{b_1}$', '$\dot{x}_{b_2}$', '$\dot{x}_{b_3}$',...
-    '$x__{b_1}$', '$x__{b_2}$', '$x__{b_3}$', '$\dot{y}_{b_1}$',...
-    '$\dot{y}_{b_2}$', '$\dot{y}_{b_3}$', '$y__{b_1}$', '$y__{b_2}$',...
-    '$y__{b_3}$', '$\dot{\theta}_{b_1}$', '$\dot{\theta}_{b_2}$',...
-    '$\dot{\theta}_{b_3}$', '$\theta__{b_1}$', '$\theta__{b_2}$',...
-    '$\theta__{b_3}$', '$T_g$', '$v_t$', '$v_m$', '$\psi$'};
+    '$\dot{x}_{b}$', '$x_{b}$', '$\dot{y}_{b}$', '$y_{b}$',...
+    '$\dot{\theta}_{b}$', '$\theta_{b}$', '$T_g$', '$v_t$', '$v_m$'};
 
-
-y_vl = {'$\omega_r$', '$\ddot{x}_t$', '$\ddot{y}_t$', '$M_{x_1}$', '$M_{x_2}$',...
-    '$M_{x_3}$', '$M_{y_1}$', '$M_{y_2}$', '$M_{y_3}$', '$P_e$', '$v_r$', '$psi$'};
+y_vl = {'$\omega_r$', '$\ddot{x}_t$', '$\ddot{y}_t$', '$M_{y}$', '$M_{x}$',...
+    '$P_e$', '$v_r$'};
 
 x_ul = {'$Angular\, velocity [\frac{rad}{s}]$', ...
     '$Velocity [\frac{m}{s}]$', '$Position [m]$', ...
     '$Velocity [\frac{m}{s}]$', '$Position [m]$', ...
-    '$Velocity [\frac{m}{s}]$', '$Velocity [\frac{m}{s}]$', ...
     '$Velocity [\frac{m}{s}]$', '$Position [m]$', ...
-    '$Position [m]$', '$Position [m]$', ...
-    '$Velocity [\frac{m}{s}]$', '$Velocity [\frac{m}{s}]$', ...
     '$Velocity [\frac{m}{s}]$', '$Position [m]$', ...
-    '$Position [m]$', '$Position [m]$', ...
-    '$Angular\, velocity [\frac{rad}{s}]$', '$Angular\, velocity [\frac{rad}{s}]$',...
-    '$Angular\, velocity [\frac{rad}{s}]$', '$Angular\, position [rad]$', ...
-    '$Angular\, position [rad]$', '$Angular\, position [rad]$',...
-    '$Torque [Nm]$', '$Velocity [\frac{m}{s}]$', ...
-    '$Velocity [\frac{m}{s}]$', '$Angular\, position [rad]$'};
+    '$Angular\, velocity [\frac{rad}{s}]$', '$Angular\, position [rad]$',...
+    '$Torque [Nm]$', '$Velocity [\frac{m}{s}]$', '$Velocity [\frac{m}{s}]$'};

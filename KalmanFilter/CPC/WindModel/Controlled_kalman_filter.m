@@ -11,8 +11,12 @@ theta_f = 0;
 K = 0.5*Ae.rho*Ae.Rr^5*pi*cp_opt/lamb_opt^3;
 u_b = [theta_f; K].*u_b;
 
-
 %% Before filter execution
+% System properties
+%N1 = 20; % Station 1 North coordinate
+%E1 = 0; % Station 1 East coordinate
+%N2 = 0; % Station 2 North coordinate
+%E2 = 20; % Station 2 East coordinate
 
 % Step 1: Define UT Scaling parameters and weight vectors
 Lk = size(x_i,1); % Size of state vector
@@ -29,57 +33,59 @@ wm(1) = lambda/(lambda+Lk);
 wc(1) = lambda/(lambda+Lk) + 1 - alpha^2 + beta;
 
 % Step 2: Define noise assumptions
-% w_p = @(d) d(1)*pi/(2*W.L);
-% ve = @(x,d) x(13) + d(1);
-lamb = @(x,d) (x(1)*Ae.Rr)/(d(1));
-% lamb = @(x,d) (x(1)*Ae.Rr-x(9))/(d(1)-x(7));
-cp = @(x,d) cp_ct(lamb(x,d),x(10),cp_l,lambdaVec,pitchVec);
-% cpy = @(x,d) cp_ct(lamb(x,d),x(10),cp_l,lambdaVec,pitchVec);
-ct = @(x,d) cp_ct(lamb(x,d),x(10),ct_l,lambdaVec,pitchVec);
+w_p = @(x) x(14)*pi/(2*W.L);
+ve = @(x) x(14) + x(13);
+vr = @(x) ve(x) - x(3);
 
-Tr = @(x,d) 0.5*Ae.rho*Ae.Ar*(d(1)-x(7))^3*cp(x,d)/x(1);
-Fx = @(x,d) 0.5*Ae.rho*Ae.Ar*(d(1)-x(7))^2*ct(x,d);
-Fy = @(x,d) (0.5*Ae.rho*Ae.Ar*(d(1)-x(7))^3*cp(x,d)/x(1))/(2*Ae.Rr/3);
+lamb = @(x) (x(1)*Ae.Rr-x(9))/(vr(x)-x(7));
+% lamb = @(x) (x(1)*Ae.Rr)/(vr(x));
+cp = @(x) cp_ct(lamb(x),x(10),cp_l,lambdaVec,pitchVec);
+% cpy = @(x) cp_ct(lamby(x),x(10),cp_l,lambdaVec,pitchVec);
+ct = @(x) cp_ct(lamb(x),x(10),ct_l,lambdaVec,pitchVec);
+
+Tr = @(x) 0.5*Ae.rho*Ae.Ar*(vr(x)-x(7))^3*cp(x)/x(1);
+Fx = @(x) 0.5*Ae.rho*Ae.Ar*(vr(x)-x(7))^2*ct(x);
+Fy = @(x) (0.5*Ae.rho*Ae.Ar*(vr(x)-x(9))^3*cp(x)*3)/(2*x(1)*Ae.Rr);
 
 %% Drive train
-f1 = @(x,d) (1-D.mu)*Tr(x,d)/(D.Jr+D.Jg) - x(12)/(D.Jr+D.Jg);
+f1 = @(x) (1-D.mu)*Tr(x)/(D.Jr+D.Jg) - x(12)/(D.Jr+D.Jg);
 
 %% Tower
 f2 = @(x) x(3); % Tower foreafter velocity
 f3 = @(x) -(B.B*B.kx + To.k)*x(2)/To.m - (B.B*B.cx + To.c)*x(3)/To.m + B.B*B.kx*x(6)/To.m + B.B*B.cx*x(7)/To.m; % Tower foreafter acceleration
 
 f4 = @(x) x(5); % Tower edgewise velocity
-f5 = @(x) 3*x(12)/(2*To.H*To.m) - (B.B*B.ky + To.k)*x(4)/To.m - (B.B*B.cy + To.c)*x(5)/To.m + B.B*B.ky*x(8)/To.m + B.B*B.cy*x(9)/To.m; % Tower edgewise acceleration
+f5 = @(x) -3*x(12)/(2*To.H*To.m) - (B.B*B.ky + To.k)*x(4)/To.m - (B.B*B.cy + To.c)*x(5)/To.m + B.B*B.ky*x(8)/To.m + B.B*B.cy*x(9)/To.m; % Tower edgewise acceleration
 
 %% Blades
 f6 = @(x) x(7); % Blade foreafter velocity
-f7 = @(x,d) Fx(x,d)/(B.B*B.m) + B.kx*x(2)/B.m + B.cx*x(3)/B.m - B.kx*x(6)/B.m - B.cx*x(7)/B.m; % Blade foreafter acceleration
+f7 = @(x) Fx(x)/(B.B*B.m) + B.kx*x(2)/B.m + B.cx*x(3)/B.m - B.kx*x(6)/B.m - B.cx*x(7)/B.m; % Blade foreafter acceleration
 
 f8 = @(x) x(9); % Blade edgewise velocity
-f9 = @(x,d) Fy(x,d)/(B.B*B.m) + B.ky*x(4)/B.m + B.cy*x(5)/B.m - B.ky*x(8)/B.m - B.cy*x(9)/B.m; % Blade edgewise acceleration
+f9 = @(x) B.ky*x(4)/B.m + B.cy*x(5)/B.m - B.ky*x(8)/B.m - B.cy*x(9)/B.m; % Blade edgewise acceleration
 
-%% Actuators
+%% Actuators BIEN
 f10 = @(x) x(11); % Pitch velocity
 f11 = @(x,u) Ac.omega^2*u(1) - 2*Ac.omega*Ac.xi*x(11) - Ac.omega^2*x(10); % Pitch acceleration
 f12 = @(x,u) (u(2)*x(1)^2-x(12))/Ac.tau; % Torque change in time
 
 %% Wind
-% f13 = @(x,d) -w_p(d)*x(13); % Wind turbulence acceleration
-% f14 = 0; % Mean wind acceleration
+f13 = @(x) -w_p(x)*x(13); % Wind turbulence acceleration
+f14 = 0; % Mean wind acceleration
 
 
-f = @(x,u,d) x + Ts*[f1(x,d); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x,d);...
-    f8(x); f9(x,d); f10(x); f11(x,u); f12(x,u)]; % Nonlinear prediction
+f = @(x,u) x + Ts*[f1(x); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x);...
+    f8(x); f9(x); f10(x); f11(x,u); f12(x,u); f13(x);  f14]; % Nonlinear prediction
 
-h = @(x,d) [x(1); f3(x); f5(x); B.l*B.m*f7(x,d); B.l*B.m*f9(x,d); ...
-    D.eta*x(12)*x(1); d(1)];
+h = @(x) [x(1); f3(x); f5(x); B.l*B.m*f7(x); B.l*B.m*f9(x); ...
+    D.eta*x(12)*x(1); vr(x)];
 
 
-% a = @(d) 1 - w_p(d)*Ts; % Euler
-% a = @(d) exp(-w_p(d)*Ts); % Zero Order Hold
-% sigma_t = @(d) W.ti*d(1)*sqrt((1-a(d)^2)/(1-a(d))^2);
-% sigma_m = sqrt(Ts*W.q);
-Q = @(d) diag([zeros(Lk-1,1); 0]); % Covariance matrix of the process noise
+a = @(x) 1 - w_p(x)*Ts; % Euler
+% a = @(d) exp(-w_p(x)*Ts); % Zero Order Hold
+sigma_t = @(x) W.ti*x(14)*sqrt((1-a(x)^2)/(1-a(x))^2);
+sigma_m = sqrt(Ts*W.q);
+Q = @(x) diag([zeros(Lk-2,1); sigma_t(x)*w_p(x)^2; sigma_m]); % Covariance matrix of the process noise
 
 temp = [M.sigma_enc; M.sigma_acc; M.sigma_acc; M.sigma_root; M.sigma_root;...
     M.sigma_pow; M.sigma_vane].^2;
@@ -94,7 +100,7 @@ P0 = 0.01*eye(Lk,Lk); % Set initial error covariance
 % Simulation Only: Calculate true state trajectory for comparison
 % Also calculate measurement vector
 % Var(QX) = QVar(X)Q' = sigma^4 -> Var(sqrt(Q)X) = sqrt(Q)Var(X)sqrt(Q)' = sigma^2
-n = @(d) sqrt(Q(d))*randn(Lk, 1); % Generate random process noise (from assumed Q)
+n = @(x) sqrt(Q(x))*randn(Lk, 1); % Generate random process noise (from assumed Q)
 v = sqrt(R)*randn(Yk, N); % Generate random measurement noise (from assumed R)
 %w = zeros(1,N);
 %v = zeros(1,N);
@@ -105,20 +111,19 @@ yt = zeros(Yk, N); % Initialize size of output vector for all k
 
 % Generate the true state values
 for k = 2:N
-    xt(:,k) = f(xt(:,k-1),u_b(:,k-1),d_b(:,k-1)) + Ts*n(d_b(:,k-1));
-    yt(:,k-1) = h(xt(:,k-1),d_b(:,k-1)) + v(:,k-1);
+    xt(:,k) = f(xt(:,k-1),u_b(:,k-1)) + Ts*n(xt(:,k-1));
+    yt(:,k-1) = h(xt(:,k-1)) + v(:,k-1);
 end
 for k=1:N
-%     p(k) = vr(xt(:,k),d(:,k));
-    frx(k) = Fx(xt(:,k),d_b(:,k))/(B.B*B.m);
-    fry(k) = Fy(xt(:,k),d_b(:,k))/(B.B*B.m);
-    tr(k) = (1-D.mu)*Tr(xt(:,k),d_b(:,k))/(D.Jr+D.Jg);
-    cpl(k) = cp(xt(:,k),d_b(:,k));
-    ctl(k) = ct(xt(:,k),d_b(:,k));
-    la(k) = lamb(xt(:,k),d_b(:,k));
+%     p(k) = ve(xt(:,k),d(:,k))-xt(3,k);
+    fx(k) = Fx(xt(:,k))/(B.B*B.m);
+    fy(k) = Fy(xt(:,k))/(B.B*B.m);
+    tr(k) = (1-D.mu)*Tr(xt(:,k))/(D.Jr+D.Jg);
+    cpl(k) = cp(xt(:,k));
+    ctl(k) = ct(xt(:,k));
+    la(k) = lamb(xt(:,k));
     %     pi(k) = vri(xt(:,k),1);
 end
-
 t = Ts*(1:N);
 
 figure
@@ -150,15 +155,16 @@ title("yb")
 % xlim([1 50])
 
 figure
-plot(t,d_b(1,:))
+plot(yt(7,:))
 title("vr")
 % xlim([1 50])
+
 figure
-plot(t,frx,t,fry)
-title("Frx & Fry")
+plot(1:N,fx,1:N,fy)
+title("Fx & Fy")
+% xlim([1 50])
 
-
-%% Execute Unscented Kalman Filter
+% Execute Unscented Kalman Filter
 P = P0; % Set first value of P to the initial P0
 for k = 2:N
     % Step 1: Generate the sigma-points
@@ -172,12 +178,12 @@ for k = 2:N
     % chi_m = "chi minus" = chi(k|k-1)
     chi_m = zeros(Lk,n_sigma_p); % Transformed sigma points
     for j=1:n_sigma_p
-        chi_m(:,j) = f(chi_p(:,j),u_b(:,k-1),d_b(:,k-1));
+        chi_m(:,j) = f(chi_p(:,j),u_b(:,k-1));
     end
     
     x_m = chi_m*wm; % Calculate mean of predicted state
     % Calculate covariance of predicted state
-    P_m = Q(d_b(:,k-1)); % A priori covariance estimate
+    P_m = Q(x(:,k-1)); % A priori covariance estimate
     for i = 1:n_sigma_p
         P_m = P_m + wc(i)*(chi_m(:,i) - x_m)*(chi_m(:,i) - x_m)';
     end
@@ -188,7 +194,7 @@ for k = 2:N
     % obtaining the acceleration
     psi_m = zeros(Yk,n_sigma_p);
     for j=1:n_sigma_p
-        psi_m(:,j) = h(chi_m(:,j),d_b(:,k-1));
+        psi_m(:,j) = h(chi_m(:,j));
     end
     y_m = psi_m*wm; % Calculate mean of predicted output
     
@@ -230,9 +236,9 @@ for i = 1:Lk
     title(['$Error $' x_vl(i)], 'Interpreter', 'latex', 'FontSize', 15);
 end
 
-v_r = @(x,d) d(1,:)+x(13,:)-x(3,:);
+v_r = @(x) x(14,:)+x(13,:)-x(3,:);
 figure(6)
-plot(t,v_r(x,d),'b-',t,v_r(xt,d),'r-');
+plot(t,v_r(x),'b-',t,v_r(xt,d),'r-');
 xlabel('Time [s]', 'FontSize', 14);
 ylabel('Velocity [m/s]', 'FontSize', 14);
 grid on;
