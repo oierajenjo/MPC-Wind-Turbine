@@ -60,7 +60,7 @@ f9 = @(x) Fy(x)/(B.B*B.m) + B.ky*x(4)/B.m + B.cy*x(5)/B.m - B.ky*x(8)/B.m - B.cy
 %% Actuators BIEN
 f10 = @(x) x(11); % Pitch velocity
 f11 = @(x,u) Ac.omega^2*u(1) - 2*Ac.omega*Ac.xi*x(11) - Ac.omega^2*x(10); % Pitch acceleration
-f12 = @(x,u) (u(2)*x(1)^2-x(12))/Ac.tau; % Torque change in time
+f12 = @(x,u) (u(2)-x(12))/Ac.tau; % Torque change in time
 
 %% Wind
 f13 = @(x) -w_p(x)*x(13); % Wind turbulence acceleration
@@ -70,12 +70,12 @@ f14 = 0; % Mean wind acceleration
 f = @(x,u) x + Ts*[f1(x); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x);...
     f8(x); f9(x); f10(x); f11(x,u); f12(x,u); f13(x);  f14]; % Nonlinear prediction
 
-h = @(x) [x(1); f3(x); f5(x); B.l*B.m*f7(x); B.l*B.m*f9(x); ...
+h = @(x) [x(1); f3(x); f5(x); B.B*B.l*B.m*f7(x); B.B*B.l*B.m*f9(x); ...
     D.eta*x(12)*x(1); vr(x)];
 
 
 a = @(x) 1 - w_p(x)*Ts; % Euler
-% a = @(d) exp(-w_p(x)*Ts); % Zero Order Hold
+% a = @(x) exp(-w_p(x)*Ts); % Zero Order Hold
 sigma_t = @(x) W.ti*x(14)*sqrt((1-a(x)^2)/(1-a(x))^2);
 sigma_m = sqrt(Ts*W.q);
 Q = @(x) diag([zeros(Lk-2,1); sigma_t(x)*w_p(x)^2; sigma_m]); % Covariance matrix of the process noise
@@ -112,19 +112,18 @@ for k=1:N
     fx(k) = Fx(xt(:,k))/(B.B*B.m);
     fy(k) = Fy(xt(:,k))/(B.B*B.m);
     tr(k) = (1-D.mu)*Tr(xt(:,k))/(D.Jr+D.Jg);
-    cpl(k) = cp(xt(:,k));
-    ctl(k) = ct(xt(:,k));
-    la(k) = lamb(xt(:,k));
-    %     pi(k) = vri(xt(:,k),1);
+%     cpl(k) = cp(xt(:,k));
+%     ctl(k) = ct(xt(:,k));
+%     la(k) = lamb(xt(:,k));
 end
-t = Ts*(1:N);
 
+t = Ts*(1:N);
 figure
 plot(t,xt(1,:),t,d_b(3,:));
 title("wr")
 % xlim([1 50])
 figure
-plot(t,xt(2,:),t, -data.Data(:,224));
+plot(t,xt(2,:),t,-data.Data(:,224));
 title("xt")
 % xlim([1 50])
 % figure
@@ -148,12 +147,12 @@ title("yb")
 % xlim([1 50])
 
 figure
-plot(yt(7,:))
+plot(t,yt(7,:))
 title("vr")
 % xlim([1 50])
 
 figure
-plot(1:N,fx,1:N,fy)
+plot(t,fx,t,fy)
 title("Fx & Fy")
 % xlim([1 50])
 
