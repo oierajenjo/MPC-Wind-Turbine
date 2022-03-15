@@ -31,14 +31,15 @@ w_p = @(x) x(14)*pi/(2*W.L);
 ve = @(x) x(14) + x(13);
 vr = @(x) ve(x) - x(3);
 
-lamb = @(x) (x(1)*Ae.Rr-x(9))/(vr(x)-x(7));
-% lamb = @(x) (x(1)*Ae.Rr)/(vr(x));
+% lamb = @(x) (x(1)*Ae.Rr-x(9))/(vr(x)-x(7));
+lamb = @(x) (x(1)*Ae.Rr)/(vr(x));
 cp = @(x) cp_ct(lamb(x),x(10),cp_l,lambdaVec,pitchVec);
+% cpy = @(x) cp_ct(lamby(x),x(10),cp_l,lambdaVec,pitchVec);
 ct = @(x) cp_ct(lamb(x),x(10),ct_l,lambdaVec,pitchVec);
 
-Tr = @(x) 0.5*Ae.rho*Ae.Ar*(vr(x)-x(7))^3*cp(x)/x(1);
+Tr = @(x) 0.5*Ae.rho*Ae.Ar*(vr(x))^3*cp(x)/x(1);
 Fx = @(x) 0.5*Ae.rho*Ae.Ar*(vr(x)-x(7))^2*ct(x);
-Fy = @(x) (0.5*Ae.rho*Ae.Ar*(vr(x)-x(7))^3*cp(x)/x(1))/(2*Ae.Rr/3);
+Fy = @(x) (0.5*Ae.rho*Ae.Ar*(vr(x)-x(7))^3*cp(x)*3)/(2*x(1)*Ae.Rr);
 
 %% Drive train
 f1 = @(x) (1-D.mu)*Tr(x)/(D.Jr+D.Jg) - x(12)/(D.Jr+D.Jg);
@@ -48,7 +49,7 @@ f2 = @(x) x(3); % Tower foreafter velocity
 f3 = @(x) -(B.B*B.kx + To.k)*x(2)/To.m - (B.B*B.cx + To.c)*x(3)/To.m + B.B*B.kx*x(6)/To.m + B.B*B.cx*x(7)/To.m; % Tower foreafter acceleration
 
 f4 = @(x) x(5); % Tower edgewise velocity
-f5 = @(x) 3*x(12)/(2*To.H*To.m) - (B.B*B.ky + To.k)*x(4)/To.m - (B.B*B.cy + To.c)*x(5)/To.m + B.B*B.ky*x(8)/To.m + B.B*B.cy*x(9)/To.m; % Tower edgewise acceleration
+f5 = @(x) -3*x(12)/(2*To.H*To.m) - (B.B*B.ky + To.k)*x(4)/To.m - (B.B*B.cy + To.c)*x(5)/To.m + B.B*B.ky*x(8)/To.m + B.B*B.cy*x(9)/To.m; % Tower edgewise acceleration
 
 %% Blades
 f6 = @(x) x(7); % Blade foreafter velocity
@@ -108,7 +109,6 @@ for k = 2:N
     yt(:,k-1) = h(xt(:,k-1)) + v(:,k-1);
 end
 for k=1:N
-%     p(k) = ve(xt(:,k),d(:,k))-xt(3,k);
     fx(k) = Fx(xt(:,k))/(B.B*B.m);
     fy(k) = Fy(xt(:,k))/(B.B*B.m);
     tr(k) = (1-D.mu)*Tr(xt(:,k))/(D.Jr+D.Jg);

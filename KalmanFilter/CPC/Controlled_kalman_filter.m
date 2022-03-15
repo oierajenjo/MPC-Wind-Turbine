@@ -4,6 +4,8 @@ close all
 
 %% Obtain all variables
 variables_CPC
+u_b = ones(2,N);
+
 theta_f = 0;
 [lamb_opt, cp_opt] = cp_max(theta_f,cp_l,lambdaVec,pitchVec);
 K = 0.5*Ae.rho*Ae.Rr^5*pi*cp_opt/lamb_opt^3;

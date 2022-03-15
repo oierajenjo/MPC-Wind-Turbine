@@ -29,8 +29,8 @@ wc(1) = lambda/(lambda+Lk) + 1 - alpha^2 + beta;
 % Step 2: Define noise assumptions
 % w_p = @(d) d(1)*pi/(2*W.L);
 % ve = @(x,d) x(13) + d(1);
-% lamb = @(x,d) (x(1)*Ae.Rr)/(d(1));
-lamb = @(x,d) (x(1)*Ae.Rr-x(9))/(d(1)-x(7));
+lamb = @(x,d) (x(1)*Ae.Rr)/(d(1));
+% lamb = @(x,d) (x(1)*Ae.Rr-x(9))/(d(1)-x(7));
 cp = @(x,d) cp_ct(lamb(x,d),x(10),cp_l,lambdaVec,pitchVec);
 % cpy = @(x,d) cp_ct(lamb(x,d),x(10),cp_l,lambdaVec,pitchVec);
 ct = @(x,d) cp_ct(lamb(x,d),x(10),ct_l,lambdaVec,pitchVec);
@@ -47,7 +47,7 @@ f2 = @(x) x(3); % Tower foreafter velocity
 f3 = @(x) -(B.B*B.kx + To.k)*x(2)/To.m - (B.B*B.cx + To.c)*x(3)/To.m + B.B*B.kx*x(6)/To.m + B.B*B.cx*x(7)/To.m; % Tower foreafter acceleration
 
 f4 = @(x) x(5); % Tower edgewise velocity
-f5 = @(x) 3*x(12)/(2*To.H*To.m) - (B.B*B.ky + To.k)*x(4)/To.m - (B.B*B.cy + To.c)*x(5)/To.m + B.B*B.ky*x(8)/To.m + B.B*B.cy*x(9)/To.m; % Tower edgewise acceleration
+f5 = @(x) -3*x(12)/(2*To.H*To.m) - (B.B*B.ky + To.k)*x(4)/To.m - (B.B*B.cy + To.c)*x(5)/To.m + B.B*B.ky*x(8)/To.m + B.B*B.cy*x(9)/To.m; % Tower edgewise acceleration
 
 %% Blades
 f6 = @(x) x(7); % Blade foreafter velocity

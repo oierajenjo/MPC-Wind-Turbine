@@ -81,8 +81,7 @@ N = data.Channels.Scans; % Number of time steps for filter
 theta_ref = data.Data(:,30); % Mean pitch angle (collective pitch)
 tg_ref = data.Data(:,20); % Generator Torque
 
-% u_b = [theta_ref tg_ref]';
-u_b = ones(2,N);
+u_b = [theta_ref tg_ref]';
 
 %% Disturbances
 % vm = data.Data(:,59); % Wind mean speed

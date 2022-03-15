@@ -4,6 +4,8 @@ close all
 
 %% Obtain all variables
 Copy_of_variables_CPC
+u_b = ones(2,N);
+
 theta_f = 0;
 [lamb_opt, cp_opt] = cp_max(theta_f,cp_l,lambdaVec,pitchVec);
 K = 0.5*Ae.rho*Ae.Rr^5*pi*cp_opt/lamb_opt^3;
@@ -38,11 +40,12 @@ vr = @(x) ve(x) - x(3);
 lamb = @(x) (x(1)*Ae.Rr-x(9))/(vr(x)-x(7));
 % lamb = @(x) (x(1)*Ae.Rr)/(vr(x));
 cp = @(x) cp_ct(lamb(x),x(10),cp_l,lambdaVec,pitchVec);
+% cpy = @(x) cp_ct(lamby(x),x(10),cp_l,lambdaVec,pitchVec);
 ct = @(x) cp_ct(lamb(x),x(10),ct_l,lambdaVec,pitchVec);
 
 Tr = @(x) 0.5*Ae.rho*Ae.Ar*(vr(x)-x(7))^3*cp(x)/x(1);
 Fx = @(x) 0.5*Ae.rho*Ae.Ar*(vr(x)-x(7))^2*ct(x);
-Fy = @(x) (0.5*Ae.rho*Ae.Ar*(vr(x)-x(7))^3*cp(x)/x(1))/(2*Ae.Rr/3);
+Fy = @(x) (0.5*Ae.rho*Ae.Ar*(vr(x)-x(9))^3*cp(x)*3)/(2*x(1)*Ae.Rr);
 
 %% Drive train
 f1 = @(x) (1-D.mu)*Tr(x)/(D.Jr+D.Jg) - x(12)/(D.Jr+D.Jg);
@@ -52,14 +55,14 @@ f2 = @(x) x(3); % Tower foreafter velocity
 f3 = @(x) -(B.B*B.kx + To.k)*x(2)/To.m - (B.B*B.cx + To.c)*x(3)/To.m + B.B*B.kx*x(6)/To.m + B.B*B.cx*x(7)/To.m; % Tower foreafter acceleration
 
 f4 = @(x) x(5); % Tower edgewise velocity
-f5 = @(x) 3*x(12)/(2*To.H*To.m) - (B.B*B.ky + To.k)*x(4)/To.m - (B.B*B.cy + To.c)*x(5)/To.m + B.B*B.ky*x(8)/To.m + B.B*B.cy*x(9)/To.m; % Tower edgewise acceleration
+f5 = @(x) -3*x(12)/(2*To.H*To.m) - (B.B*B.ky + To.k)*x(4)/To.m - (B.B*B.cy + To.c)*x(5)/To.m + B.B*B.ky*x(8)/To.m + B.B*B.cy*x(9)/To.m; % Tower edgewise acceleration
 
 %% Blades
 f6 = @(x) x(7); % Blade foreafter velocity
 f7 = @(x) Fx(x)/(B.B*B.m) + B.kx*x(2)/B.m + B.cx*x(3)/B.m - B.kx*x(6)/B.m - B.cx*x(7)/B.m; % Blade foreafter acceleration
 
 f8 = @(x) x(9); % Blade edgewise velocity
-f9 = @(x) Fy(x)/(B.B*B.m) + B.ky*x(4)/B.m + B.cy*x(5)/B.m - B.ky*x(8)/B.m - B.cy*x(9)/B.m; % Blade edgewise acceleration
+f9 = @(x) B.ky*x(4)/B.m + B.cy*x(5)/B.m - B.ky*x(8)/B.m - B.cy*x(9)/B.m; % Blade edgewise acceleration
 
 %% Actuators BIEN
 f10 = @(x) x(11); % Pitch velocity
