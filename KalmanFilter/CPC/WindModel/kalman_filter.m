@@ -63,7 +63,7 @@ f13 = @(x) -w_p(x)*x(13); % Wind turbulence acceleration
 f14 = 0; % Mean wind acceleration
 
 
-f = @(x,u) x + Ts*[f1(x); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x);...
+f = @(x,u) [f1(x); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x);...
     f8(x); f9(x); f10(x); f11(x,u); f12(x,u); f13(x);  f14]; % Nonlinear prediction
 
 h = @(x) [x(1); f3(x); f5(x); B.B*B.l*B.m*f7(x); B.B*B.l*B.m*f9(x); ...
@@ -100,7 +100,7 @@ yt = zeros(Yk, N); % Initialize size of output vector for all k
 
 % Generate the true state values
 for k = 2:N
-    xt(:,k) = f(xt(:,k-1),u_b(:,k-1)) + Ts*n(xt(:,k-1));
+    xt(:,k) = xt(:,k-1) + Ts*f(xt(:,k-1),u_b(:,k-1)) + Ts*n(xt(:,k-1));
     yt(:,k-1) = h(xt(:,k-1)) + v(:,k-1);
 end
 for k=1:N

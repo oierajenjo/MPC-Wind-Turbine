@@ -66,12 +66,11 @@ f12 = @(x,u) (u(2)*x(1)^2-x(12))/Ac.tau; % Torque change in time
 % f14 = 0; % Mean wind acceleration
 
 
-f = @(x,u,d) x + Ts*[f1(x,d); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x,d);...
+f = @(x,u,d) [f1(x,d); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x,d);...
     f8(x); f9(x,d); f10(x); f11(x,u); f12(x,u)]; % Nonlinear prediction
 
 h = @(x,d) [x(1); f3(x); f5(x); B.l*B.m*f7(x,d); B.l*B.m*f9(x,d); ...
     D.eta*x(12)*x(1); d(1)];
-
 
 % a = @(d) 1 - w_p(d)*Ts; % Euler
 % a = @(d) exp(-w_p(d)*Ts); % Zero Order Hold
@@ -83,27 +82,18 @@ temp = [M.sigma_enc; M.sigma_acc; M.sigma_acc; M.sigma_root; M.sigma_root;...
     M.sigma_pow; M.sigma_vane].^2;
 R = diag(temp); % Covariance matrix of measurement noise
 
-% Step 3: Initialize state and covariance
-x = zeros(Lk, N); % Initialize size of state estimate for all k
-% x(:,1) = [0]; % Set initial state estimate
-x(:,1) = x_i;
-P0 = 0.01*eye(Lk,Lk); % Set initial error covariance
-
 % Simulation Only: Calculate true state trajectory for comparison
 % Also calculate measurement vector
 % Var(QX) = QVar(X)Q' = sigma^4 -> Var(sqrt(Q)X) = sqrt(Q)Var(X)sqrt(Q)' = sigma^2
 n = @(d) sqrt(Q(d))*randn(Lk, 1); % Generate random process noise (from assumed Q)
 v = sqrt(R)*randn(Yk, N); % Generate random measurement noise (from assumed R)
-%w = zeros(1,N);
-%v = zeros(1,N);
 xt = zeros(Lk, N); % Initialize size of true state for all k
-% xt(:,1) = zeros(Lk,1) + sqrt(P0)*randn(Lk,1); % Set true initial state
 xt(:,1) = x_i; % Set true initial state
 yt = zeros(Yk, N); % Initialize size of output vector for all k
 
 % Generate the true state values
 for k = 2:N
-    xt(:,k) = f(xt(:,k-1),u_b(:,k-1),d_b(:,k-1)) + Ts*n(d_b(:,k-1));
+    xt(:,k) = xt(:,k-1) + Ts*f(xt(:,k-1),u_b(:,k-1),d_b(:,k-1)) + Ts*n(d_b(:,k-1));
     yt(:,k-1) = h(xt(:,k-1),d_b(:,k-1)) + v(:,k-1);
 end
 for k=1:N
@@ -118,7 +108,6 @@ for k=1:N
 end
 
 t = Ts*(1:N);
-
 figure
 plot(t,xt(1,:), t,d_b(3,:));
 title("wr")
@@ -157,6 +146,10 @@ title("Frx & Fry")
 
 
 %% Execute Unscented Kalman Filter
+% Step 3: Initialize state and covariance
+x = zeros(Lk, N); % Initialize size of state estimate for all k
+x(:,1) = x_i;
+P0 = 0.01*eye(Lk,Lk); % Set initial error covariance
 P = P0; % Set first value of P to the initial P0
 for k = 2:N
     % Step 1: Generate the sigma-points

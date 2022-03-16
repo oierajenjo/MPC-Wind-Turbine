@@ -60,7 +60,7 @@ f12 = @(x,u) (u(2)*x(1)^2-x(12))/Ac.tau; % Torque change in time
 % f14 = 0; % Mean wind acceleration
 
 
-f = @(x,u,d) x + Ts*[f1(x,d); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x,d);...
+f = @(x,u,d) [f1(x,d); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x,d);...
     f8(x); f9(x,d); f10(x); f11(x,u); f12(x,u)]; % Nonlinear prediction
 
 h = @(x,d) [x(1); f3(x); f5(x); B.B*B.l*B.m*f7(x,d); B.B*B.l*B.m*f9(x,d); ...
@@ -97,7 +97,7 @@ yt = zeros(Yk, N); % Initialize size of output vector for all k
 
 % Generate the true state values
 for k = 2:N
-    xt(:,k) = f(xt(:,k-1),u_b(:,k-1),d_b(:,k-1)) + Ts*n(d_b(:,k-1));
+    xt(:,k) = xt(:,k-1) + Ts*f(xt(:,k-1),u_b(:,k-1),d_b(:,k-1)) + Ts*n(d_b(:,k-1));
     yt(:,k-1) = h(xt(:,k-1),d_b(:,k-1)) + v(:,k-1);
 end
 for k=1:N

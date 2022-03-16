@@ -59,7 +59,7 @@ f9 = @(x) -w_p(x)*x(9); % Wind turbulence acceleration
 f10 = 0; % Mean wind acceleration
 
 
-f = @(x,u) x + Ts*[f1(x); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x,u);...
+f = @(x,u) [f1(x); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x,u);...
     f8(x,u); f9(x); f10]; % Nonlinear prediction
 
 h = @(x) [x(1); f3(x); f5(x); D.eta*x(8)*x(1); vr(x)];
@@ -74,27 +74,19 @@ Q = @(x) diag([zeros(Lk-2,1); sigma_t(x)*w_p(x)^2; sigma_m]); % Covariance matri
 temp = [M.sigma_enc; M.sigma_acc; M.sigma_acc; M.sigma_pow; M.sigma_vane].^2;
 R = diag(temp); % Covariance matrix of measurement noise
 
-% Step 3: Initialize state and covariance
-x = zeros(Lk, N); % Initialize size of state estimate for all k
-% x(:,1) = [0]; % Set initial state estimate
-x(:,1) = x_i;
-P0 = 0.01*eye(Lk,Lk); % Set initial error covariance
-
 % Simulation Only: Calculate true state trajectory for comparison
 % Also calculate measurement vector
 % Var(QX) = QVar(X)Q' = sigma^4 -> Var(sqrt(Q)X) = sqrt(Q)Var(X)sqrt(Q)' = sigma^2
 n = @(x) sqrt(Q(x))*randn(Lk, 1); % Generate random process noise (from assumed Q)
 v = sqrt(R)*randn(Yk, N); % Generate random measurement noise (from assumed R)
-%w = zeros(1,N);
-%v = zeros(1,N);
 xt = zeros(Lk, N); % Initialize size of true state for all k
-% xt(:,1) = zeros(Lk,1) + sqrt(P0)*randn(Lk,1); % Set true initial state
 xt(:,1) = x_i; % Set true initial state
 yt = zeros(Yk, N); % Initialize size of output vector for all k
 
 % Generate the true state values
 for k = 2:N
-    xt(:,k) = f(xt(:,k-1),u_b(:,k-1)) + Ts*n(xt(:,k-1));
+    xt(:,k) = xt(:,k-1) + Ts*(f(xt(:,k),u_b(:,k))+f(xt(:,k-1),u_b(:,k-1)))/2 ...
+    + Ts*n(xt(:,k-1));
     yt(:,k-1) = h(xt(:,k-1)) + v(:,k-1);
 end
 for k=1:N
@@ -141,6 +133,10 @@ title("Fx & Fy")
 % xlim([1 50])
 
 % Execute Unscented Kalman Filter
+% Step 3: Initialize state and covariance
+x = zeros(Lk, N); % Initialize size of state estimate for all k
+x(:,1) = x_i;
+P0 = 0.01*eye(Lk,Lk); % Set initial error covariance
 P = P0; % Set first value of P to the initial P0
 for k = 2:N
     % Step 1: Generate the sigma-points

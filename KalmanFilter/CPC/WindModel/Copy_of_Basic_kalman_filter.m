@@ -13,12 +13,10 @@ Uk = size(u_b,1); % Size of imput vector
 
 f1 = @(x) -3*x(3)/(2*To.H*To.m) - To.c*x(1)/To.m - To.k*x(2)/To.m; % Tower edgewise acceleration
 f2 = @(x) x(1); % Tower edgewise velocity
-
 f3 = @(x,u) (u(1)-x(3))/Ac.tau; % Torque change in time
 
 
 f = @(x,u) [f1(x); f2(x); f3(x,u)]; % Nonlinear prediction
-
 h = @(x) f1(x);
 
 Q = diag(zeros(Lk,1)); % Covariance matrix of the process noise
@@ -43,13 +41,10 @@ xt = zeros(Lk, N); % Initialize size of true state for all k
 xt(:,1) = x_i; % Set true initial state
 yt = zeros(Yk, N); % Initialize size of output vector for all k
 
-A = [-To.c/To.m -To.k/To.m -3/(2*To.H*To.m); 
-    1 0 0;
-    0 0 -1/Ac.tau];
-B = [0;0;1/Ac.tau];
 % Generate the true state values
 for k = 2:N
-    xt(:,k) = xt(:,k-1) + Ts*A*xt(:,k-1) + Ts*B*u_b(:,k-1) + Ts*n;
+    p(:,k) = f(xt(:,k),u_b(:,k));
+    xt(:,k) = xt(:,k-1) + Ts*(f(xt(:,k),u_b(:,k))+f(xt(:,k-1),u_b(:,k-1)))/2;
 end
 
 t = Ts*(1:N);
@@ -69,7 +64,7 @@ B2 = [0;0;1/Ac.tau];
 C2 = eye(3);
 D2 = zeros(3,1);
 
-sys=ss(eye(Lk)+Ts*A2,Ts*B2,C2,D2);
+sys=ss(A2,B2,C2,D2);
 isstable(sys)
 ts = data.Data(:,25);
 figure
@@ -79,3 +74,5 @@ xlabel('Time (sec)')
 ylabel('System response')
 legend('yt','yt_{dot}','Tg')
 
+sys=ss(eye(Lk)+Ts*A2,Ts*B2,C2,D2);
+isstable(sys)

@@ -2,8 +2,8 @@ close all
 clear all
 clc
 
-data = load('Bladed\DLC12_06p0_Y000_S0201').DLC12_06p0_Y000_S0201;
-load('Bladed\performancemap_data.mat')
+data = load('BladedFiles\DLC12_06p0_Y000_S0201').DLC12_06p0_Y000_S0201;
+load('BladedFiles\performancemap_data.mat')
 ts = data.Data(:,25); % Generator Torque
 theta_ref = data.Data(:,30); % Mean pitch angle (collective pitch)
 tg_ref = data.Data(:,20); % Generator Torque
