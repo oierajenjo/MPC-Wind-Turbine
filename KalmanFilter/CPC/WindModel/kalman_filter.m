@@ -114,11 +114,11 @@ end
 
 t = Ts*(1:N);
 figure
-plot(t,xt(1,:),t,d_b(3,:));
+plot(t,xt(1,:), t,d_b(3,:));
 title("wr")
 % xlim([1 50])
 figure
-plot(t,xt(2,:),t,-data.Data(:,224));
+plot(t,xt(2,:), t,-data.Data(:,224));
 title("xt")
 % xlim([1 50])
 % figure
@@ -130,7 +130,7 @@ title("xb")
 % xlim([1 50])
 
 figure
-plot(t,xt(4,:),t, data.Data(:,225));
+plot(t,xt(4,:), t,data.Data(:,225));
 title("yt")
 % xlim([1 50])
 % figure
@@ -147,7 +147,7 @@ title("vr")
 % xlim([1 50])
 
 figure
-plot(t,fx,t,fy)
+plot(t,fx, t,fy)
 title("Fx & Fy")
 % xlim([1 50])
 

@@ -7,7 +7,7 @@ D.mu = 0; % Drive train mechanical losses (friction)
 D.eta = 0.93; % Generator efficiency
 
 %% Blades model constants
-B.m = 65566; % Blade mass
+B.m = 65566/3; % Blade mass
 B.d = 0.03; % Blade damping ratio
 B.fx = 0.541; % Blade freq. flapwise
 B.fy = 0.636; % Blade freq. edgewise

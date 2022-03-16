@@ -47,7 +47,7 @@ f2 = @(x) x(3); % Tower foreafter velocity
 f3 = @(x) Fx(x)/To.m - To.c*x(3)/To.m - To.k*x(2)/To.m; % Tower foreafter acceleration
 
 f4 = @(x) x(5); % Tower edgewise velocity
-f5 = @(x) -3*x(8)/(2*To.H*To.m) - To.c*x(5)/To.m - To.k*x(4)/To.m; % Tower edgewise acceleration
+f5 = @(x) Fy(x)/To.m - 3*x(8)/(2*To.H*To.m) - To.c*x(5)/To.m - To.k*x(4)/To.m; % Tower edgewise acceleration
 
 %% Actuators BIEN
 f6 = @(x) x(7); % Pitch velocity
@@ -98,40 +98,46 @@ for k = 2:N
     yt(:,k-1) = h(xt(:,k-1)) + v(:,k-1);
 end
 for k=1:N
-    fx(k) = Fx(xt(:,k))/(B.B*B.m);
-    fy(k) = Fy(xt(:,k))/(B.B*B.m);
+    fx(k) = Fx(xt(:,k))/(To.m);
+    fy(k) = Fy(xt(:,k))/(To.m);
     tr(k) = (1-D.mu)*Tr(xt(:,k))/(D.Jr+D.Jg);
+    p(k) = ve(xt(:,k));
 end
 
 t = Ts*(1:N);
 figure
-plot(t,xt(1,:),t,data.Data(:,10));
+plot(t,xt(1,:), t,data.Data(:,10));
 title("wr")
+legend(["Us" "Bladed"])
 % xlim([1 50])
 figure
-plot(t,xt(2,:),t,-data.Data(:,224));
+plot(t,xt(2,:), t,-data.Data(:,224));
 title("xt")
+legend(["Us" "Bladed"])
 % xlim([1 50])
 % figure
 % plot(xt(3,:));
 % title("xtdot")
 
 figure
-plot(t,xt(4,:),t, data.Data(:,225));
+plot(t,xt(4,:), t,data.Data(:,225));
 title("yt")
+legend(["Us" "Bladed"])
 % xlim([1 50])
 % figure
 % plot(xt(5,:));
 % title("ytdot")
 
 figure
-plot(t,yt(5,:))
+plot(t,yt(5,:), t,data.Data(:,54))
 title("vr")
+legend(["Us" "Bladed"])
 % xlim([1 50])
 
 figure
-plot(t,fx,t,fy)
+plot(t,fx, t,fy)
 title("Fx & Fy")
+% legend(["Us" "Bladed"])
 % xlim([1 50])
 
 % Execute Unscented Kalman Filter
