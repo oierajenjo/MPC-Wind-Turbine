@@ -47,14 +47,14 @@ f2 = @(x) x(3); % Tower foreafter velocity
 f3 = @(x) -(B.B*B.kx + To.k)*x(2)/To.m - (B.B*B.cx + To.c)*x(3)/To.m + B.B*B.kx*x(6)/To.m + B.B*B.cx*x(7)/To.m; % Tower foreafter acceleration
 
 f4 = @(x) x(5); % Tower edgewise velocity
-f5 = @(x) 3*x(12)/(2*To.H*To.m) - (B.B*B.ky + To.k)*x(4)/To.m - (B.B*B.cy + To.c)*x(5)/To.m + B.B*B.ky*x(8)/To.m + B.B*B.cy*x(9)/To.m; % Tower edgewise acceleration
+f5 = @(x) -3*x(12)/(2*To.H*To.m) - (B.B*B.ky + To.k)*x(4)/To.m - (B.B*B.cy + To.c)*x(5)/To.m + B.B*B.ky*x(8)/To.m + B.B*B.cy*x(9)/To.m; % Tower edgewise acceleration
 
 %% Blades
 f6 = @(x) x(7); % Blade foreafter velocity
 f7 = @(x,d) Fx(x,d)/(B.B*B.m) + B.kx*x(2)/B.m + B.cx*x(3)/B.m - B.kx*x(6)/B.m - B.cx*x(7)/B.m; % Blade foreafter acceleration
 
 f8 = @(x) x(9); % Blade edgewise velocity
-f9 = @(x,d) Fy(x,d)/(B.B*B.m) + B.ky*x(4)/B.m + B.cy*x(5)/B.m - B.ky*x(8)/B.m - B.cy*x(9)/B.m; % Blade edgewise acceleration
+f9 = @(x,d) B.ky*x(4)/B.m + B.cy*x(5)/B.m - B.ky*x(8)/B.m - B.cy*x(9)/B.m; % Blade edgewise acceleration
 
 %% Actuators
 f10 = @(x) x(11); % Pitch velocity
@@ -91,11 +91,26 @@ xt = zeros(Lk, N); % Initialize size of true state for all k
 xt(:,1) = x_i; % Set true initial state
 yt = zeros(Yk, N); % Initialize size of output vector for all k
 
-% Generate the true state values
-for k = 2:N
-    xt(:,k) = xt(:,k-1) + Ts*f(xt(:,k-1),u_b(:,k-1),d_b(:,k-1)) + Ts*n(d_b(:,k-1));
-    yt(:,k-1) = h(xt(:,k-1),d_b(:,k-1)) + v(:,k-1);
+% % Generate the true state values
+% for k = 2:N
+%     xt(:,k) = xt(:,k-1) + Ts*(f(xt(:,k),u_b(:,k))+f(xt(:,k-1),u_b(:,k-1)))/2 ...
+%     + Ts*n(xt(:,k-1));
+%     yt(:,k-1) = h(xt(:,k-1)) + v(:,k-1);
+% end
+
+% Runge-Kutta 4th order method
+for k = 1:N-1  
+    k_1 = f(xt(:,k), u_b(:,k), d_b(:,k));
+    k_2 = f(xt(:,k)+0.5*Ts*k_1, u_b(:,k)+0.5*Ts, d_b(:,k)+0.5*Ts);
+    k_3 = f(xt(:,k)+0.5*Ts*k_2, u_b(:,k)+0.5*Ts, d_b(:,k)+0.5*Ts);
+    k_4 = f(xt(:,k)+Ts*k_3, u_b(:,k)+Ts, d_b(:,k)+Ts);
+    xt(:,k+1) = xt(:,k) + (1/6)*(k_1+2*k_2+2*k_3+k_4)*Ts + Ts*n(d_b(:,k));  % main equation
+    
+    yt(:,k) = h(xt(:,k), d_b(:,k)) + v(:,k);
 end
+yt(:,N) = h(xt(:,N), d_b(:,N)) + v(:,N);
+
+
 for k=1:N
 %     p(k) = vr(xt(:,k),d(:,k));
     frx(k) = Fx(xt(:,k),d_b(:,k))/(B.B*B.m);
@@ -140,9 +155,9 @@ figure
 plot(t,d_b(1,:))
 title("vr")
 % xlim([1 50])
-figure
-plot(t,frx, t,fry)
-title("Frx & Fry")
+% figure
+% plot(t,frx, t,fry)
+% title("Frx & Fry")
 
 
 %% Execute Unscented Kalman Filter

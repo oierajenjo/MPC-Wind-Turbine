@@ -40,12 +40,31 @@ xt = zeros(Lk, N); % Initialize size of true state for all k
 % xt(:,1) = zeros(Lk,1) + sqrt(P0)*randn(Lk,1); % Set true initial state
 xt(:,1) = x_i; % Set true initial state
 yt = zeros(Yk, N); % Initialize size of output vector for all k
-
+yt(:,1) = y_me(:,1);
 % Generate the true state values
-for k = 2:N
-    p(:,k) = f(xt(:,k),u_b(:,k));
-    xt(:,k) = xt(:,k-1) + Ts*(f(xt(:,k),u_b(:,k))+f(xt(:,k-1),u_b(:,k-1)))/2;
+% for k = 1:N
+%     p(:,k) = f(xt(:,k),u_b(:,k));
+%     xt(:,k+1) = xt(:,k) + Ts*(f(xt(:,k+1),u_b(:,k+1))+f(xt(:,k),u_b(:,k)))/2;
+% end
+
+% % Backward Euler's method 
+%  for k = 1:N
+%      wprime = xt(:,k) + Ts*f(xt(:,k),u_b(:,k));
+%      xt(:,k+1) = xt(:,k) + Ts*f(xt(:,k),wprime);
+%  end
+
+
+% Runge-Kutta 4th order method
+for k = 1:N-1  
+    k_1 = f(xt(:,k),u_b(:,k));
+    k_2 = f(xt(:,k)+0.5*Ts*k_1,u_b(:,k)+0.5*Ts);
+    k_3 = f(xt(:,k)+0.5*Ts*k_2,u_b(:,k)+0.5*Ts);
+    k_4 = f(xt(:,k)+Ts*k_3,u_b(:,k)+Ts);
+    xt(:,k+1) = xt(:,k) + (1/6)*(k_1+2*k_2+2*k_3+k_4)*Ts;  % main equation
+    
+    yt(:,k) = h(xt(:,k)) + v(:,k);
 end
+yt(:,N) = h(xt(:,N)) + v(:,N);
 
 t = Ts*(1:N);
 figure
@@ -58,21 +77,21 @@ plot(t,xt(1,:), t,data.Data(1,231));
 title("ytdot")
 legend(["Us" "Bladed"])
 
-% % Tower and blades edgewise
-A2 = [-To.c/To.m -To.k/To.m -3/(2*To.H*To.m); 1 0 0; 0 0 -1/Ac.tau];
-B2 = [0;0;1/Ac.tau];
-C2 = eye(3);
-D2 = zeros(3,1);
-
-sys=ss(A2,B2,C2,D2);
-isstable(sys)
-ts = data.Data(:,25);
-figure
-[y_2,ts_2,x_2] = lsim(sys,u_b',ts,x_i);
-plot(ts_2,y_2)
-xlabel('Time (sec)')
-ylabel('System response')
-legend('yt','yt_{dot}','Tg')
-
-sys=ss(eye(Lk)+Ts*A2,Ts*B2,C2,D2);
-isstable(sys)
+%% Tower and blades edgewise
+% A2 = [-To.c/To.m -To.k/To.m -3/(2*To.H*To.m); 1 0 0; 0 0 -1/Ac.tau];
+% B2 = [0;0;1/Ac.tau];
+% C2 = eye(3);
+% D2 = zeros(3,1);
+% 
+% sys=ss(A2,B2,C2,D2);
+% isstable(sys)
+% ts = data.Data(:,25);
+% figure
+% [y_2,ts_2,x_2] = lsim(sys,u_b',ts,x_i);
+% plot(ts_2,y_2)
+% xlabel('Time (sec)')
+% ylabel('System response')
+% legend('yt','yt_{dot}','Tg')
+% 
+% sys=ss(eye(Lk)+Ts*A2,Ts*B2,C2,D2);
+% isstable(sys)

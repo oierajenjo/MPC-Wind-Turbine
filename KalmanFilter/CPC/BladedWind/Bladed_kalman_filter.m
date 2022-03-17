@@ -4,6 +4,13 @@ close all
 
 %% Obtain all variables
 Bladed_variables_CPC
+% % Controlled
+% u_b = ones(2,N);
+% 
+% theta_f = 0;
+% [lamb_opt, cp_opt] = cp_max(theta_f,cp_l,lambdaVec,pitchVec);
+% K = 0.5*Ae.rho*Ae.Rr^5*pi*cp_opt/lamb_opt^3;
+% u_b = [theta_f; K].*u_b;
 
 %% Before filter execution
 % Step 1: Define UT Scaling parameters and weight vectors
@@ -21,12 +28,8 @@ wm(1) = lambda/(lambda+Lk);
 wc(1) = lambda/(lambda+Lk) + 1 - alpha^2 + beta;
 
 % Step 2: Define noise assumptions
-% w_p = @(d) d(1)*pi/(2*W.L);
-% ve = @(x,d) x(13) + d(1);
-lamb = @(x,d) (x(1)*Ae.Rr)/(d(1));
-% lamb = @(x,d) (x(1)*Ae.Rr-x(9))/(d(1)-x(7));
+lamb = @(x,d) (x(1)*Ae.Rr-x(9))/(d(1)-x(7));
 cp = @(x,d) cp_ct(lamb(x,d),x(10),cp_l,lambdaVec,pitchVec);
-% cpy = @(x,d) cp_ct(lamb(x,d),x(10),cp_l,lambdaVec,pitchVec);
 ct = @(x,d) cp_ct(lamb(x,d),x(10),ct_l,lambdaVec,pitchVec);
 
 Tr = @(x,d) 0.5*Ae.rho*Ae.Ar*(d(1)-x(7))^3*cp(x,d)/x(1);
@@ -48,17 +51,13 @@ f6 = @(x) x(7); % Blade foreafter velocity
 f7 = @(x,d) Fx(x,d)/(B.B*B.m) + B.kx*x(2)/B.m + B.cx*x(3)/B.m - B.kx*x(6)/B.m - B.cx*x(7)/B.m; % Blade foreafter acceleration
 
 f8 = @(x) x(9); % Blade edgewise velocity
-f9 = @(x,d) Fy(x,d)/(B.B*B.m) + B.ky*x(4)/B.m + B.cy*x(5)/B.m - B.ky*x(8)/B.m - B.cy*x(9)/B.m; % Blade edgewise acceleration
+f9 = @(x,d) B.ky*x(4)/B.m + B.cy*x(5)/B.m - B.ky*x(8)/B.m - B.cy*x(9)/B.m; % Blade edgewise acceleration
 
 %% Actuators
 f10 = @(x) x(11); % Pitch velocity
 f11 = @(x,u) Ac.omega^2*u(1) - 2*Ac.omega*Ac.xi*x(11) - Ac.omega^2*x(10); % Pitch acceleration
-f12 = @(x,u) (u(2)*x(1)^2-x(12))/Ac.tau; % Torque change in time
-
-%% Wind
-% f13 = @(x,d) -w_p(d)*x(13); % Wind turbulence acceleration
-% f14 = 0; % Mean wind acceleration
-
+f12 = @(x,u) (u(2)-x(12))/Ac.tau; % Torque change in time
+% f12 = @(x,u) (u(2)*x(1)^2-x(12))/Ac.tau; % Torque change in time (CONTROLLED)
 
 f = @(x,u,d) [f1(x,d); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x,d);...
     f8(x); f9(x,d); f10(x); f11(x,u); f12(x,u)]; % Nonlinear prediction
@@ -66,78 +65,78 @@ f = @(x,u,d) [f1(x,d); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x,d);...
 h = @(x,d) [x(1); f3(x); f5(x); B.B*B.l*B.m*f7(x,d); B.B*B.l*B.m*f9(x,d); ...
     D.eta*x(12)*x(1); d(1)];
 
-
-% a = @(d) 1 - w_p(d)*Ts; % Euler
-% a = @(d) exp(-w_p(d)*Ts); % Zero Order Hold
-% sigma_t = @(d) W.ti*d(1)*sqrt((1-a(d)^2)/(1-a(d))^2);
-% sigma_m = sqrt(Ts*W.q);
 Q = @(d) diag([zeros(Lk-1,1); 0]); % Covariance matrix of the process noise
 
 temp = [M.sigma_enc; M.sigma_acc; M.sigma_acc; M.sigma_root; M.sigma_root;...
     M.sigma_pow; M.sigma_vane].^2;
 R = diag(temp); % Covariance matrix of measurement noise
 
-% Step 3: Initialize state and covariance
-x = zeros(Lk, N); % Initialize size of state estimate for all k
-% x(:,1) = [0]; % Set initial state estimate
-x(:,1) = x_i;
-P0 = 0.01*eye(Lk,Lk); % Set initial error covariance
-
 % Simulation Only: Calculate true state trajectory for comparison
 % Also calculate measurement vector
 % Var(QX) = QVar(X)Q' = sigma^4 -> Var(sqrt(Q)X) = sqrt(Q)Var(X)sqrt(Q)' = sigma^2
 n = @(d) sqrt(Q(d))*randn(Lk, 1); % Generate random process noise (from assumed Q)
 v = sqrt(R)*randn(Yk, N); % Generate random measurement noise (from assumed R)
-%w = zeros(1,N);
-%v = zeros(1,N);
+
 xt = zeros(Lk, N); % Initialize size of true state for all k
-% xt(:,1) = zeros(Lk,1) + sqrt(P0)*randn(Lk,1); % Set true initial state
 xt(:,1) = x_i; % Set true initial state
 yt = zeros(Yk, N); % Initialize size of output vector for all k
 
-% Generate the true state values
-for k = 2:N
-    xt(:,k) = xt(:,k-1) + Ts*f(xt(:,k-1),u_b(:,k-1),d_b(:,k-1)) + Ts*n(d_b(:,k-1));
-    yt(:,k-1) = h(xt(:,k-1),d_b(:,k-1)) + v(:,k-1);
+% % Generate the true state values
+% for k = 2:N
+%     xt(:,k) = xt(:,k-1) + Ts*(f(xt(:,k),u_b(:,k))+f(xt(:,k-1),u_b(:,k-1)))/2 ...
+%     + Ts*n(xt(:,k-1));
+%     yt(:,k-1) = h(xt(:,k-1)) + v(:,k-1);
+% end
+
+% Runge-Kutta 4th order method
+for k = 1:N-1  
+    k_1 = f(xt(:,k), u_b(:,k), d_b(:,k));
+    k_2 = f(xt(:,k)+0.5*Ts*k_1, u_b(:,k)+0.5*Ts, d_b(:,k)+0.5*Ts);
+    k_3 = f(xt(:,k)+0.5*Ts*k_2, u_b(:,k)+0.5*Ts, d_b(:,k)+0.5*Ts);
+    k_4 = f(xt(:,k)+Ts*k_3, u_b(:,k)+Ts, d_b(:,k)+Ts);
+    xt(:,k+1) = xt(:,k) + (1/6)*(k_1+2*k_2+2*k_3+k_4)*Ts + Ts*n(d_b(:,k));  % main equation
+    
+    yt(:,k) = h(xt(:,k), d_b(:,k)) + v(:,k);
 end
+yt(:,N) = h(xt(:,N), d_b(:,N)) + v(:,N);
+
 for k=1:N
-%     p(k) = vr(xt(:,k),d(:,k));
     frx(k) = Fx(xt(:,k),d_b(:,k))/(B.B*B.m);
     fry(k) = Fy(xt(:,k),d_b(:,k))/(B.B*B.m);
     tr(k) = (1-D.mu)*Tr(xt(:,k),d_b(:,k))/(D.Jr+D.Jg);
-    cpl(k) = cp(xt(:,k),d_b(:,k));
-    ctl(k) = ct(xt(:,k),d_b(:,k));
-    la(k) = lamb(xt(:,k),d_b(:,k));
-    %     pi(k) = vri(xt(:,k),1);
 end
 
 t = Ts*(1:N);
 
 figure
-plot(t,xt(1,:), t,d_b(3,:));
+plot(t,xt(1,:), t,y_me(1,:));
 title("wr")
+legend(["Us" "Bladed"])
 % xlim([1 50])
 figure
 plot(t,xt(2,:), t,-data.Data(:,224));
 title("xt")
+legend(["Us" "Bladed"])
 % xlim([1 50])
 % figure
 % plot(xt(3,:));
 % title("xtdot")
 figure
-plot(t,xt(6,:));
+plot(t,xt(6,:),t,mean([data.Data(:,85) data.Data(:,91) data.Data(:,97)], 2));
 title("xb")
 % xlim([1 50])
 
 figure
 plot(t,xt(4,:), t,data.Data(:,225));
 title("yt")
+legend(["Us" "Bladed"])
 % xlim([1 50])
 % figure
 % plot(xt(5,:));
 % title("ytdot")
+
 figure
-plot(t,xt(8,:));
+plot(t,xt(8,:),t,mean([data.Data(:,86) data.Data(:,92) data.Data(:,98)], 2));
 title("yb")
 % xlim([1 50])
 
@@ -145,12 +144,51 @@ figure
 plot(t,d_b(1,:))
 title("vr")
 % xlim([1 50])
+
 figure
-plot(t,frx,t,fry)
-title("Frx & Fry")
+plot(t,yt(7,:),t,y_me(7,:))
+title("vr")
+legend(["Us" "Bladed"])
+% xlim([1 50])
+
+% figure
+% plot(t,yt(2,:),t,y_me(2,:));
+% title("xtddot")
+% legend(["Us" "Bladed"])
+% % xlim([1 50])
+% 
+% figure
+% plot(t,yt(3,:),t,y_me(3,:));
+% title("ytddot")
+% legend(["Us" "Bladed"])
+% % xlim([1 50])
+
+figure
+plot(t,yt(4,:),t,y_me(4,:));
+title("Mx")
+legend(["Us" "Bladed"])
+% xlim([1 50])
+
+figure
+plot(t,yt(5,:),t,y_me(5,:));
+title("My")
+legend(["Us" "Bladed"])
+% xlim([1 50])
+
+% figure
+% plot(t,yt(6,:),t,y_me(6,:));
+% title("Pe")
+% legend(["Us" "Bladed"])
+% % xlim([1 50])
 
 
 %% Execute Unscented Kalman Filter
+% Initialize state and covariance
+x = zeros(Lk, N); % Initialize size of state estimate for all k
+% x(:,1) = [0]; % Set initial state estimate
+x(:,1) = x_i;
+P0 = 0.01*eye(Lk,Lk); % Set initial error covariance
+
 P = P0; % Set first value of P to the initial P0
 for k = 2:N
     % Step 1: Generate the sigma-points

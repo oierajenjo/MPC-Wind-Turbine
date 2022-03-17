@@ -100,11 +100,25 @@ xt = zeros(Lk, N); % Initialize size of true state for all k
 xt(:,1) = x_i; % Set true initial state
 yt = zeros(Yk, N); % Initialize size of output vector for all k
 
-% Generate the true state values
-for k = 2:N
-    xt(:,k) = xt(:,k-1) + Ts*f(xt(:,k-1),u_b(:,k-1)) + Ts*n(xt(:,k-1));
-    yt(:,k-1) = h(xt(:,k-1)) + v(:,k-1);
+% % Generate the true state values
+% for k = 2:N
+%     xt(:,k) = xt(:,k-1) + Ts*(f(xt(:,k),u_b(:,k))+f(xt(:,k-1),u_b(:,k-1)))/2 ...
+%     + Ts*n(xt(:,k-1));
+%     yt(:,k-1) = h(xt(:,k-1)) + v(:,k-1);
+% end
+
+% Runge-Kutta 4th order method
+for k = 1:N-1  
+    k_1 = f(xt(:,k),u_b(:,k));
+    k_2 = f(xt(:,k)+0.5*Ts*k_1,u_b(:,k)+0.5*Ts);
+    k_3 = f(xt(:,k)+0.5*Ts*k_2,u_b(:,k)+0.5*Ts);
+    k_4 = f(xt(:,k)+Ts*k_3,u_b(:,k)+Ts);
+    xt(:,k+1) = xt(:,k) + (1/6)*(k_1+2*k_2+2*k_3+k_4)*Ts + Ts*n(xt(:,k));  % main equation
+    
+    yt(:,k) = h(xt(:,k)) + v(:,k);
 end
+yt(:,N) = h(xt(:,N)) + v(:,N);
+
 for k=1:N
 %     p(k) = ve(xt(:,k),d(:,k))-xt(3,k);
     fx(k) = Fx(xt(:,k))/(B.B*B.m);

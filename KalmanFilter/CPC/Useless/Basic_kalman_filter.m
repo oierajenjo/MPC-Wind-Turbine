@@ -4,12 +4,12 @@ close all
 
 %% Obtain all variables
 Basic_variables_CPC
-u_b = ones(2,N);
-
-theta_f = 0;
-[lamb_opt, cp_opt] = cp_max(theta_f,cp_l,lambdaVec,pitchVec);
-K = 0.5*Ae.rho*Ae.Rr^5*pi*cp_opt/lamb_opt^3;
-u_b = [theta_f; K].*u_b;
+% u_b = ones(2,N);
+% 
+% theta_f = 0;
+% [lamb_opt, cp_opt] = cp_max(theta_f,cp_l,lambdaVec,pitchVec);
+% K = 0.5*Ae.rho*Ae.Rr^5*pi*cp_opt/lamb_opt^3;
+% u_b = [theta_f; K].*u_b;
 
 %% Before filter execution
 % Step 1: Define UT Scaling parameters and weight vectors
@@ -47,12 +47,12 @@ f2 = @(x) x(3); % Tower foreafter velocity
 f3 = @(x) Fx(x)/To.m - To.c*x(3)/To.m - To.k*x(2)/To.m; % Tower foreafter acceleration
 
 f4 = @(x) x(5); % Tower edgewise velocity
-f5 = @(x) Fy(x)/To.m - 3*x(8)/(2*To.H*To.m) - To.c*x(5)/To.m - To.k*x(4)/To.m; % Tower edgewise acceleration
+f5 = @(x) -3*x(8)/(2*To.H*To.m) - To.c*x(5)/To.m - To.k*x(4)/To.m; % Tower edgewise acceleration
 
 %% Actuators BIEN
 f6 = @(x) x(7); % Pitch velocity
 f7 = @(x,u) Ac.omega^2*u(1) - 2*Ac.omega*Ac.xi*x(7) - Ac.omega^2*x(6); % Pitch acceleration
-f8 = @(x,u) (u(2)*x(1)^2-x(8))/Ac.tau; % Torque change in time
+f8 = @(x,u) (u(2)-x(8))/Ac.tau; % Torque change in time
 
 %% Wind
 f9 = @(x) -w_p(x)*x(9); % Wind turbulence acceleration
@@ -83,12 +83,25 @@ xt = zeros(Lk, N); % Initialize size of true state for all k
 xt(:,1) = x_i; % Set true initial state
 yt = zeros(Yk, N); % Initialize size of output vector for all k
 
-% Generate the true state values
-for k = 2:N
-    xt(:,k) = xt(:,k-1) + Ts*(f(xt(:,k),u_b(:,k))+f(xt(:,k-1),u_b(:,k-1)))/2 ...
-    + Ts*n(xt(:,k-1));
-    yt(:,k-1) = h(xt(:,k-1)) + v(:,k-1);
+% % Generate the true state values
+% for k = 2:N
+%     xt(:,k) = xt(:,k-1) + Ts*(f(xt(:,k),u_b(:,k))+f(xt(:,k-1),u_b(:,k-1)))/2 ...
+%     + Ts*n(xt(:,k-1));
+%     yt(:,k-1) = h(xt(:,k-1)) + v(:,k-1);
+% end
+
+% Runge-Kutta 4th order method
+for k = 1:N-1  
+    k_1 = f(xt(:,k),u_b(:,k));
+    k_2 = f(xt(:,k)+0.5*Ts*k_1,u_b(:,k)+0.5*Ts);
+    k_3 = f(xt(:,k)+0.5*Ts*k_2,u_b(:,k)+0.5*Ts);
+    k_4 = f(xt(:,k)+Ts*k_3,u_b(:,k)+Ts);
+    xt(:,k+1) = xt(:,k) + (1/6)*(k_1+2*k_2+2*k_3+k_4)*Ts + Ts*n(xt(:,k));  % main equation
+    
+    yt(:,k) = h(xt(:,k)) + v(:,k);
 end
+yt(:,N) = h(xt(:,N)) + v(:,N);
+
 for k=1:N
     fx(k) = Fx(xt(:,k))/(To.m);
     fy(k) = Fy(xt(:,k))/(To.m);

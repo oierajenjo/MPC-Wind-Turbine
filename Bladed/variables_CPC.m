@@ -3,7 +3,7 @@ D.Jr = 321699000; % Rotor moment of inertia
 D.Jg = 3.223e6; % Generator moment of inertia
 % D.c = 0.005; % Drive train damping
 % D.k = 1.409e10; % Drive train torsion stiffness
-D.mu = 0; % Drive train mechanical losses (friction)
+D.mu = 0.05; % Drive train mechanical losses (friction)
 D.eta = 0.93; % Generator efficiency
 
 %% Blades model constants
@@ -50,7 +50,7 @@ W.alpha = 0.15; % Wind shear exponent for smooth terrain
 %% Actuator constants
 Ac.omega = 2.4*pi; % Natural frequency of pitch actuator model
 Ac.xi = 0.8; % Damping factor of pitch actuator model
-Ac.tau = 0.1; % Generator time constant
+Ac.tau = Ts; % Generator time constant
 
 %% Measurement constants
 M.sigma_enc = 0.01;
@@ -82,19 +82,17 @@ u_b = [theta_ref tg_ref]';
 
 %% Disturbances
 % vm = data.Data(:,59); % Wind mean speed
-vr = data.Data(:,54); % Wind speed
-Fy = sum([data.Data(:,66) data.Data(:,74) data.Data(:,82)], 2); % Fy in the principal axis
-wr = data.Data(:,10); % Rotor speed
-vry = data.Data(:,55); % Wind speed
-% d_b = vr';
-d_b = [vr vry wr Fy]';
+% vr = data.Data(:,54); % Wind speed
+% Fy = sum([data.Data(:,66) data.Data(:,74) data.Data(:,82)], 2); % Fy in the principal axis
+% wr = data.Data(:,10); % Rotor speed
+% d_b = [vr vry wr Fy]';
 
 %% Measurements
 omega_r = data.Data(:,10); % Rotor speed
-xt_ddot = -data.Data(:,236); % Tower fore-aft acceleration
+xt_ddot = data.Data(:,236); % Tower fore-aft acceleration
 yt_ddot = data.Data(:,237); % Tower edgewise acceleration
-% Mx = sum([data1.Data(:,111) data1.Data(:,119) data1.Data(:,127)], 2); % Mx in the principal axis
-% My = sum([data1.Data(:,112) data1.Data(:,120) data1.Data(:,128)], 2); % My in the principal axis
+% Mx = mean([data.Data(:,111) data.Data(:,119) data.Data(:,127)], 2); % Mx in the principal axis
+% My = mean([data.Data(:,112) data.Data(:,120) data.Data(:,128)], 2); % My in the principal axis
 Mx = sum([data.Data(:,61) data.Data(:,69) data.Data(:,77)], 2); % Mx in the principal axis
 My = sum([data.Data(:,62) data.Data(:,70) data.Data(:,78)], 2); % My in the principal axis
 Pe = data.Data(:,28);
@@ -104,8 +102,8 @@ psi = data.Data(:,11);
 y_me = [omega_r xt_ddot yt_ddot My Mx Pe vr]';
 
 %% Initial state vector
-xt_dot = -data.Data(1,230);
-xt = -data.Data(1,224);
+xt_dot = data.Data(1,230);
+xt = data.Data(1,224);
 yt_dot = data.Data(1,231);
 yt = data.Data(1,225);
 
