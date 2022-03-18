@@ -40,15 +40,15 @@ Fy = @(x,d) (0.5*Ae.rho*Ae.Ar*(d(1)-x(7))^3*cp(x,d)/x(1))/(2*Ae.Rr/3);
 f1 = @(x,d) (1-D.mu)*Tr(x,d)/(D.Jr+D.Jg) - x(12)/(D.Jr+D.Jg);
 
 %% Tower
-f2 = @(x) x(3); % Tower foreafter velocity
-f3 = @(x) -(B.B*B.kx + To.k)*x(2)/To.m - (B.B*B.cx + To.c)*x(3)/To.m + B.B*B.kx*x(6)/To.m + B.B*B.cx*x(7)/To.m; % Tower foreafter acceleration
+f2 = @(x) x(3); % Tower foreaft velocity
+f3 = @(x) -(B.B*B.kx + To.k)*x(2)/To.m - (B.B*B.cx + To.c)*x(3)/To.m + B.B*B.kx*x(6)/To.m + B.B*B.cx*x(7)/To.m; % Tower foreaft acceleration
 
-f4 = @(x) x(5); % Tower edgewise velocity
-f5 = @(x) -3*x(12)/(2*To.H*To.m) - (B.B*B.ky + To.k)*x(4)/To.m - (B.B*B.cy + To.c)*x(5)/To.m + B.B*B.ky*x(8)/To.m + B.B*B.cy*x(9)/To.m; % Tower edgewise acceleration
+f4 = @(x) x(5); % Tower sideways velocity
+f5 = @(x) -3*x(12)/(2*To.H*To.m) - (B.B*B.ky + To.k)*x(4)/To.m - (B.B*B.cy + To.c)*x(5)/To.m + B.B*B.ky*x(8)/To.m + B.B*B.cy*x(9)/To.m; % Tower sideways acceleration
 
 %% Blades
-f6 = @(x) x(7); % Blade foreafter velocity
-f7 = @(x,d) Fx(x,d)/(B.B*B.m) + B.kx*x(2)/B.m + B.cx*x(3)/B.m - B.kx*x(6)/B.m - B.cx*x(7)/B.m; % Blade foreafter acceleration
+f6 = @(x) x(7); % Blade flapwise velocity
+f7 = @(x,d) Fx(x,d)/(B.B*B.m) + B.kx*x(2)/B.m + B.cx*x(3)/B.m - B.kx*x(6)/B.m - B.cx*x(7)/B.m; % Blade flapwise acceleration
 
 f8 = @(x) x(9); % Blade edgewise velocity
 f9 = @(x,d) B.ky*x(4)/B.m + B.cy*x(5)/B.m - B.ky*x(8)/B.m - B.cy*x(9)/B.m; % Blade edgewise acceleration
@@ -62,8 +62,8 @@ f12 = @(x,u) (u(2)-x(12))/Ac.tau; % Torque change in time
 f = @(x,u,d) [f1(x,d); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x,d);...
     f8(x); f9(x,d); f10(x); f11(x,u); f12(x,u)]; % Nonlinear prediction
 
-h = @(x,d) [x(1); f3(x); f5(x); B.B*B.l*B.m*f7(x,d); B.B*B.l*B.m*f9(x,d); ...
-    D.eta*x(12)*x(1); d(1)];
+h = @(x,d) [x(1); f3(x); f5(x); -(2*B.l)/3*Fx(x,d)+B.B*(2*B.l)/3*B.m*f7(x,d); ...
+    -Tr(x,d)+B.B*(2*B.l)/3*B.m*f9(x,d); D.eta*x(12)*x(1); d(1)];
 
 Q = @(d) diag([zeros(Lk-1,1); 0]); % Covariance matrix of the process noise
 
@@ -114,7 +114,7 @@ title("wr")
 legend(["Us" "Bladed"])
 % xlim([1 50])
 figure
-plot(t,xt(2,:), t,-data.Data(:,224));
+plot(t,xt(2,:), t, data.Data(:,224));
 title("xt")
 legend(["Us" "Bladed"])
 % xlim([1 50])
@@ -124,6 +124,11 @@ legend(["Us" "Bladed"])
 figure
 plot(t,xt(6,:),t,mean([data.Data(:,85) data.Data(:,91) data.Data(:,97)], 2));
 title("xb")
+% xlim([1 50])
+
+figure
+plot(t,xt(7,:));
+title("xbdot")
 % xlim([1 50])
 
 figure
@@ -139,6 +144,7 @@ figure
 plot(t,xt(8,:),t,mean([data.Data(:,86) data.Data(:,92) data.Data(:,98)], 2));
 title("yb")
 % xlim([1 50])
+
 
 figure
 plot(t,d_b(1,:))
@@ -165,20 +171,20 @@ legend(["Us" "Bladed"])
 
 figure
 plot(t,yt(4,:),t,y_me(4,:));
-title("Mx")
-legend(["Us" "Bladed"])
+title("My")
+legend(["Us","Bladed"])
 % xlim([1 50])
 
 figure
 plot(t,yt(5,:),t,y_me(5,:));
-title("My")
-legend(["Us" "Bladed"])
+title("Mx")
+legend(["Us","Bladed"])
 % xlim([1 50])
 
 % figure
-% plot(t,yt(6,:),t,y_me(6,:));
-% title("Pe")
-% legend(["Us" "Bladed"])
+% plot(t,yt(4,:)/(B.B*B.m*B.l),t,y_me(4,:)/(B.B*B.m*B.l));
+% title("xbddot")
+% legend(["Us","Bladed"])
 % % xlim([1 50])
 
 
