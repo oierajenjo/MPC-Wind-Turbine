@@ -34,7 +34,7 @@ ct = @(x,d) cp_ct(lamb(x,d),x(10),ct_l,lambdaVec,pitchVec);
 
 Tr = @(x,d) 0.5*Ae.rho*Ae.Ar*(d(1)-x(7))^3*cp(x,d)/x(1);
 Fx = @(x,d) 0.5*Ae.rho*Ae.Ar*(d(1)-x(7))^2*ct(x,d);
-Fy = @(x,d) (0.5*Ae.rho*Ae.Ar*(d(1)-x(7))^3*cp(x,d)/x(1))/(2*Ae.Rr/3);
+Fy = @(x,d) (0.5*Ae.rho*Ae.Ar*(d(1)-x(7))^3*cp(x,d)*3)/(2*x(1)*Ae.Rr);
 
 %% Drive train
 f1 = @(x,d) (1-D.mu)*Tr(x,d)/(D.Jr+D.Jg) - x(12)/(D.Jr+D.Jg);

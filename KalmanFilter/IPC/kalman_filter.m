@@ -6,12 +6,6 @@ close all
 variables_IPC
 
 %% Before filter execution
-% System properties
-%N1 = 20; % Station 1 North coordinate
-%E1 = 0; % Station 1 East coordinate
-%N2 = 0; % Station 2 North coordinate
-%E2 = 20; % Station 2 East coordinate
-
 % Step 1: Define UT Scaling parameters and weight vectors
 Lk = size(x_i,1); % Size of state vector
 Yk = size(y_me,1); % Size of measured vector
@@ -35,17 +29,17 @@ vei = @(x,i) x(26)*(To.r^2*(Ae.Rr^2*(sin(wrapTo2Pi(x(27)+2*pi*i/3)))^2-To.xh^2)/
     ((Ae.Rr*cos(wrapTo2Pi(x(27)+2*pi*i/3))+To.H)/To.H)^W.alpha) + x(25);
 vri = @(x,i) vei(x,i) - x(3);
 
-lamb = @(x) (x(1)*Ae.Rr-mean(x(15:17)))/(vr(x)-mean(x(9:11)));
+% lamb = @(x) (x(1)*Ae.Rr-mean(x(15:17)))/(vr(x)-mean(x(9:11)));
 lambi = @(x,i) (x(1)*Ae.Rr-x(15+i))/(vri(x,i)-x(9+i));
 
-cp = @(x) cp_ct(lamb(x),mean(x(18:20)),cp_l,lambdaVec,pitchVec);
+% cp = @(x) cp_ct(lamb(x),mean(x(18:20)),cp_l,lambdaVec,pitchVec);
 cpi = @(x,i) cp_ct(lambi(x,i),x(18+i),cp_l,lambdaVec,pitchVec)/B.B;
 ct = @(x,i) cp_ct(lambi(x,i),x(18+i),ct_l,lambdaVec,pitchVec);
 
 % Tr = @(x) 0.5*Ae.rho*Ae.Ar*(vr(x)-mean(x(9:11)))^3*cp(x)/x(1);
-Tr = @(x) (0.5*Ae.rho*Ae.Ar*((vri(x,0)-x(9))^3*cpi(x,0)+(vri(x,1)-x(10))^3*cpi(x,1)+(vri(x,2)-x(11))^3*cpi(x,2))/x(1))/3;
+Tr = @(x) (0.5*Ae.rho*Ae.Ar*((vri(x,0)-x(9))^3*cpi(x,0)+(vri(x,1)-x(10))^3*cpi(x,1)+(vri(x,2)-x(11))^3*cpi(x,2))/x(1));
 Fxi = @(x,i) 0.5*Ae.rho*Ae.Ar*(vri(x,i)-x(9+i))^2*ct(x,i); % Thrust coefficient
-Fyi = @(x,i) (0.5*Ae.rho*Ae.Ar*(vri(x,i)-x(9+i))^3*cpi(x,i)/x(1))/(2*Ae.Rr/3);
+Fyi = @(x,i) (0.5*Ae.rho*Ae.Ar*(vri(x,i)-x(9+i))^3*cpi(x,i)*3)/(2*x(1)*Ae.Rr);
 
 %% Drive train
 f1 = @(x) (1-D.mu)*Tr(x)/(D.Jr+D.Jg) - x(24)/(D.Jr+D.Jg);
@@ -62,17 +56,17 @@ f6 = @(x) x(9); % Blade 1 foreafter velocity
 f7 = @(x) x(10); % Blade 2 foreafter velocity
 f8 = @(x) x(11); % Blade 3 foreafter velocity
 
-f9 = @(x) Fxi(x,0)/(B.B*B.m) + B.kx*x(2)/B.m + B.cx*x(3)/B.m - B.kx*x(6)/B.m - B.cx*x(9)/B.m; % Blade 1 foreafter acceleration
-f10 = @(x) Fxi(x,1)/(B.B*B.m) + B.kx*x(2)/B.m + B.cx*x(3)/B.m - B.kx*x(7)/B.m - B.cx*x(10)/B.m; % Blade 2 foreafter acceleration
-f11 = @(x) Fxi(x,2)/(B.B*B.m) + B.kx*x(2)/B.m + B.cx*x(3)/B.m - B.kx*x(8)/B.m - B.cx*x(11)/B.m; % Blade 3 foreafter acceleration
+f9 = @(x) Fxi(x,0)/B.m + B.kx*x(2)/B.m + B.cx*x(3)/B.m - B.kx*x(6)/B.m - B.cx*x(9)/B.m; % Blade 1 foreafter acceleration
+f10 = @(x) Fxi(x,1)/B.m + B.kx*x(2)/B.m + B.cx*x(3)/B.m - B.kx*x(7)/B.m - B.cx*x(10)/B.m; % Blade 2 foreafter acceleration
+f11 = @(x) Fxi(x,2)/B.m + B.kx*x(2)/B.m + B.cx*x(3)/B.m - B.kx*x(8)/B.m - B.cx*x(11)/B.m; % Blade 3 foreafter acceleration
 
 f12 = @(x) x(15); % Blade 1 edgewise velocity
 f13 = @(x) x(16); % Blade 2 edgewise velocity
 f14 = @(x) x(17); % Blade 3 edgewise velocity
 
-f15 = @(x) Fyi(x,0)/(B.B*B.m) + B.ky*x(4)/B.m + B.cy*x(5)/B.m - B.ky*x(12)/B.m - B.cy*x(15)/B.m; % Blade 1 edgewise acceleration
-f16 = @(x) Fyi(x,1)/(B.B*B.m) + B.ky*x(4)/B.m + B.cy*x(5)/B.m - B.ky*x(13)/B.m - B.cy*x(16)/B.m; % Blade 2 edgewise acceleration
-f17 = @(x) Fyi(x,2)/(B.B*B.m) + B.ky*x(4)/B.m + B.cy*x(5)/B.m - B.ky*x(14)/B.m - B.cy*x(17)/B.m; % Blade 3 edgewise acceleration
+f15 = @(x) -Fyi(x,0)/B.m + B.ky*x(4)/B.m + B.cy*x(5)/B.m - B.ky*x(12)/B.m - B.cy*x(15)/B.m; % Blade 1 edgewise acceleration
+f16 = @(x) -Fyi(x,1)/B.m + B.ky*x(4)/B.m + B.cy*x(5)/B.m - B.ky*x(13)/B.m - B.cy*x(16)/B.m; % Blade 2 edgewise acceleration
+f17 = @(x) -Fyi(x,2)/B.m + B.ky*x(4)/B.m + B.cy*x(5)/B.m - B.ky*x(14)/B.m - B.cy*x(17)/B.m; % Blade 3 edgewise acceleration
 
 %% Actuators
 f18 = @(x) x(21); % Pitch 1 velocity
@@ -115,20 +109,12 @@ temp = [M.sigma_enc; M.sigma_acc; M.sigma_acc; M.sigma_root; M.sigma_root;...
 R = diag(temp); % Covariance matrix of measurement noise
 
 % Step 3: Initialize state and covariance
-x = zeros(Lk, N); % Initialize size of state estimate for all k
-% x(:,1) = [0]; % Set initial state estimate
-x(:,1) = x_i;
-P0 = 0.01*eye(Lk,Lk); % Set initial error covariance
-
 % Simulation Only: Calculate true state trajectory for comparison
 % Also calculate measurement vector
 % Var(QX) = QVar(X)Q' = sigma^4 -> Var(sqrt(Q)X) = sqrt(Q)Var(X)sqrt(Q)' = sigma^2
 n = @(x) sqrt(Q(x))*randn(Lk, 1); % Generate random process noise (from assumed Q)
 v = sqrt(R)*randn(Yk, N); % Generate random measurement noise (from assumed R)
-%w = zeros(1,N);
-%v = zeros(1,N);
 xt = zeros(Lk, N); % Initialize size of true state for all k
-% xt(:,1) = zeros(Lk,1) + sqrt(P0)*randn(Lk,1); % Set true initial state
 xt(:,1) = x_i; % Set true initial state
 y = zeros(Yk, N); % Initialize size of output vector for all k
 
@@ -231,6 +217,9 @@ title("ve1, ve2, ve3")
 % end
 
 %% Execute Unscented Kalman Filter
+x = zeros(Lk, N); % Initialize size of state estimate for all k
+x(:,1) = x_i;
+P0 = 0.01*eye(Lk,Lk); % Set initial error covariance
 P = P0; % Set first value of P to the initial P0
 for k = 2:N
     % Step 1: Generate the sigma-points
