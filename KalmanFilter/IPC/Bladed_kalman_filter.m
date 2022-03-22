@@ -44,7 +44,8 @@ f1 = @(x,d) (1-D.mu)*Tr(x,d)/(D.Jr+D.Jg) - x(24)/(D.Jr+D.Jg);
 
 %% Tower
 f2 = @(x) x(3); % Tower foreafter velocity
-f3 = @(x) -(B.B*B.kx + To.k)*x(2)/To.m - (B.B*B.cx + To.c)*x(3)/To.m + B.kx*sum(x(6:8))/To.m + B.cx*sum(x(9:11))/To.m; % Tower foreafter acceleration
+% f3 = @(x) -(B.B*B.kx + To.k)*x(2)/To.m - (B.B*B.cx + To.c)*x(3)/To.m + B.kx*sum(x(6:8))/To.m + B.cx*sum(x(9:11))/To.m; % Tower foreafter acceleration
+f3 = @(x)  - (B.B*B.kx + To.k)*(x(2)/To.H)*To.H/To.Jt - (B.B*B.cx + To.c)*(x(3)/To.H)*To.H/To.Jt + (B.kx*sum(x(6:8))/(2*B.l/3))*To.H/To.Jt + (B.cx*sum(x(9:11))/(2*B.l/3))*To.H/To.Jt; % Tower foreafter acceleration
 
 f4 = @(x) x(5); % Tower edgewise velocity
 f5 = @(x) -3*x(24)/(2*To.H*To.m) - (B.B*B.ky + To.k)*x(4)/To.m - (B.B*B.cy + To.c)*x(5)/To.m + B.ky*sum(x(12:14))/To.m + B.cy*sum(x(15:17))/To.m ; % Tower edgewise acceleration
@@ -85,10 +86,8 @@ f = @(x,u,d) [f1(x,d); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x);...
     f23(x,u); f24(x,u); f25(x)]; % Nonlinear prediction
 
 % % h = @(x) (x);
-% My = @(x,d,i) -(2*B.l)/3*Fxi(x,d,i) + B.m*(2*B.l/3)*str2func(compose("f%d(x,d)",9+i));
-% Mx = @(x,d,i) -Tr(x,d) + B.m*(2*B.l/3)*str2func(compose("f%d(x,d)",15+i));
 
-h = @(x,d) [x(1); f3(x); f5(x); -(2*B.l/3)*Fxi(x,d,0) + B.m*(2*B.l/3)*f9(x,d); ...
+h = @(x,d) [x(1); f3(x); f5(x); (2*B.l/3)*(-Fxi(x,d,0) + B.m*f9(x,d)); ...
     -(2*B.l/3)*Fxi(x,d,1) + B.m*(2*B.l/3)*f10(x,d); -(2*B.l/3)*Fxi(x,d,2) + B.m*(2*B.l/3)*f11(x,d); ...
     -Tr(x,d) + B.m*(2*B.l/3)*f15(x,d); -Tr(x,d) + B.m*(2*B.l/3)*f16(x,d); -Tr(x,d) + B.m*(2*B.l/3)*f17(x,d); ...
     D.eta*x(24)*x(1); d(1); x(25)];
@@ -120,7 +119,6 @@ yt = zeros(Yk, N); % Initialize size of output vector for all k
 %     y(:,k-1) = h(xt(:,k-1)) + v(:,k-1);
 % end
 
-% Runge-Kutta 4th order method
 % Runge-Kutta 4th order method
 for k = 1:N-1  
     k_1 = f(xt(:,k), u_b(:,k), d_b(:,k));

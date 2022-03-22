@@ -23,9 +23,10 @@ B.ydd_min = 0;
 B.ydd_max = 0;
 
 %% Tower model constants
-Mn = 630888; % Nacelle mass
-Mt = 1086002; % Tower mass
-To.m = Mn + Mt/3; % Tower mass
+To.Mn = 630888; % Nacelle mass
+To.Mt = 1086002; % Tower mass
+To.Mr = 387198;
+To.m = To.Mn + To.Mt/3; % Tower mass
 % To.m = 2475680-B.m*B.B; % Tower mass
 To.d = 0.005; % Tower damping ratio
 To.f = 0.18; % Tower freq. flapwise
@@ -37,6 +38,7 @@ To.r_base = 5; % Tower base radius
 To.H = To.h + 4.34799; % Hub height
 To.r = (To.r_top-To.r_base)*(To.H-B.l)/To.H + To.r_base; % Tower radius
 To.xh = 10.93; % Hub overhang
+To.Jt = To.Mn*To.H^2 + To.Mt*To.H^2/3;
 
 %% Aerodynamic model constants
 Ae.rho = 1.225; % Density of the air
