@@ -3,7 +3,7 @@ D.Jr = 321699000; % Rotor moment of inertia
 D.Jg = 3.223e6; % Generator moment of inertia
 % D.c = 0.005; % Drive train damping
 % D.k = 1.409e10; % Drive train torsion stiffness
-D.mu = 0; % Drive train mechanical losses (friction)
+D.mu = 0.05; % Drive train mechanical losses (friction)
 D.eta = 0.93; % Generator efficiency
 
 %% Blades model constants
@@ -41,7 +41,7 @@ Ae.Ar = pi*Ae.Rr^2; % Rotor area
 
 %% Wind model constants
 Ts = 0.05; % Sampling time
-W.ti = 0.1; % Turbulence intensity
+W.ti = 0.15; % Turbulence intensity
 W.q = 2^2/600; % Incremental variance mean wind speed
 W.mu_m = 6; % Fixed mean wind speed: 10 m/s
 W.L = 340.2;

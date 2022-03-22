@@ -45,7 +45,7 @@ Ae.Ar = pi*Ae.Rr^2; % Rotor area
 
 %% Wind model constants
 Ts = 0.05; % Sampling time
-ti = 0.1; % Turbulence intensity
+W.ti = 0.15; % Turbulence intensity
 W.q = 2^2/600; % Incremental variance mean wind speed
 W.mu_m = 6; % Fixed mean wind speed: 10 m/s
 W.L = 340.2;
@@ -107,8 +107,8 @@ psi = data.Data(:,11);
 y_me = [omega_r xt_ddot yt_ddot My Mx Pe vr psi]';
 
 %% Initial state vector
-xt_dot = -data.Data(1,230);
-xt = -data.Data(1,224);
+xt_dot = data.Data(1,230);
+xt = data.Data(1,224);
 yt_dot = data.Data(1,231);
 yt = data.Data(1,225);
 

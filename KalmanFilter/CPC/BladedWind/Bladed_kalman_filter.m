@@ -62,8 +62,8 @@ f12 = @(x,u) (u(2)-x(12))/Ac.tau; % Torque change in time
 f = @(x,u,d) [f1(x,d); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x,d);...
     f8(x); f9(x,d); f10(x); f11(x,u); f12(x,u)]; % Nonlinear prediction
 
-h = @(x,d) [x(1); f3(x); f5(x); -(2*B.l)/3*Fx(x,d)+B.B*(2*B.l)/3*B.m*f7(x,d); ...
-    -Tr(x,d)+B.B*(2*B.l)/3*B.m*f9(x,d); D.eta*x(12)*x(1); d(1)];
+h = @(x,d) [x(1); f3(x); f5(x); -(2*B.l)/3*Fx(x,d) + B.B*B.m*(2*B.l)/3*f7(x,d); ...
+    -Tr(x,d) + B.B*B.m*(2*B.l)/3*f9(x,d); D.eta*x(12)*x(1); d(1)];
 
 Q = @(d) diag([zeros(Lk-1,1); 0]); % Covariance matrix of the process noise
 
