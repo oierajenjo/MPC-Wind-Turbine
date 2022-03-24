@@ -4,7 +4,10 @@ close all
 
 %% Obtain all variables
 variables_CPC
-% % For CONTROLLED
+load('BladedFiles\performancemap_data.mat')
+Constant_variables
+
+%% For CONTROLLED
 % u_b = ones(2,N);
 % 
 % theta_f = 0;
@@ -13,20 +16,6 @@ variables_CPC
 % u_b = [theta_f; K].*u_b;
 
 %% Before filter execution
-% Step 1: Define UT Scaling parameters and weight vectors
-Lk = size(x_i,1); % Size of state vector
-Yk = size(y_me,1); % Size of measured vector
-Uk = size(u_b,1); % Size of imput vector
-alpha = 1; % Primary scaling parameter
-beta = 2; % Secondary scaling parameter (Gaussian assumption)
-kappa = 0; % Tertiary scaling parameter
-lambda = alpha^2*(Lk+kappa) - Lk;
-n_sigma_p = 2*Lk + 1; % Number of sigma points
-wm = ones(n_sigma_p,1)*1/(2*(Lk+lambda)); % Weight for transformed mean
-wc = wm; % Weight for transformed covariance
-wm(1) = lambda/(lambda+Lk);
-wc(1) = lambda/(lambda+Lk) + 1 - alpha^2 + beta;
-
 % Step 2: Define noise assumptions
 w_p = @(x) x(14)*pi/(2*W.L);
 ve = @(x) x(14) + x(13);
@@ -71,8 +60,8 @@ f14 = 0; % Mean wind acceleration
 f = @(x,u) [f1(x); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x);...
     f8(x); f9(x); f10(x); f11(x,u); f12(x,u); f13(x);  f14]; % Nonlinear prediction
 
-h = @(x) [x(1); f3(x); f5(x); -(2*B.l)/3*Fx(x) + B.B*B.m*(2*B.l)/3*f7(x); ...
-    -Tr(x) + B.B*B.m*(2*B.l)/3*f9(x); D.eta*x(12)*x(1); vr(x)];
+h = @(x) [x(1); f3(x); f5(x); -(2*B.l)*(Fx(x)/3 - B.B*B.m*f7(x)/3); ...
+    -Tr(x) + B.B*B.m*(2*B.l)*f9(x)/3; D.eta*x(12)*x(1); vr(x)];
 
 
 a = @(x) 1 - w_p(x)*Ts; % Euler
@@ -96,15 +85,8 @@ xt = zeros(Lk, N); % Initialize size of true state for all k
 xt(:,1) = x_i; % Set true initial state
 yt = zeros(Yk, N); % Initialize size of output vector for all k
 
-% % Generate the true state values
-% for k = 2:N
-%     xt(:,k) = xt(:,k-1) + Ts*(f(xt(:,k),u_b(:,k))+f(xt(:,k-1),u_b(:,k-1)))/2 ...
-%     + Ts*n(xt(:,k-1));
-%     yt(:,k-1) = h(xt(:,k-1)) + v(:,k-1);
-% end
-
 % Runge-Kutta 4th order method
-for k = 1:N-1  
+for k = 1:N-1
     k_1 = f(xt(:,k),u_b(:,k));
     k_2 = f(xt(:,k)+0.5*Ts*k_1,u_b(:,k)+0.5*Ts);
     k_3 = f(xt(:,k)+0.5*Ts*k_2,u_b(:,k)+0.5*Ts);
@@ -140,7 +122,7 @@ legend(["Us" "Bladed"])
 % plot(t,xt(6,:));
 % title("xb")
 % % xlim([1 50])
-% 
+%
 % figure
 % plot(t,xt(4,:), t,data.Data(:,225));
 % title("yt")
@@ -165,7 +147,7 @@ legend(["Us" "Bladed"])
 % title("xtddot")
 % legend(["Us" "Bladed"])
 % % xlim([1 50])
-% 
+%
 % figure
 % plot(t,yt(3,:),t,y_me(3,:));
 % title("ytddot")
@@ -198,24 +180,24 @@ x(:,1) = x_i;
 P0 = 0.01*eye(Lk,Lk); % Set initial error covariance
 
 P = P0; % Set first value of P to the initial P0
-for k = 2:N
+for k = 1:N-1
     % Step 1: Generate the sigma-points
     sP = chol(P,'lower'); % Calculate square root of error covariance
     % chi_p = "chi previous" = chi(k-1) % Untransformed sigma points
-    chi_p = [x(:,k-1), x(:,k-1)*ones(1,Lk)+sqrt(Lk+lambda)*sP, ...
-        x(:,k-1)*ones(1,Lk)-sqrt(Lk+lambda)*sP]; % Untransformed sigma points
+    chi_p = [x(:,k), x(:,k)*ones(1,Lk)+sqrt(Lk+lambda)*sP, ...
+        x(:,k)*ones(1,Lk)-sqrt(Lk+lambda)*sP]; % Untransformed sigma points
     
     % Step 2: Prediction Transformation
     % Propagate each sigma-point through prediction
     % chi_m = "chi minus" = chi(k|k-1)
     chi_m = zeros(Lk,n_sigma_p); % Transformed sigma points
     for j=1:n_sigma_p
-        chi_m(:,j) = f(chi_p(:,j),u_b(:,k-1));
+        chi_m(:,j) = chi_p(:,j) + Ts*f(chi_p(:,j),u_b(:,k));
     end
     
     x_m = chi_m*wm; % Calculate mean of predicted state
     % Calculate covariance of predicted state
-    P_m = Q(x(:,k-1)); % A priori covariance estimate
+    P_m = Q(x(:,k)); % A priori covariance estimate
     for i = 1:n_sigma_p
         P_m = P_m + wc(i)*(chi_m(:,i) - x_m)*(chi_m(:,i) - x_m)';
     end
@@ -242,7 +224,7 @@ for k = 2:N
     
     % Step 4: Measurement Update
     K = Pxy/Pyy; % Calculate Kalman gain
-    x(:,k) = x_m + K*(yt(:,k) - y_m); % Update state estimate
+    x(:,k+1) = x_m + K*(y_me(:,k) - y_m); % Update state estimate
     P = P_m - K*Pyy*K'; % Update covariance estimate
 end
 
@@ -279,6 +261,12 @@ title('Effective wind speed [v_r]', 'FontSize', 14);
 set(gcf, 'PaperOrientation','landscape');
 saveas(figure(6),'Figures/Kalman_ve.pdf');
 
+function [la,res] = cp_max(be,cl,lambdaVec,pitchVec)
+[~,i_be] = min(abs(pitchVec-be));
+l_c = cl(:,i_be);
+[res,i_la] = max(l_c);
+la = lambdaVec(i_la);
+end
 
 function res = cp_ct(la,be,cl,lambdaVec,pitchVec)
 [~,i_la] = min(abs(lambdaVec-abs(la)));

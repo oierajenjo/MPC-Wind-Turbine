@@ -4,34 +4,16 @@ close all
 
 %% Obtain all variables
 variables_CPC
-u_b = ones(2,N);
+load('BladedFiles\performancemap_data.mat')
+Constant_variables
 
-theta_f = 0;
-[lamb_opt, cp_opt] = cp_max(theta_f,cp_l,lambdaVec,pitchVec);
-K = 0.5*Ae.rho*Ae.Rr^5*pi*cp_opt/lamb_opt^3;
-u_b = [theta_f; K].*u_b;
+% u_b = ones(2,N);
+% theta_f = 0;
+% [lamb_opt, cp_opt] = cp_max(theta_f,cp_l,lambdaVec,pitchVec);
+% K = 0.5*Ae.rho*Ae.Rr^5*pi*cp_opt/lamb_opt^3;
+% u_b = [theta_f; K].*u_b;
 
 %% Before filter execution
-% System properties
-%N1 = 20; % Station 1 North coordinate
-%E1 = 0; % Station 1 East coordinate
-%N2 = 0; % Station 2 North coordinate
-%E2 = 20; % Station 2 East coordinate
-
-% Step 1: Define UT Scaling parameters and weight vectors
-Lk = size(x_i,1); % Size of state vector
-Yk = size(y_me,1); % Size of measured vector
-Uk = size(u_b,1); % Size of imput vector
-alpha = 1; % Primary scaling parameter
-beta = 2; % Secondary scaling parameter (Gaussian assumption)
-kappa = 0; % Tertiary scaling parameter
-lambda = alpha^2*(Lk+kappa) - Lk;
-n_sigma_p = 2*Lk + 1; % Number of sigma points
-wm = ones(n_sigma_p,1)*1/(2*(Lk+lambda)); % Weight for transformed mean
-wc = wm; % Weight for transformed covariance
-wm(1) = lambda/(lambda+Lk);
-wc(1) = lambda/(lambda+Lk) + 1 - alpha^2 + beta;
-
 % Step 2: Define noise assumptions
 w_p = @(x) x(14)*pi/(2*W.L);
 ve = @(x) x(14) + x(13);
@@ -67,7 +49,8 @@ f9 = @(x) B.ky*x(4)/B.m + B.cy*x(5)/B.m - B.ky*x(8)/B.m - B.cy*x(9)/B.m; % Blade
 %% Actuators BIEN
 f10 = @(x) x(11); % Pitch velocity
 f11 = @(x,u) Ac.omega^2*u(1) - 2*Ac.omega*Ac.xi*x(11) - Ac.omega^2*x(10); % Pitch acceleration
-f12 = @(x,u) (u(2)*x(1)^2-x(12))/Ac.tau; % Torque change in time
+f12 = @(x,u) (u(2)-x(12))/Ac.tau; % Torque change in time
+% f12 = @(x,u) (u(2)*x(1)^2-x(12))/Ac.tau; % Torque change in time
 
 %% Wind
 f13 = @(x) -w_p(x)*x(13); % Wind turbulence acceleration
@@ -100,13 +83,6 @@ xt = zeros(Lk, N); % Initialize size of true state for all k
 xt(:,1) = x_i; % Set true initial state
 yt = zeros(Yk, N); % Initialize size of output vector for all k
 
-% % Generate the true state values
-% for k = 2:N
-%     xt(:,k) = xt(:,k-1) + Ts*(f(xt(:,k),u_b(:,k))+f(xt(:,k-1),u_b(:,k-1)))/2 ...
-%     + Ts*n(xt(:,k-1));
-%     yt(:,k-1) = h(xt(:,k-1)) + v(:,k-1);
-% end
-
 % Runge-Kutta 4th order method
 for k = 1:N-1  
     k_1 = f(xt(:,k),u_b(:,k));
@@ -132,7 +108,7 @@ end
 t = Ts*(1:N);
 
 figure
-plot(t,xt(1,:),t,d_b(3,:));
+plot(t,xt(1,:),t,y_me(1,:));
 title("wr")
 % xlim([1 50])
 figure
@@ -169,8 +145,7 @@ plot(t,fx, t,fy)
 title("Fx & Fy")
 % xlim([1 50])
 
-% Execute Unscented Kalman Filter
-% Step 3: Initialize state and covariance
+%% Execute Unscented Kalman Filter
 x = zeros(Lk, N); % Initialize size of state estimate for all k
 x(:,1) = x_i;
 P0 = 0.01*eye(Lk,Lk); % Set initial error covariance

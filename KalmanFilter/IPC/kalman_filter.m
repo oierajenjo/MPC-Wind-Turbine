@@ -4,22 +4,10 @@ close all
 
 %% Obtain all variables
 variables_IPC
+load('BladedFiles\performancemap_data.mat')
+Constant_variables
 
 %% Before filter execution
-% Step 1: Define UT Scaling parameters and weight vectors
-Lk = size(x_i,1); % Size of state vector
-Yk = size(y_me,1); % Size of measured vector
-Uk = size(u,1); % Size of imput vector
-alpha = 1; % Primary scaling parameter
-beta = 2; % Secondary scaling parameter (Gaussian assumption)
-kappa = 0; % Tertiary scaling parameter
-lambda = alpha^2*(Lk+kappa) - Lk;
-n_sigma_p = 2*Lk + 1; % Number of sigma points
-wm = ones(n_sigma_p,1)*1/(2*(Lk+lambda)); % Weight for transformed mean
-wc = wm; % Weight for transformed covariance
-wm(1) = lambda/(lambda+Lk);
-wc(1) = lambda/(lambda+Lk) + 1 - alpha^2 + beta;
-
 % Step 2: Define noise assumptions
 w_p = @(x) x(26)*pi/(2*W.L);
 ve = @(x) x(26) + x(25);
