@@ -3,7 +3,7 @@ D.Jr = 321699000; % Rotor moment of inertia
 D.Jg = 3.223e6; % Generator moment of inertia
 % D.c = 0.005; % Drive train damping
 % D.k = 1.409e10; % Drive train torsion stiffness
-D.mu = 0; % Drive train mechanical losses (friction)
+D.mu = 0.05; % Drive train mechanical losses (friction)
 D.eta = 0.93; % Generator efficiency
 
 %% Blades model constants
@@ -25,8 +25,8 @@ To.m = Mn + Mt/3; % Tower mass
 % To.m = 2475680-B.m*B.B; % Tower mass
 To.d = 0.005; % Tower damping ratio
 To.f = 0.18; % Tower freq. flapwise
-To.c = To.d*2*Mt*2*pi*To.f; % Tower damping
-To.k = (2*pi*To.f)^2*Mt; % Tower stiffness
+To.c = To.d*2*To.m*2*pi*To.f; % Tower damping
+To.k = (2*pi*To.f)^2*To.m; % Tower stiffness
 To.h = 144.582; % Tower height
 To.r_top = 3.25; % Tower top radius
 To.r_base = 5; % Tower base radius
@@ -75,23 +75,36 @@ data = load('BladedFiles\DLC12_06p0_Y000_S0201').DLC12_06p0_Y000_S0201;
 N = data.Channels.Scans; % Number of time steps for filter
 
 %% Inputs
+theta_ref = data.Data(:,30); % Mean pitch angle (collective pitch)
 tg_ref = data.Data(:,20); % Generator Torque
 
-u_b = tg_ref';
+u_b = [theta_ref tg_ref]';
+
+%% Disturbances
+vr = data.Data(:,54); % Wind speed
+d_b = vr';
 
 %% Measurements
+omega_r = data.Data(:,10); % Rotor speed
+xt_ddot = -data.Data(:,236); % Tower fore-aft acceleration
 yt_ddot = data.Data(:,237); % Tower edgewise acceleration
+Pe = data.Data(:,28);
 
-y_me = yt_ddot';
+y_me = [omega_r xt_ddot yt_ddot Pe vr]';
 
 %% Initial state vector
-yt = data.Data(1,225);
+xt_dot = -data.Data(1,230);
+xt = -data.Data(1,224);
 yt_dot = data.Data(1,231);
+yt = data.Data(1,225);
+
+theta = theta_ref(1);
+theta_dot = mean(data.Data(1,37:39), 2);
 Tg = tg_ref(1);
 
-x_i = [yt_dot yt Tg]';
+x_i = [omega_r(1) xt xt_dot yt yt_dot theta theta_dot Tg]';
 
-clearvars -except D To B Ae Ac M Ts W w_p x_i y_me u_b N data
+clearvars -except D To B Ae Ac M Ts W w_p x_i y_me u_b N data d_b
 
 load('BladedFiles\performancemap_data.mat')
 %% Plotting variables

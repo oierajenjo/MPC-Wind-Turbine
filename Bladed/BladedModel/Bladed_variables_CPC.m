@@ -105,9 +105,9 @@ yt_dot = data.Data(1,231);
 yt = data.Data(1,225);
 
 xb = mean([data.Data(1,85) data.Data(1,91) data.Data(1,97)], 2);
-xb_dot = 0;
+xb_dot = mean([data.Data(2,85)-data.Data(1,85) data.Data(2,91)-data.Data(1,91) data.Data(2,97)-data.Data(1,97)]/Ts, 2);
 yb = mean([data.Data(1,86) data.Data(1,92) data.Data(1,98)], 2);
-yb_dot = 0;
+yb_dot = mean([data.Data(2,86)-data.Data(1,86) data.Data(2,92)-data.Data(1,92) data.Data(2,98)-data.Data(1,98)]/Ts, 2);
 
 theta = theta_ref(1);
 theta_dot = mean(data.Data(1,37:39), 2);
