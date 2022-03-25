@@ -22,7 +22,6 @@ B.xdd_max = 0;
 B.ydd_min = 0;
 B.ydd_max = 0;
 
-
 %% Tower model constants
 To.Mn = 630888; % Nacelle mass
 To.Mt = 1086002; % Tower mass
@@ -44,9 +43,7 @@ rr = sqrt(To.xh^2+To.H^2);
 rn = sqrt(3.945^2+To.H^2);
 alpha_r = sin(acos(To.H/sqrt(To.xh^2+To.H^2)));
 alpha_n = sin(acos(To.H/sqrt(3.945^2+To.H^2)));
-To.xtoff = (rr*To.Mr*9.807*alpha_r+rn*To.Mn*9.807*alpha_n)/(To.k*(rr*0.37+rn*0.63)*sin(alpha_n*0.37+alpha_r*0.63))
-
-
+To.xtoff = (rr*To.Mr*9.807*alpha_r+rn*To.Mn*9.807*alpha_n)/(To.k*(rr*0.37+rn*0.63)*sin(alpha_n*0.37+alpha_r*0.63));
 
 %% Aerodynamic model constants
 Ae.rho = 1.225; % Density of the air
@@ -74,18 +71,15 @@ M.sigma_pow = 0.01; % ¿?
 M.sigma_vane = 1;
 M.sigma_azim = 0.01;
 
+M.sigma_tdef = 0.01; % ¿?
+M.sigma_tvel = 0.01; % ¿?
+M.sigma_bdef = 0.01; % ¿?
+M.sigma_bvel = 0.01; % ¿?
+M.sigma_pit = 0.01; % ¿?
+M.sigma_pitvel = 0.01; % ¿?
+
 %% Vector Sizes
 Lk = size(x_i,1); % Size of state vector
 Yk = size(y_me,1); % Size of measured vector
 Uk = size(u_b,1); % Size of imput vector
-
-%% Kalman variables
-alpha = 1; % Primary scaling parameter
-beta = 2; % Secondary scaling parameter (Gaussian assumption)
-kappa = 0; % Tertiary scaling parameter
-lambda = alpha^2*(Lk+kappa) - Lk;
-n_sigma_p = 2*Lk + 1; % Number of sigma points
-wm = ones(n_sigma_p,1)*1/(2*(Lk+lambda)); % Weight for transformed mean
-wc = wm; % Weight for transformed covariance
-wm(1) = lambda/(lambda+Lk);
-wc(1) = lambda/(lambda+Lk) + 1 - alpha^2 + beta;
+t = Ts*(1:N);

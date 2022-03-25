@@ -21,9 +21,10 @@ lamb = @(x,d) (x(1)*Ae.Rr-x(9))/(d(1)-x(7));
 cp = @(x,d) cp_ct(lamb(x,d),x(10),cp_l,lambdaVec,pitchVec);
 ct = @(x,d) cp_ct(lamb(x,d),x(10),ct_l,lambdaVec,pitchVec);
 
-Tr = @(x,d) 0.5*Ae.rho*Ae.Ar*(d(1)-x(7))^3*cp(x,d)/x(1);
+Tr = @(x,d) x(8)*B.ky*2*B.l/3;
+% Tr = @(x,d) 0.5*Ae.rho*Ae.Ar*(d(1)-x(7))^3*cp(x,d)/x(1);
 Fx = @(x,d) 0.5*Ae.rho*Ae.Ar*(d(1)-x(7))^2*ct(x,d);
-Fy = @(x,d) (0.5*Ae.rho*Ae.Ar*(d(1)-x(7))^3*cp(x,d)*3)/(2*x(1)*Ae.Rr);
+Fy = @(x,d) (0.5*Ae.rho*Ae.Ar*(d(1)-x(7))^3*cp(x,d)*3)/(2*x(1)*B.l);
 
 %% Drive train
 f1 = @(x,d) (1-D.mu)*Tr(x,d)/(D.Jr+D.Jg) - x(12)/(D.Jr+D.Jg);
@@ -51,8 +52,8 @@ f12 = @(x,u) (u(2)-x(12))/Ac.tau; % Torque change in time
 f = @(x,u,d) [f1(x,d); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x,d);...
     f8(x); f9(x,d); f10(x); f11(x,u); f12(x,u)]; % Nonlinear prediction
 
-h = @(x,d) [x(1); f3(x); f5(x); (2*B.l/3)*(-Fx(x,d) + B.B*B.m*f7(x,d)); ...
-    -(Tr(x,d) - B.B*B.m*(2*B.l/3)*f9(x,d)); D.eta*x(12)*x(1); d(1)];
+h = @(x,d) [x(1); f3(x); f5(x); -x(6)*B.kx*2*B.l/3; -x(8)*B.ky*2*B.l/3;...
+    D.eta*x(12)*x(1); d(1)];
 
 Q = diag(zeros(Lk,1)); % Covariance matrix of the process noise
 
@@ -63,24 +64,14 @@ R = diag(temp); % Covariance matrix of measurement noise
 % Simulation Only: Calculate true state trajectory for comparison
 % Also calculate measurement vector
 % Var(QX) = QVar(X)Q' = sigma^4 -> Var(sqrt(Q)X) = sqrt(Q)Var(X)sqrt(Q)' = sigma^2
-n = @() sqrt(Q)*randn(Lk, 1); % Generate random process noise (from assumed Q)
+n = sqrt(Q)*randn(Lk, 1); % Generate random process noise (from assumed Q)
 v = sqrt(R)*randn(Yk, N); % Generate random measurement noise (from assumed R)
 
+% Initialize matrices
 xt = zeros(Lk, N); % Initialize size of true state for all k
 xt(:,1) = x_i; % Set true initial state
 yt = zeros(Yk, N); % Initialize size of output vector for all k
-
-% Runge-Kutta 4th order method
-for k = 1:N-1 
-    k_1 = f(xt(:,k), u_b(:,k), d_b(:,k));
-    k_2 = f(xt(:,k)+0.5*Ts*k_1, u_b(:,k)+0.5*Ts, d_b(:,k)+0.5*Ts);
-    k_3 = f(xt(:,k)+0.5*Ts*k_2, u_b(:,k)+0.5*Ts, d_b(:,k)+0.5*Ts);
-    k_4 = f(xt(:,k)+Ts*k_3, u_b(:,k)+Ts, d_b(:,k)+Ts);
-    xt(:,k+1) = xt(:,k) + (1/6)*(k_1+2*k_2+2*k_3+k_4)*Ts + Ts*n();  % main equation
-    
-    yt(:,k) = h(xt(:,k), d_b(:,k)) + v(:,k);
-end
-yt(:,N) = h(xt(:,N), d_b(:,N)) + v(:,N);
+[xt,yt] = BRK4(f,xt,h,yt,u_b,d_b,N,n,v,Ts);
 
 for k=1:N
     frx(k) = Fx(xt(:,k),d_b(:,k))/(B.B*B.m);
@@ -89,19 +80,19 @@ for k=1:N
 end
 
 t = Ts*(1:N);
+
 figure
 plot(t,xt(1,:), t,y_me(1,:));
 title("wr")
 legend(["Us" "Bladed"])
 % xlim([1 50])
+
 figure
 plot(t,xt(2,:), t, data.Data(:,224));
 title("xt")
 legend(["Us" "Bladed"])
 % xlim([1 50])
-% figure
-% plot(xt(3,:));
-% title("xtdot")
+
 figure
 plot(t,xt(6,:),t,mean([data.Data(:,85) data.Data(:,91) data.Data(:,97)], 2));
 title("xb")
@@ -117,9 +108,6 @@ plot(t,xt(4,:), t,data.Data(:,225));
 title("yt")
 legend(["Us" "Bladed"])
 % xlim([1 50])
-% figure
-% plot(xt(5,:));
-% title("ytdot")
 
 figure
 plot(t,xt(8,:), t,mean([data.Data(:,86) data.Data(:,92) data.Data(:,98)], 2));
@@ -136,18 +124,6 @@ plot(t,yt(7,:),t,y_me(7,:))
 title("vr")
 legend(["Us" "Bladed"])
 % xlim([1 50])
-
-% figure
-% plot(t,yt(2,:),t,y_me(2,:));
-% title("xtddot")
-% legend(["Us" "Bladed"])
-% % xlim([1 50])
-% 
-% figure
-% plot(t,yt(3,:),t,y_me(3,:));
-% title("ytddot")
-% legend(["Us" "Bladed"])
-% % xlim([1 50])
 
 figure
 plot(t,yt(4,:),t,y_me(4,:));
@@ -171,96 +147,13 @@ legend(["Us","Bladed"])
 % Initialize state and covariance
 xk = zeros(Lk, N); % Initialize size of state estimate for all k
 xk(:,1) = x_i;
-P0 = 0.01*eye(Lk,Lk); % Set initial error covariance
+P0 = [M.sigma_enc; M.sigma_tdef; M.sigma_tvel; M.sigma_tdef; M.sigma_tvel;...
+    M.sigma_bdef; M.sigma_bvel; M.sigma_bdef; M.sigma_bvel;... 
+    M.sigma_pit; M.sigma_pitvel; M.sigma_pow].^2;
+P0 = diag(P0);
+% P0 = 0.01*eye(Lk,Lk); % Set initial error covariance
 
-P = P0; % Set first value of P to the initial P0
-for k = 2:N
-    % Step 1: Generate the sigma-points
-    sP = chol(P,'lower'); % Calculate square root of error covariance
-    % chi_p = "chi previous" = chi(k-1) % Untransformed sigma points
-    chi_p = [xk(:,k-1), xk(:,k-1)*ones(1,Lk)+sqrt(Lk+lambda)*sP, ...
-        xk(:,k-1)*ones(1,Lk)-sqrt(Lk+lambda)*sP]; % Untransformed sigma points
-    
-    % Step 2: Prediction Transformation
-    % Propagate each sigma-point through prediction
-    % chi_m = "chi minus" = chi(k|k-1)
-    chi_m = zeros(Lk,n_sigma_p); % Transformed sigma points
-    x_m = 0;
-    for j=1:n_sigma_p
-        chi_m(:,j) = chi_p(:,j) + Ts*f(chi_p(:,j),u_b(:,k-1),d_b(:,k-1));
-        x_m = x_m + wm(j)*chi_m(:,j); % Calculate mean of predicted state
-    end
-%     x_m = chi_m*wm
-
-    % Calculate covariance of predicted state
-    P_m = Q(:,k-1); % A priori covariance estimate
-    for i = 1:n_sigma_p
-        P_m = P_m + wc(i)*(chi_m(:,i) - x_m)*(chi_m(:,i) - x_m)';
-    end
-    
-    % Step 3: Observation Transformation
-    % Propagate each sigma-point through observation
-    % Initial velocity will be considered as 0, as we need it for
-    % obtaining the acceleration
-    psi_m = zeros(Yk,n_sigma_p);
-    y_m = 0;
-    for j=1:n_sigma_p
-        psi_m(:,j) = h(chi_m(:,j),d_b(:,k));
-        y_m = y_m + wm(j)*psi_m(:,j); % Calculate mean of predicted output
-    end
-%     y_m = psi_m*wm; % Calculate mean of predicted output
-    
-    % Calculate covariance of predicted output
-    % and cross-covariance between state and output
-    Pyy = R;
-    %Pxy = zeros(L,2);
-    Pxy = 0;
-    for i = 1:n_sigma_p
-        Pyy = Pyy + wc(i)*(psi_m(:,i) - y_m)*(psi_m(:,i) - y_m)';
-        Pxy = Pxy + wc(i)*(chi_m(:,i) - x_m)*(psi_m(:,i) - y_m)';
-    end
-    
-    % Step 4: Measurement Update
-    K = Pxy/Pyy; % Calculate Kalman gain
-    xk(:,k) = x_m + K*(y_me(:,k-1) - y_m); % Update state estimate
-    P = P_m - K*Pyy*K'; % Update covariance estimate
-end
+xk = BUKF(f,h,Q,R,xk,y_me,u_b,d_b,Lk,Yk,N,P0,Ts);
 
 %% Display results
-t = Ts*(1:N);
-for i = 1:Lk
-    figure(i)
-    subplot(1,2,1);
-    %     plot(t,xt(i,:),'r-','LineWidth', 2);
-    plot(t,xk(i,:),'b-', t,xt(i,:),'r-');
-    xlabel('Time (s)', 'Interpreter', 'latex', 'FontSize', 14);
-    ylabel(x_ul(i), 'Interpreter', 'latex', 'FontSize', 14);
-    grid on;
-    legend('UKF','True');
-    title(['$Estimations $' x_vl(i)], 'Interpreter', 'latex', 'FontSize', 15);
-    
-    subplot(1,2,2);
-    plot(t,xk(i,:)-xt(i,:),'b-');
-    xlabel('$Time (s)$', 'Interpreter', 'latex', 'FontSize', 14);
-    ylabel(x_ul(i), 'Interpreter', 'latex', 'FontSize', 14);
-    grid on;
-    legend('UKF');
-    title(['$Error $' x_vl(i)], 'Interpreter', 'latex', 'FontSize', 15);
-end
-
-v_r = @(x,d) d(1,:)+x(13,:)-x(3,:);
-figure(6)
-plot(t,v_r(xk,d),'b-',t,v_r(xt,d),'r-');
-xlabel('Time [s]', 'FontSize', 14);
-ylabel('Velocity [m/s]', 'FontSize', 14);
-grid on;
-legend('UKF', 'True');
-title('Effective wind speed [v_r]', 'FontSize', 14);
-set(gcf, 'PaperOrientation','landscape');
-saveas(figure(6),'Figures/Kalman_ve.pdf');
-
-function res = cp_ct(la,be,cl,lambdaVec,pitchVec)
-[~,i_la] = min(abs(lambdaVec-abs(la)));
-[~,i_be] = min(abs(pitchVec-be));
-res = cl(i_la,i_be);
-end
+result_display(t,Lk,xk,xt,x_ul,x_vl)

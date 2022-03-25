@@ -34,7 +34,7 @@ yt_ddot = data.Data(:,237); % Tower edgewise acceleration
 Mx = [data.Data(:,61) data.Data(:,69) data.Data(:,77)]; % Mx in the principal axis
 My = [data.Data(:,62) data.Data(:,70) data.Data(:,78)]; % My in the principal axis
 Pe = data.Data(:,28);
-vr = data.Data(:,26); % Wind speed magnitud at the hub
+vr = data.Data(:,54); % Wind speed magnitud at the hub
 psi = data.Data(:,11);
 
 y_me = [omega_r xt_ddot yt_ddot My Mx Pe vr psi]';
@@ -45,16 +45,17 @@ xt = data.Data(1,224);
 yt_dot = data.Data(1,231);
 yt = data.Data(1,225);
 
+Ts = 0.05;
 xb = [data.Data(1,85) data.Data(1,91) data.Data(1,97)];
-xb_dot = zeros(1,3);
+xb_dot = [(data.Data(2,85)-data.Data(1,85))/Ts (data.Data(2,91)-data.Data(1,91))/Ts (data.Data(2,97)-data.Data(1,97))/Ts];
 yb = [data.Data(1,86) data.Data(1,92) data.Data(1,98)];
-yb_dot = zeros(1,3);
+yb_dot = [(data.Data(2,86)-data.Data(1,86))/Ts (data.Data(2,92)-data.Data(1,92))/Ts (data.Data(2,98)-data.Data(1,98))/Ts];
 
 theta = theta_ref(1,:);
 theta_dot = data.Data(1,37:39);
 tg = tg_ref(1);
 vt = 0;
-vm = data.Data(1,59);
+vm = mean(data.Data(:,59));
 
 x_i = [omega_r(1) xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta theta_dot...
     tg vt vm psi(1)]';
