@@ -8,12 +8,12 @@ load('BladedFiles\performancemap_data.mat')
 Constant_variables
 
 %% Controlled
-u_b = ones(1,N);
-
-theta_f = 0;
-[lamb_opt, cp_opt] = cp_max(theta_f,cp_l,lambdaVec,pitchVec);
-K = 0.5*Ae.rho*Ae.Rr^5*pi*cp_opt/lamb_opt^3;
-u_b = [theta_f; K].*u_b;
+% u_b = ones(1,N);
+% 
+% theta_f = 0;
+% [lamb_opt, cp_opt] = cp_max(theta_f,cp_l,lambdaVec,pitchVec);
+% K = 0.5*Ae.rho*Ae.Rr^5*pi*cp_opt/lamb_opt^3;
+% u_b = [theta_f; K].*u_b;
 
 %% Before filter execution
 % Step 1: Define UT Scaling parameters and weight vectors
@@ -27,7 +27,7 @@ f3 = @(x,u) (u(1)-x(3))/Ac.tau; % Torque change in time
 
 
 f = @(x,u) [f1(x); f2(x); f3(x,u)]; % Nonlinear prediction
-h = @(x) f1(x);
+h = @(x) [f1(x)];
 
 Q = diag(zeros(Lk,1)); % Covariance matrix of the process noise
 
@@ -52,16 +52,16 @@ yt = zeros(Yk, N); % Initialize size of output vector for all k
 yt(:,1) = y_me(:,1);
 
 % Runge-Kutta 4th order method
-for k = 1:N-1  
-    k_1 = f(xt(:,k),u_b(:,k));
-    k_2 = f(xt(:,k)+0.5*Ts*k_1,u_b(:,k)+0.5*Ts);
-    k_3 = f(xt(:,k)+0.5*Ts*k_2,u_b(:,k)+0.5*Ts);
-    k_4 = f(xt(:,k)+Ts*k_3,u_b(:,k)+Ts);
-    xt(:,k+1) = xt(:,k) + (1/6)*(k_1+2*k_2+2*k_3+k_4)*Ts;  % main equation
+for k = 2:N
+    k_1 = f(xt(:,k-1),u_b(:,k-1));
+    k_2 = f(xt(:,k-1)+0.5*Ts*k_1,u_b(:,k-1)+0.5*Ts);
+    k_3 = f(xt(:,k-1)+0.5*Ts*k_2,u_b(:,k-1)+0.5*Ts);
+    k_4 = f(xt(:,k-1)+Ts*k_3,u_b(:,k-1)+Ts);
+    xt(:,k) = xt(:,k-1) + (1/6)*(k_1+2*k_2+2*k_3+k_4)*Ts;  % main equation
     
     yt(:,k) = h(xt(:,k)) + v(:,k);
 end
-yt(:,N) = h(xt(:,N)) + v(:,N);
+% yt(:,N) = h(xt(:,N)) + v(:,N);
 
 t = Ts*(1:N);
 figure
@@ -74,17 +74,30 @@ plot(t,xt(1,:), t,data.Data(1,231));
 title("ytdot")
 legend(["Us" "Bladed"])
 
+%% Kalman variables
+alpha = 1; % Primary scaling parameter
+beta = 2; % Secondary scaling parameter (Gaussian assumption)
+kappa = 0; % Tertiary scaling parameter
+lambda = alpha^2*(Lk+kappa) - Lk;
+n_sigma_p = 2*Lk + 1; % Number of sigma points
+wm = ones(n_sigma_p,1)*1/(2*(Lk+lambda)); % Weight for transformed mean
+wc = wm; % Weight for transformed covariance
+wm(1) = lambda/(lambda+Lk);
+wc(1) = lambda/(lambda+Lk) + 1 - alpha^2 + beta;
+
 %% Execute Unscented Kalman Filter
 xk = zeros(Lk, N); % Initialize size of state estimate for all k
 xk(:,1) = x_i;
-P0 = 0.01*eye(Lk,Lk); % Set initial error covariance
-P = P0; % Set first value of P to the initial P0
-for k = 1:N-1
+% P0 = 0.01*eye(Lk,Lk); % Set initial error covariance
+% P = P0; % Set first value of P to the initial P0
+P0 = [0.01;0.01;0.01].^2;
+P = diag(P0);
+for k = 2:N
     % Step 1: Generate the sigma-points
     sP = chol(P,'lower'); % Calculate square root of error covariance
     % chi_p = "chi previous" = chi(k-1) % Untransformed sigma points
-    chi_p = [xk(:,k), xk(:,k)*ones(1,Lk)+sqrt(Lk+lambda)*sP, ...
-        xk(:,k)*ones(1,Lk)-sqrt(Lk+lambda)*sP]; % Untransformed sigma points
+    chi_p = [xk(:,k-1), xk(:,k-1)*ones(1,Lk)+sqrt(Lk+lambda)*sP, ...
+        xk(:,k-1)*ones(1,Lk)-sqrt(Lk+lambda)*sP]; % Untransformed sigma points
     
     % Step 2: Prediction Transformation
     % Propagate each sigma-point through prediction
@@ -92,7 +105,7 @@ for k = 1:N-1
     chi_m = zeros(Lk,n_sigma_p); % Transformed sigma points
     x_m = 0;
     for j=1:n_sigma_p
-        chi_m(:,j) = chi_p(:,j) + Ts*f(chi_p(:,j),u_b(:,k));
+        chi_m(:,j) = chi_p(:,j) + Ts*f(chi_p(:,j),u_b(:,k-1));
         x_m = x_m + wm(j)*chi_m(:,j); % Calculate mean of predicted state
     end
 %     x_m = chi_m*wm; % Calculate mean of predicted state
@@ -125,7 +138,7 @@ for k = 1:N-1
     
     % Step 4: Measurement Update
     K = Pxy/Pyy; % Calculate Kalman gain
-    xk(:,k+1) = x_m + K*(y_me(:,k) - y_m); % Update state estimate
+    xk(:,k+1) = x_m + K*(yt(:,k+1) - y_m); % Update state estimate
     P = P_m - K*Pyy*K'; % Update covariance estimate
 end
 
