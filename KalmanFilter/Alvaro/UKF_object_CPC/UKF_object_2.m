@@ -7,11 +7,6 @@ variables_CPC
 load('BladedFiles\performancemap_data.mat')
 Constant_variables
 
-%% States, measurements and inputs size
-Lk = size(x_i,1); % Size of state vector
-Yk = size(y_me,1); % Size of measured vector
-Uk = size(u_b,1); % Size of imput vector
-
 %% Unscented Kalman Filter Construction
 % Your initial state guess at time k, utilizing measurements up to time k-1: xhat[k|k-1]
 initialStateGuess = x_i; % xhat[k|k-1]
