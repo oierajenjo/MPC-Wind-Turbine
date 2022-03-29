@@ -1,4 +1,4 @@
-function xk = BUKF(f,h,Q,R,xk,y_me,u_b,d_b,Lk,Yk,N,P0,Ts)
+function [xk,P,e] = BUKF(f,h,Q,R,xk,y_me,u_b,d_b,Lk,Yk,N,P0,Ts)
 %% Kalman variables
 alpha = 1; % Primary scaling parameter
 beta = 2; % Secondary scaling parameter (Gaussian assumption)
@@ -9,12 +9,18 @@ wm = ones(n_sigma_p,1)*1/(2*(Lk+lambda)); % Weight for transformed mean
 wc = wm; % Weight for transformed covariance
 wm(1) = lambda/(lambda+Lk);
 wc(1) = lambda/(lambda+Lk) + 1 - alpha^2 + beta;
+e = zeros(Yk,N);
 
 %% Unscented Kalman Filter
 P = P0; % Set first value of P to the initial P0
 for k = 1:N-1
     % Step 1: Generate the sigma-points
-    sP = chol(P,'lower'); % Calculate square root of error covariance
+    try
+        sP = chol(P,'lower'); % Calculate square root of error covariance
+    catch
+        k
+        break
+    end
     % chi_p = "chi previous" = chi(k-1) % Untransformed sigma points
     chi_p = [xk(:,k), xk(:,k)*ones(1,Lk)+sqrt(Lk+lambda)*sP, ...
         xk(:,k)*ones(1,Lk)-sqrt(Lk+lambda)*sP]; % Untransformed sigma points
@@ -56,7 +62,8 @@ for k = 1:N-1
     
     % Step 4: Measurement Update
     K = Pxy/Pyy; % Calculate Kalman gain
-    xk(:,k+1) = x_m + K*(y_me(:,k) - y_m); % Update state estimate
+    e(:,k+1) = y_me(:,k+1) - y_m;
+    xk(:,k+1) = x_m + K*e(:,k+1); % Update state estimate
     P = P_m - K*Pyy*K'; % Update covariance estimate
 end
 end
