@@ -10,7 +10,8 @@ Constant_variables
 %% Filter construction
 pf = particleFilter(@ParticleFilterStateFcn1,@ParticleFilterMeasurementLikelihoodFcn1);
 % Initialize it with 1000 particles around the mean x_i with 0.1 covariance.
-initialize(pf, 1000, x_i, 0.1*eye(Lk));
+% The covariance represents the confidence in your initial estimate
+initialize(pf, 1000, x_i, 0.01*eye(Lk));
 
 % The filter uses as default option a state estimation method of 'mean',
 % selected by the 'StateEstimationMethod' property and 'multinomial'
@@ -44,7 +45,7 @@ yMeas = y_me';
 
 % Estimate
 xCorrectedPF = zeros(N,Lk);
-for k=1:size(xTrue,1)
+for k=1:size(xTrue,2)
     % Use measurement y[k] to correct the particles for time k
     xCorrectedPF(k,:) = correct(pf,yMeas(k,:),To); % Filter updates and stores Particles[k|k], Weights[k|k]
     % The result is x[k|k]: Estimate of states at time k, utilizing
@@ -53,7 +54,7 @@ for k=1:size(xTrue,1)
     %
     % Now, predict particles at next time step. These are utilized in the
     % next correct command
-    predict(pf,u_b(:,1:1000),To,Ac); % Filter updates and stores Particles[k+1|k]
+    predict(pf,(u_b(:,k).*ones(1000,Uk))',To,Ac); % Filter updates and stores Particles[k+1|k]
 end
 
 %% Plot the state estimates from particle filter:

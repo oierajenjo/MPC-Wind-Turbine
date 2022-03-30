@@ -10,10 +10,10 @@ lamb = (x(1)*Ae.Rr-x(9))/(vr-x(7));
 cp = cp_ct(lamb,x(10),cp_l,lambdaVec,pitchVec);
 ct = cp_ct(lamb,x(10),ct_l,lambdaVec,pitchVec);
 
-Tr = x(8)*B.ky*2*B.l/3;
-% Tr = @(x) 0.5*Ae.rho*Ae.Ar*(vr(x)-x(7))^3*cp(x)/x(1);
+% Tr = B.B*x(8)*B.ky*2*B.l/3;
+Tr = 0.5*Ae.rho*Ae.Ar*(vr-x(7))^3*cp/x(1);
 Fx = 0.5*Ae.rho*Ae.Ar*(vr-x(7))^2*ct;
-Fy = (0.5*Ae.rho*Ae.Ar*(vr-x(7))^3*cp*3)/(2*x(1)*B.l);
+% Fy = (0.5*Ae.rho*Ae.Ar*(vr-x(7))^3*cp*3)/(2*x(1)*B.l);
 
 f = zeros(14,1);
 %% Drive train
@@ -31,7 +31,7 @@ f(6) = x(7); % Blade foreafter velocity
 f(7) = Fx/(B.B*B.m) + B.kx*x(2)/B.m + B.cx*x(3)/B.m - B.kx*x(6)/B.m - B.cx*x(7)/B.m; % Blade foreafter acceleration
 
 f(8) = x(9); % Blade edgewise velocity
-f(9) = Fy/(B.B*B.m) + B.ky*x(4)/B.m + B.cy*x(5)/B.m - B.ky*x(8)/B.m - B.cy*x(9)/B.m; % Blade edgewise acceleration
+f(9) = B.ky*x(4)/B.m + B.cy*x(5)/B.m - B.ky*x(8)/B.m - B.cy*x(9)/B.m; % Blade edgewise acceleration
 
 %% Actuators
 f(10) = x(11); % Pitch velocity

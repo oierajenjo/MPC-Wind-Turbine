@@ -5,11 +5,11 @@ N = 12000;
 v_m = zeros(N,1);
 v_t = zeros(N,1);
 Ts = 0.05; % Sampling time
-ti = 0.1; % Turbulence intensity
+ti = 0.15; % Turbulence intensity
 q = 2^2/600; % Incremental variance mean wind speed
-mu_m = 10; % Fixed mean wind speed: 10 m/s
+mu_m = 6; % Fixed mean wind speed: 10 m/s
 L = 340.2;
-sigma_m = sqrt(Ts*q); % Standard deviation mean wind noise
+sigma_m = sqrt(q); % Standard deviation mean wind noise
 
 
 v_m(1) = mu_m;
@@ -20,7 +20,7 @@ for i = 2:N
   a = 1-w_p*Ts; %Discretizing filter with Fordward Euler
   sigma_t = ti*v_m(i-1)*sqrt((1-a^2)/(1-a)^2); % Standard deviation turbulent wind noise
   %sigma_t = ti*mu_m*sqrt(1-a^2);
-  v_m(i) = v_m(i-1)+normrnd(0,sigma_m);
+  v_m(i) = v_m(i-1)+Ts*normrnd(0,sigma_m);
   v_t(i) = a*v_t(i-1)+(1-a)*normrnd(0,sigma_t);
 end
 plot(v_m)

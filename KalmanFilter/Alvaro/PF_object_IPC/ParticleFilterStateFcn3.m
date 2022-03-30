@@ -1,4 +1,4 @@
-function particles = ParticleFilterStateFcn2(particles,u,Ac,Ae,B,D,To,W,cp_l,ct_l,lambdaVec,pitchVec,v_m) 
+function particles = ParticleFilterStateFcn3(particles,u,Ac,Ae,B,D,To,W,cp_l,ct_l,lambdaVec,pitchVec,v_m) 
 % ParticleFilterStateFcn Example state transition function for particle
 %                           filter
 %

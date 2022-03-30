@@ -3,12 +3,12 @@ clear all
 close all
 
 %% Obtain all variables
-variables_CPC
+variables_IPC
 load('BladedFiles\performancemap_data.mat')
 Constant_variables
 
 %% Filter construction
-pf = particleFilter(@ParticleFilterStateFcn2,@ParticleFilterMeasurementLikelihoodFcn2);
+pf = particleFilter(@ParticleFilterStateFcn3,@ParticleFilterMeasurementLikelihoodFcn3);
 % Initialize it with 1000 particles around the mean x_i with 0.1 covariance.
 n_part = 100;
 initialize(pf, n_part, x_i, 0.1*eye(Lk));
@@ -22,11 +22,11 @@ initialize(pf, n_part, x_i, 0.1*eye(Lk));
 % This represents measurements arriving over time, step by step.
 
 % Generate inputs with controller
-u_b = ones(2,N);
+u_b = ones(4,N);
 theta_f = 0;
 [lamb_opt, cp_opt] = cp_max(theta_f,cp_l,lambdaVec,pitchVec);
 K = 0.5*Ae.rho*Ae.Rr^5*pi*cp_opt/lamb_opt^3;
-u_b = [theta_f; K].*u_b;
+u_b = [theta_f; theta_f; theta_f; K].*u_b;
 
 % Simulate the system for 600 seconds with the filter sample
 % time 0.05 [s] to generate the true states of the system.
@@ -51,10 +51,10 @@ xTrue = zeros(Lk, N); % Initialize size of true state for all k
 xTrue(:,1) = x_i; % Set true initial state
 % Runge-Kutta 4th order method
 for k = 1:N-1
-    k_1 = StateFcnContinuous2(xTrue(:,k),u_b(:,k),Ac,Ae,B,D,To,W,cp_l,ct_l,lambdaVec,pitchVec,v_m);
-    k_2 = StateFcnContinuous2(xTrue(:,k)+0.5*Ts*k_1,u_b(:,k)+0.5*Ts,Ac,Ae,B,D,To,W,cp_l,ct_l,lambdaVec,pitchVec,v_m);
-    k_3 = StateFcnContinuous2(xTrue(:,k)+0.5*Ts*k_2,u_b(:,k)+0.5*Ts,Ac,Ae,B,D,To,W,cp_l,ct_l,lambdaVec,pitchVec,v_m);
-    k_4 = StateFcnContinuous2(xTrue(:,k)+Ts*k_3,u_b(:,k)+Ts,Ac,Ae,B,D,To,W,cp_l,ct_l,lambdaVec,pitchVec,v_m);
+    k_1 = StateFcnContinuous3(xTrue(:,k),u_b(:,k),Ac,Ae,B,D,To,W,cp_l,ct_l,lambdaVec,pitchVec,v_m);
+    k_2 = StateFcnContinuous3(xTrue(:,k)+0.5*Ts*k_1,u_b(:,k)+0.5*Ts,Ac,Ae,B,D,To,W,cp_l,ct_l,lambdaVec,pitchVec,v_m);
+    k_3 = StateFcnContinuous3(xTrue(:,k)+0.5*Ts*k_2,u_b(:,k)+0.5*Ts,Ac,Ae,B,D,To,W,cp_l,ct_l,lambdaVec,pitchVec,v_m);
+    k_4 = StateFcnContinuous3(xTrue(:,k)+Ts*k_3,u_b(:,k)+Ts,Ac,Ae,B,D,To,W,cp_l,ct_l,lambdaVec,pitchVec,v_m);
     xTrue(:,k+1) = xTrue(:,k) + (1/6)*(k_1+2*k_2+2*k_3+k_4)*Ts + Ts*n(:,k);  % main equation
 end
 
@@ -62,7 +62,7 @@ end
 % yt = xt(:,:);
 yTrue = zeros(Yk, N); % Initialize size of output vector for all k
 for k = 1:N
-    yTrue(:,k) = MeasurementFcn2(xTrue(:,k),B,D,To);
+    yTrue(:,k) = MeasurementFcn3(xTrue(:,k),B,D,To);
 end
 % yMeas = yt .* (1+sqrt(R)*randn(size(yt))); % sqrt(R): Standard deviation of noise
 yMeas = y_me';
@@ -89,22 +89,22 @@ figure
 plot(timeVector,yTrue(4,:)',timeVector,yMeas(:,4));
 legend('yTrue','yMeas')
 % ylim([-2.6 2.6]);
-ylabel('My');
+ylabel('My1');
 
 figure
-plot(timeVector,yTrue(5,:)',timeVector,yMeas(:,5));
+plot(timeVector,yTrue(7,:)',timeVector,yMeas(:,7));
 legend('yTrue','yMeas')
 % ylim([-2.6 2.6]);
-ylabel('Mx');
+ylabel('Mx1');
 
 figure
-plot(timeVector,yTrue(6,:)',timeVector,yMeas(:,6));
+plot(timeVector,yTrue(10,:)',timeVector,yMeas(:,10));
 legend('yTrue','yMeas')
 % ylim([-2.6 2.6]);
 ylabel('Pe');
 
 figure
-plot(timeVector,yTrue(7,:)',timeVector,yMeas(:,7));
+plot(timeVector,yTrue(11,:)',timeVector,yMeas(:,11));
 legend('yTrue','yMeas')
 % ylim([-2.6 2.6]);
 ylabel('vr');
@@ -122,19 +122,19 @@ legend('xTrue','Bladed')
 ylabel('yt');
 
 figure
-plot(timeVector,xTrue(6,:)',timeVector,mean([data.Data(:,85),data.Data(:,91),data.Data(:,97)],2));
+plot(timeVector,xTrue(6,:)',timeVector,data.Data(:,85));
 legend('xTrue','Bladed')
 % ylim([-2.6 2.6]);
-ylabel('xb');
+ylabel('xb1');
 
 figure
-plot(timeVector,xTrue(8,:)',timeVector,mean([data.Data(:,86),data.Data(:,92),data.Data(:,98)],2));
+plot(timeVector,xTrue(12,:)',timeVector,data.Data(:,86));
 legend('xTrue','Bladed')
 % ylim([-2.6 2.6]);
-ylabel('yb');
+ylabel('yb1');
 
 figure
-plot(timeVector,xTrue(12,:)',timeVector,data.Data(:,20));
+plot(timeVector,xTrue(24,:)',timeVector,data.Data(:,20));
 legend('xTrue','Bladed')
 % ylim([-2.6 2.6]);
 ylabel('Tg');

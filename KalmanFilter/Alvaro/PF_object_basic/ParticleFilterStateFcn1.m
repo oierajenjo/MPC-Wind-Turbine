@@ -26,9 +26,12 @@ function particles = ParticleFilterStateFcn1(particles,u,To,Ac)
 [numberOfStates, numberOfParticles] = size(particles);
 
 % Time-propagate each particle
+%
 % Runge-Kutta 4th order method with sample time Ts
 Ts = 0.05; % [s] Sample time
-
+% for kk=1:numberOfParticles
+%     particles(:,kk) = particles(:,kk) + StateFcnContinuous1(particles(:,kk),u(:,kk),To,Ac)*Ts;
+% end
 for kk=1:numberOfParticles
     k_1 = StateFcnContinuous1(particles(:,kk),u(:,kk),To,Ac);
     k_2 = StateFcnContinuous1(particles(:,kk)+0.5*Ts*k_1,u(:,kk)+0.5*Ts,To,Ac);
@@ -43,6 +46,6 @@ n = sqrt(Q)*randn(size(particles));
 particles = particles + n;
 
 % Add extra noise to every state variable
-extraNoise = 0.025*eye(numberOfStates);
-particles = particles + extraNoise * randn(size(particles));
+% extraNoise = 0.025*eye(numberOfStates);
+% particles = particles + extraNoise * randn(size(particles));
 end

@@ -29,7 +29,7 @@ w_p = v_m*pi/(2*W.L); % Kaimal spectrum frequency
 a = 1 - w_p*Ts; % Turbulent wind filter parameter using Euler
 % a = @(x) exp(-w_p(x)*Ts); % Turbulent wind filter parameter using Zero Order Hold
 sigma_t = W.ti*v_m*sqrt((1-a^2)/(1-a)^2); % Standard deviation turbulent wind
-sigma_m = sqrt(Ts*W.q); % Standard deviation mean wind
+sigma_m = sqrt(W.q); % Standard deviation mean wind
 Q = diag([zeros(Lk-2,1); sigma_t^2*w_p^2; sigma_m^2]); % Covariance matrix of the process noise
 ukf.ProcessNoise = Q;
 
@@ -47,16 +47,27 @@ u_b = [theta_f; K].*u_b;
 timeVector = 0:Ts:600-Ts;
 rng(1); % Fix the random number generator for reproducible results
 n = sqrt(Q)*randn(Lk, N); % Generate random process noise (from assumed Q)
-v = sqrt(R)*randn(Yk, N); % Generate random measurement noise (from assumed R)
+% v = sqrt(R)*randn(Yk, N); % Generate random measurement noise (from assumed R)
 
-[~,xt] = ode45(@(t,x) odeWindTurbine2(t,x,u_b,n,timeVector,Ac,Ae,B,D,To,W,cp_l,ct_l,lambdaVec,pitchVec,v_m), timeVector, x_i);
-xt = xt';
+% [~,xTrue] = ode45(@(t,x) odeWindTurbine2(t,x,u_b,n,timeVector,Ac,Ae,B,D,To,W,cp_l,ct_l,lambdaVec,pitchVec,v_m), timeVector, x_i);
+% xTrue = xTrue';
+% Initialize matrices
+xTrue = zeros(Lk, N); % Initialize size of true state for all k
+xTrue(:,1) = x_i; % Set true initial state
+% Runge-Kutta 4th order method
+for k = 1:N-1
+    k_1 = StateFcnContinuous2(xTrue(:,k),u_b(:,k),Ac,Ae,B,D,To,W,cp_l,ct_l,lambdaVec,pitchVec,v_m);
+    k_2 = StateFcnContinuous2(xTrue(:,k)+0.5*Ts*k_1,u_b(:,k)+0.5*Ts,Ac,Ae,B,D,To,W,cp_l,ct_l,lambdaVec,pitchVec,v_m);
+    k_3 = StateFcnContinuous2(xTrue(:,k)+0.5*Ts*k_2,u_b(:,k)+0.5*Ts,Ac,Ae,B,D,To,W,cp_l,ct_l,lambdaVec,pitchVec,v_m);
+    k_4 = StateFcnContinuous2(xTrue(:,k)+Ts*k_3,u_b(:,k)+Ts,Ac,Ae,B,D,To,W,cp_l,ct_l,lambdaVec,pitchVec,v_m);
+    xTrue(:,k+1) = xTrue(:,k) + (1/6)*(k_1+2*k_2+2*k_3+k_4)*Ts + Ts*n(:,k);  % main equation
+end
 
 % Generate the measurements
 % yt = xt(:,:);
-yt = zeros(Yk, N); % Initialize size of output vector for all k
+yTrue = zeros(Yk, N); % Initialize size of output vector for all k
 for k = 1:N
-    yt(:,k) = MeasurementFcn2(xt(:,k),B,D,To) + v(:,k);
+    yTrue(:,k) = MeasurementFcn2(xTrue(:,k),B,D,To);
 end
 % yMeas = yt .* (1+sqrt(R)*randn(size(yt))); % sqrt(R): Standard deviation of noise
 yMeas = y_me';
@@ -86,22 +97,98 @@ end
 
 %% Unscented Kalman Filter Results and Validation
 figure
-plot(timeVector,xt(1,:)',timeVector,xCorrectedUKF(:,1));
+plot(timeVector,xTrue(1,:)',timeVector,xCorrectedUKF(:,1));
 legend('True','UKF estimate')
 % ylim([-2.6 2.6]);
-xlabel('Time [s]');
-ylabel('x_1');
+ylabel('wr');
 
 figure
-plot(timeVector,xt(2,:)',timeVector,xCorrectedUKF(:,2));
+plot(timeVector,xTrue(2,:)',timeVector,xCorrectedUKF(:,2));
 legend('True','UKF estimate')
 % ylim([-3 1.5]);
 xlabel('Time [s]');
-ylabel('x_2');
+ylabel('xt');
 
 figure
-plot(timeVector,xt(3,:)',timeVector,xCorrectedUKF(:,3));
+plot(timeVector,xTrue(3,:)',timeVector,xCorrectedUKF(:,3));
 legend('True','UKF estimate')
 % ylim([-3 1.5]);
 xlabel('Time [s]');
-ylabel('x_3');
+ylabel('xtdot');
+
+figure
+plot(timeVector,xTrue(4,:)',timeVector,xCorrectedUKF(:,4));
+legend('True','UKF estimate')
+% ylim([-3 1.5]);
+xlabel('Time [s]');
+ylabel('yt');
+
+figure
+plot(timeVector,xTrue(5,:)',timeVector,xCorrectedUKF(:,5));
+legend('True','UKF estimate')
+% ylim([-3 1.5]);
+xlabel('Time [s]');
+ylabel('ytdot');
+
+figure
+plot(timeVector,xTrue(6,:)',timeVector,xCorrectedUKF(:,6));
+legend('True','UKF estimate')
+% ylim([-3 1.5]);
+xlabel('Time [s]');
+ylabel('xb');
+
+figure
+plot(timeVector,xTrue(7,:)',timeVector,xCorrectedUKF(:,7));
+legend('True','UKF estimate')
+% ylim([-3 1.5]);
+xlabel('Time [s]');
+ylabel('xbdot');
+
+figure
+plot(timeVector,xTrue(8,:)',timeVector,xCorrectedUKF(:,8));
+legend('True','UKF estimate')
+% ylim([-3 1.5]);
+xlabel('Time [s]');
+ylabel('yb');
+
+figure
+plot(timeVector,xTrue(9,:)',timeVector,xCorrectedUKF(:,9));
+legend('True','UKF estimate')
+% ylim([-3 1.5]);
+xlabel('Time [s]');
+ylabel('ybdot');
+
+figure
+plot(timeVector,xTrue(10,:)',timeVector,xCorrectedUKF(:,10));
+legend('True','UKF estimate')
+% ylim([-3 1.5]);
+xlabel('Time [s]');
+ylabel('theta');
+
+figure
+plot(timeVector,xTrue(11,:)',timeVector,xCorrectedUKF(:,11));
+legend('True','UKF estimate')
+% ylim([-3 1.5]);
+xlabel('Time [s]');
+ylabel('theta_dot');
+
+figure
+plot(timeVector,xTrue(12,:)',timeVector,xCorrectedUKF(:,12));
+legend('True','UKF estimate')
+% ylim([-3 1.5]);
+xlabel('Time [s]');
+ylabel('Tg');
+
+figure
+plot(timeVector,xTrue(13,:)',timeVector,xCorrectedUKF(:,13));
+legend('True','UKF estimate')
+% ylim([-3 1.5]);
+xlabel('Time [s]');
+ylabel('vt');
+
+figure
+plot(timeVector,xTrue(14,:)',timeVector,xCorrectedUKF(:,14));
+legend('True','UKF estimate')
+% ylim([-3 1.5]);
+xlabel('Time [s]');
+ylabel('vm');
