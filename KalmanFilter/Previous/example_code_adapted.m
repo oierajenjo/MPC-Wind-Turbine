@@ -1,5 +1,7 @@
 clc
 clear all
+close all
+
 %% Before filter execution
 % System properties
 T = 0.1; % Sampling time

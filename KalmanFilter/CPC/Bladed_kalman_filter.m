@@ -153,7 +153,7 @@ P0 = [M.sigma_enc; M.sigma_tdef; M.sigma_tvel; M.sigma_tdef; M.sigma_tvel;...
 P0 = diag(P0);
 % P0 = 0.01*eye(Lk,Lk); % Set initial error covariance
 
-xk = BUKF(f,h,Q,R,xk,y_me,u_b,d_b,Lk,Yk,N,P0,Ts);
+[xk,P,e] = BUKF(f,h,Q,R,xk,y_me,u_b,d_b,Lk,Yk,N,P0,Ts);
 
 %% Display results
 result_display(t,Lk,xk,xt,x_ul,x_vl)

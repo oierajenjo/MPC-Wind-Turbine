@@ -27,11 +27,11 @@ f3 = @(x,u) (u(1)-x(3))/Ac.tau; % Torque change in time
 
 
 f = @(x,u) [f1(x); f2(x); f3(x,u)]; % Nonlinear prediction
-h = @(x) [f1(x)];
+h = @(x) f1(x);
 
 Q = diag(zeros(Lk,1)); % Covariance matrix of the process noise
 
-temp = [M.sigma_acc].^2;
+temp = M.sigma_acc^2;
 R = diag(temp); % Covariance matrix of measurement noise
 
 % Step 3: Initialize state and covariance
@@ -42,7 +42,8 @@ xk(:,1) = x_i;
 % Simulation Only: Calculate true state trajectory for comparison
 % Also calculate measurement vector
 % Var(QX) = QVar(X)Q' = sigma^4 -> Var(sqrt(Q)X) = sqrt(Q)Var(X)sqrt(Q)' = sigma^2
-n = sqrt(Q)*randn(Lk, 1); % Generate random process noise (from assumed Q)
+rng(1)
+n = sqrt(Q)*randn(Lk, N); % Generate random process noise (from assumed Q)
 v = sqrt(R)*randn(Yk, N); % Generate random measurement noise (from assumed R)
 %w = zeros(1,N);
 %v = zeros(1,N);
@@ -92,12 +93,12 @@ xk(:,1) = x_i;
 % P = P0; % Set first value of P to the initial P0
 P0 = [0.01;0.01;0.01].^2;
 P = diag(P0);
-for k = 2:N
+for k = 1:N-1
     % Step 1: Generate the sigma-points
     sP = chol(P,'lower'); % Calculate square root of error covariance
     % chi_p = "chi previous" = chi(k-1) % Untransformed sigma points
-    chi_p = [xk(:,k-1), xk(:,k-1)*ones(1,Lk)+sqrt(Lk+lambda)*sP, ...
-        xk(:,k-1)*ones(1,Lk)-sqrt(Lk+lambda)*sP]; % Untransformed sigma points
+    chi_p = [xk(:,k), xk(:,k)*ones(1,Lk)+sqrt(Lk+lambda)*sP, ...
+        xk(:,k)*ones(1,Lk)-sqrt(Lk+lambda)*sP]; % Untransformed sigma points
     
     % Step 2: Prediction Transformation
     % Propagate each sigma-point through prediction
@@ -105,10 +106,10 @@ for k = 2:N
     chi_m = zeros(Lk,n_sigma_p); % Transformed sigma points
     x_m = 0;
     for j=1:n_sigma_p
-        chi_m(:,j) = chi_p(:,j) + Ts*f(chi_p(:,j),u_b(:,k-1));
-        x_m = x_m + wm(j)*chi_m(:,j); % Calculate mean of predicted state
+        chi_m(:,j) = chi_p(:,j) + Ts*f(chi_p(:,j),u_b(:,k));
+%         x_m = x_m + wm(j)*chi_m(:,j); % Calculate mean of predicted state
     end
-%     x_m = chi_m*wm; % Calculate mean of predicted state
+    x_m = chi_m*wm; % Calculate mean of predicted state
     % Calculate covariance of predicted state
     P_m = Q; % A priori covariance estimate
     for i = 1:n_sigma_p
@@ -123,9 +124,9 @@ for k = 2:N
     y_m = 0;
     for j=1:n_sigma_p
         psi_m(:,j) = h(chi_m(:,j));
-        y_m = y_m + wm(j)*psi_m(:,j); % Calculate mean of predicted output
+%         y_m = y_m + wm(j)*psi_m(:,j); % Calculate mean of predicted output
     end
-%     y_m = psi_m*wm; % Calculate mean of predicted output
+    y_m = psi_m*wm; % Calculate mean of predicted output
     
     % Calculate covariance of predicted output
     % and cross-covariance between state and output
@@ -138,7 +139,7 @@ for k = 2:N
     
     % Step 4: Measurement Update
     K = Pxy/Pyy; % Calculate Kalman gain
-    xk(:,k+1) = x_m + K*(yt(:,k+1) - y_m); % Update state estimate
+    xk(:,k) = x_m + K*(y_me(:,k) - y_m); % Update state estimate
     P = P_m - K*Pyy*K'; % Update covariance estimate
 end
 

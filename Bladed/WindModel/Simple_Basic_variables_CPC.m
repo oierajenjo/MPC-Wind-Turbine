@@ -21,8 +21,8 @@ yt_ddot = data.Data(:,237); % Tower edgewise acceleration
 y_me = yt_ddot';
 
 %% Initial state vector
-yt = data.Data(1,225);
 yt_dot = data.Data(1,231);
+yt = data.Data(1,225);
 Tg = tg_ref(1);
 x_i = [yt_dot yt Tg]';
 

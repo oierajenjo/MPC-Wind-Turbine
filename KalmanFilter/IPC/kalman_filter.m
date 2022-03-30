@@ -192,7 +192,7 @@ P0 = [M.sigma_enc; M.sigma_tdef; M.sigma_tvel; M.sigma_tdef; M.sigma_tvel;...
 P0 = diag(P0);
 % P0 = 0.01*eye(Lk,Lk); % Set initial error covariance
 
-xk = UKF(f,h,Q,R,xk,y_me,u_b,Lk,Yk,N,P0,Ts);
+[xk,P,e] = UKF(f,h,Q,R,xk,yt,u_b,Lk,Yk,N,P0,Ts);
 
 %% Display results
 result_display(t,Lk,xk,xt,x_ul,x_vl)
@@ -205,4 +205,4 @@ grid on;
 legend('UKF', 'True');
 title('Effective wind speed [v_r]', 'FontSize', 14);
 set(gcf, 'PaperOrientation','landscape');
-saveas(figure(6),'Figures/Kalman_ve.pdf');
+% saveas(figure(6),'Figures/Kalman_ve.pdf');
