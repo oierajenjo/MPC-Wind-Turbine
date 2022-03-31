@@ -17,6 +17,7 @@ B.cy = B.d*2*B.m*2*pi*B.fy; % Blade damping y direction
 B.ky = (2*pi*B.fy)^2*B.m; % Blade stiffness y direction
 B.l = 117.1836; % Blade length
 B.B = 3; % Blade amount
+B.cc = 1/5; % Correction coefficient Fx
 B.xdd_min = 0;
 B.xdd_max = 0;
 B.ydd_min = 0;

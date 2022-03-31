@@ -86,10 +86,10 @@ f = @(x,u) [f1(x); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x);...
     f16(x); f17(x); f18(x); f19(x); f20(x); f21(x,u); f22(x,u);...
     f23(x,u); f24(x,u); f25(x); f26; f27(x)]; % Nonlinear prediction
 
-h = @(x) [x(1); f3(x); f5(x); -x(6)*B.kx*2*B.l/3; -x(7)*B.kx*2*B.l/3;
-    -x(8)*B.kx*2*B.l/3; -x(12)*B.ky*2*B.l/3; -x(13)*B.ky*2*B.l/3; ...
-    -x(14)*B.ky*2*B.l/3; D.eta*x(24)*x(1); vr(x); x(27)];
-
+h = @(x) [x(1); f3(x); f5(x); x(6)*B.kx*2*B.l/3; x(7)*B.kx*2*B.l/3;
+    x(8)*B.kx*2*B.l/3; x(12)*B.ky*2*B.l/3; x(13)*B.ky*2*B.l/3; ...
+    x(14)*B.ky*2*B.l/3; D.eta*x(24)*x(1); vr(x); x(27)];
+rng(1);
 a = @(x) 1 - w_p(x)*Ts; % Euler
 % a = @(x) exp(-(x(5)*pi/(2*L))*Ts); % Zero Order Hold
 sigma_t = @(x) W.ti*x(26)*sqrt((1-a(x)^2)/(1-a(x))^2);
@@ -106,7 +106,8 @@ R = diag(temp); % Covariance matrix of measurement noise
 % Also calculate measurement vector
 % Var(QX) = QVar(X)Q' = sigma^4 -> Var(sqrt(Q)X) = sqrt(Q)Var(X)sqrt(Q)' = sigma^2
 n = @(x) sqrt(Q(x))*randn(Lk, 1); % Generate random process noise (from assumed Q)
-v = sqrt(R)*randn(Yk, N); % Generate random measurement noise (from assumed R)
+% v = sqrt(R)*randn(Yk, N); % Generate random measurement noise (from assumed R)
+v = zeros(Yk, N);
 
 % Initialize matrices
 xt = zeros(Lk, N); % Initialize size of true state for all k
@@ -122,62 +123,77 @@ for k=1:N
     tr(k) = (1-D.mu)*Tr(xt(:,k));
 end
 
-% figure
-% plot(t,xt(1,:),t,y_me(1,:));
-% title("wr")
-% legend(["Us" "Bladed"])
-%
-% figure
-% plot(t,xt(2,:), t, data.Data(:,224));
-% title("xt")
-% legend(["Us" "Bladed"])
-%
-% % figure
-% % plot(xt(3,1:500));
-% % title("xtdot")
-%
-% figure
-% plot(t,xt(6,:),t,data.Data(:,85));
-% title("xb1")
-% legend(["Us" "Bladed"])
-%
-% figure
-% plot(t,xt(4,:),t,data.Data(:,225));
-% title("yt")
-% legend(["Us" "Bladed"])
-%
-% % figure
-% % plot(xt(5,1:500));
-% % title("ytdot")
-%
-% figure
-% plot(t,xt(12,:),t,data.Data(:,86));
-% title("yb1")
-% legend(["Us" "Bladed"])
-%
-% figure
-% plot(t,p(:),t,data.Data(:,54))
-% title("vr")
-% legend(["Us" "Bladed"])
-%
-% figure
-% plot(t,tr(:),t,xt(24,:))
-% title("Tr & Tg")
-% legend("Tr", "Tg")
-%
-% figure
-% plot(t,p1(:),t,p2(:),t,p3(:))
-% title("ve1, ve2, ve3")
-%
-% figure
-% plot(t,yt(4,:),t,y_me(4,:));
-% title("My")
-% legend(["Us" "Bladed"])
-%
-% figure
-% plot(t,yt(7,:),t,y_me(7,:));
-% title("Mx")
-% legend(["Us" "Bladed"])
+figure
+plot(t,yt(1,:)',t,y_me(1,:));
+legend('yt','y_me')
+% ylim([-2.6 2.6]);
+ylabel('wr');
+
+figure
+plot(t,yt(2,:)',t,y_me(2,:));
+legend('yt','y_me')
+% ylim([-2.6 2.6]);
+ylabel('xtddot');
+
+figure
+plot(t,yt(3,:)',t,y_me(3,:));
+legend('yt','y_me')
+% ylim([-2.6 2.6]);
+ylabel('ytddot');
+
+figure
+plot(t,yt(4,:)',t,y_me(4,:));
+legend('yt','y_me')
+% ylim([-2.6 2.6]);
+ylabel('My1');
+
+figure
+plot(t,yt(7,:)',t,y_me(7,:));
+legend('yt','y_me')
+% ylim([-2.6 2.6]);
+ylabel('Mx1');
+
+figure
+plot(t,yt(10,:)',t,y_me(10,:));
+legend('yt','y_me')
+% ylim([-2.6 2.6]);
+ylabel('Pe');
+
+figure
+plot(t,yt(11,:)',t,y_me(11,:));
+legend('yt','y_me')
+% ylim([-2.6 2.6]);
+ylabel('vr');
+
+figure
+plot(t,xt(2,:)',t,data.Data(:,224));
+legend('xt','Bladed')
+% ylim([-2.6 2.6]);
+ylabel('xt');
+
+figure
+plot(t,xt(4,:)',t,data.Data(:,225));
+legend('xt','Bladed')
+% ylim([-2.6 2.6]);
+ylabel('yt');
+
+figure
+plot(t,xt(6,:)',t,data.Data(:,85));
+legend('xt','Bladed')
+% ylim([-2.6 2.6]);
+ylabel('xb1');
+
+figure
+plot(t,xt(12,:)',t,data.Data(:,86));
+legend('xt','Bladed')
+% ylim([-2.6 2.6]);
+ylabel('yb1');
+
+figure
+plot(t,xt(24,:)',t,data.Data(:,20));
+legend('xt','Bladed')
+% ylim([-2.6 2.6]);
+ylabel('Tg');
 
 %% Unscented Kalman Filter
 % Initialize state and covariance
@@ -195,14 +211,14 @@ P0 = diag(P0);
 [xk,P,e] = UKF(f,h,Q,R,xk,yt,u_b,Lk,Yk,N,P0,Ts);
 
 %% Display results
-result_display(t,Lk,xk,xt,x_ul,x_vl)
+% result_display(t,Lk,xk,xt,x_ul,x_vl)
 
-figure
-plot(t,vr(xk),'b-',t,vr(xt),'r-');
-xlabel('Time [s]', 'FontSize', 14);
-ylabel('Velocity [m/s]', 'FontSize', 14);
-grid on;
-legend('UKF', 'True');
-title('Effective wind speed [v_r]', 'FontSize', 14);
-set(gcf, 'PaperOrientation','landscape');
+% figure
+% plot(t,vr(xk),'b-',t,vr(xt),'r-');
+% xlabel('Time [s]', 'FontSize', 14);
+% ylabel('Velocity [m/s]', 'FontSize', 14);
+% grid on;
+% legend('UKF', 'True');
+% title('Effective wind speed [v_r]', 'FontSize', 14);
+% set(gcf, 'PaperOrientation','landscape');
 % saveas(figure(6),'Figures/Kalman_ve.pdf');

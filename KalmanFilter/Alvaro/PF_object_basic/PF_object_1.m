@@ -10,7 +10,6 @@ Constant_variables
 %% Filter construction
 pf = particleFilter(@ParticleFilterStateFcn1,@ParticleFilterMeasurementLikelihoodFcn1);
 % Initialize it with 1000 particles around the mean x_i with 0.1 covariance.
-% The covariance represents the confidence in your initial estimate
 initialize(pf, 1000, x_i, 0.01*eye(Lk));
 
 % The filter uses as default option a state estimation method of 'mean',
@@ -23,7 +22,7 @@ initialize(pf, 1000, x_i, 0.01*eye(Lk));
 
 % Simulate the system for 600 seconds with the filter sample
 % time 0.05 [s] to generate the true states of the system.
-timeVector = 0:Ts:600-Ts;
+timeVector = t;
 % rng(1); % Fix the random number generator for reproducible results
 % n = sqrt(Q)*randn(Lk, N); % Generate random process noise (from assumed Q)
 % v = sqrt(R)*randn(Yk, N); % Generate random measurement noise (from assumed R)
@@ -45,7 +44,7 @@ yMeas = y_me';
 
 % Estimate
 xCorrectedPF = zeros(N,Lk);
-for k=1:size(xTrue,2)
+for k=1:size(xTrue,1)
     % Use measurement y[k] to correct the particles for time k
     xCorrectedPF(k,:) = correct(pf,yMeas(k,:),To); % Filter updates and stores Particles[k|k], Weights[k|k]
     % The result is x[k|k]: Estimate of states at time k, utilizing

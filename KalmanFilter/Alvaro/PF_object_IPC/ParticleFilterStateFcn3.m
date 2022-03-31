@@ -30,10 +30,10 @@ function particles = ParticleFilterStateFcn3(particles,u,Ac,Ae,B,D,To,W,cp_l,ct_
 Ts = 0.05; % [s] Sample time
 
 for kk=1:numberOfParticles
-    k_1 = StateFcnContinuous2(particles(:,kk),u(:,kk),Ac,Ae,B,D,To,W,cp_l,ct_l,lambdaVec,pitchVec,v_m);
-    k_2 = StateFcnContinuous2(particles(:,kk)+0.5*Ts*k_1,u(:,kk)+0.5*Ts,Ac,Ae,B,D,To,W,cp_l,ct_l,lambdaVec,pitchVec,v_m);
-    k_3 = StateFcnContinuous2(particles(:,kk)+0.5*Ts*k_2,u(:,kk)+0.5*Ts,Ac,Ae,B,D,To,W,cp_l,ct_l,lambdaVec,pitchVec,v_m);
-    k_4 = StateFcnContinuous2(particles(:,kk)+Ts*k_3,u(:,kk)+Ts,Ac,Ae,B,D,To,W,cp_l,ct_l,lambdaVec,pitchVec,v_m);
+    k_1 = StateFcnContinuous3(particles(:,kk),u(:,kk),Ac,Ae,B,D,To,W,cp_l,ct_l,lambdaVec,pitchVec,v_m);
+    k_2 = StateFcnContinuous3(particles(:,kk)+0.5*Ts*k_1,u(:,kk)+0.5*Ts,Ac,Ae,B,D,To,W,cp_l,ct_l,lambdaVec,pitchVec,v_m);
+    k_3 = StateFcnContinuous3(particles(:,kk)+0.5*Ts*k_2,u(:,kk)+0.5*Ts,Ac,Ae,B,D,To,W,cp_l,ct_l,lambdaVec,pitchVec,v_m);
+    k_4 = StateFcnContinuous3(particles(:,kk)+Ts*k_3,u(:,kk)+Ts,Ac,Ae,B,D,To,W,cp_l,ct_l,lambdaVec,pitchVec,v_m);
     particles(:,kk) = particles(:,kk) + (1/6)*(k_1+2*k_2+2*k_3+k_4)*Ts;
 end
 

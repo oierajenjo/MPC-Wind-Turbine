@@ -21,7 +21,7 @@ function likelihood = ParticleFilterMeasurementLikelihoodFcn1(particles,measurem
 % MATLAB Coder.
 
 % Validate the sensor measurement
-numberOfMeasurements = 1; % Expected number of measurements
+numberOfMeasurements = size(measurement,2); % Expected number of measurements
 validateattributes(measurement, {'double'}, {'vector', 'numel', numberOfMeasurements}, ...
     'ParticleFilterMeasurementLikelihoodFcn1', 'measurement');
 
@@ -37,9 +37,9 @@ for k = 1:size(particles,2)
 end
 
 % Assume the ratio of the error between predicted and actual measurements
-% follow a Gaussian distribution with zero mean, variance ...
+% follow a Gaussian distribution with zero mean, variance 0.2
 mu = 0; % mean
-sigma = 0.5 * eye(numberOfMeasurements); % variance
+sigma = 0.2 * eye(numberOfMeasurements); % variance
 
 % Use multivariate Gaussian probability density function, calculate
 % likelihood of each particle
@@ -47,7 +47,7 @@ numParticles = size(particles,2);
 likelihood = zeros(numParticles,1);
 C = det(2*pi*sigma) ^ (-0.5);
 for kk=1:numParticles
-    errorRatio = (predictedMeasurement(:,kk)-measurement)/predictedMeasurement(:,kk);
+    errorRatio = (predictedMeasurement(:,kk)-measurement')./predictedMeasurement(:,kk);
     v = errorRatio-mu;
     likelihood(kk) = C * exp(-0.5 * (v' / sigma * v) );
 end

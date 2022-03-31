@@ -39,7 +39,7 @@ a = 1 - w_p*Ts; % Turbulent wind filter parameter using Euler
 % a = @(x) exp(-w_p(x)*Ts); % Turbulent wind filter parameter using Zero Order Hold
 sigma_t = W.ti*v_m*sqrt((1-a^2)/(1-a)^2); % Standard deviation turbulent wind
 sigma_m = sqrt(W.q); % Standard deviation mean wind
-Q = diag([zeros(Lk-2,1); sigma_t^2*w_p^2; sigma_m^2]);
+Q = diag([zeros(Lk-3,1); sigma_t^2*w_p^2; sigma_m^2; 0]);
 n = sqrt(Q)*randn(Lk, N); % Generate random process noise (from assumed Q)
 % v = sqrt(R)*randn(Yk, N); % Generate random measurement noise (from assumed R)
 
