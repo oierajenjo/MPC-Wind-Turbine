@@ -46,7 +46,7 @@ f6 = @(x) x(7); % Blade foreafter velocity
 f7 = @(x) Fx(x)/(B.B*B.m) + B.kx*x(2)/B.m + B.cx*x(3)/B.m - B.kx*x(6)/B.m - B.cx*x(7)/B.m; % Blade foreafter acceleration
 
 f8 = @(x) x(9); % Blade edgewise velocity
-f9 = @(x) Fy(x)/(B.B*B.m) + B.ky*x(4)/B.m + B.cy*x(5)/B.m - B.ky*x(8)/B.m - B.cy*x(9)/B.m; % Blade edgewise acceleration
+f9 = @(x) B.ky*x(4)/B.m + B.cy*x(5)/B.m - B.ky*x(8)/B.m - B.cy*x(9)/B.m; % Blade edgewise acceleration
 
 %% Actuators BIEN
 f10 = @(x) x(11); % Pitch velocity
@@ -64,7 +64,7 @@ f = @(t,x,u) [f1(x); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x);...
 StateFcnDiscrete = @(x,u) [f1(x); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x);...
     f8(x); f9(x); f10(x); f11(x,u); f12(x,u); f13(x);  f14]; % Nonlinear prediction
 
-MeasurementFcn = @(x) [x(1); f3(x); f5(x); -x(6)*B.kx*2*B.l/3; -x(8)*B.ky*2*B.l/3;...
+MeasurementFcn = @(x) [x(1); f3(x); f5(x); -B.B*x(6)*B.kx*2*B.l/3; -B.B*x(8)*B.ky*2*B.l/3;...
     D.eta*x(12)*x(1); vr(x)];
 
 vm = 6;
@@ -72,7 +72,7 @@ wp = vm*pi/(2*W.L);
 a = 1 - wp*Ts; % Euler
 % a = @(x) exp(-w_p(x)*Ts); % Zero Order Hold
 sigma_t = W.ti*vm*sqrt((1-a^2)/(1-a)^2);
-sigma_m = sqrt(Ts*W.q);
+sigma_m = sqrt(W.q);
 Q = diag([zeros(Lk-2,1); sigma_t^2*wp^2; sigma_m^2]); % Covariance matrix of the process noise
 
 temp = [M.sigma_enc; M.sigma_acc; M.sigma_acc; M.sigma_root; M.sigma_root;...
