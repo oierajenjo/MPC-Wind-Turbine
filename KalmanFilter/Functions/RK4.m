@@ -2,7 +2,7 @@ function [xt,yt] = RK4(f,xt,h,yt,u_b,N,n,v,Ts)
 % Runge-Kutta 4th order method
 for k = 1:N-1
  % main equation
-        k_1 = f(xt(:,k),u_b(:,k));
+    k_1 = f(xt(:,k),u_b(:,k));
     k_2 = f(xt(:,k)+0.5*Ts*k_1,u_b(:,k)+0.5*Ts);
     k_3 = f(xt(:,k)+0.5*Ts*k_2,u_b(:,k)+0.5*Ts);
     k_4 = f(xt(:,k)+Ts*k_3,u_b(:,k)+Ts);

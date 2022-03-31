@@ -7,11 +7,11 @@ variables_IPC
 load('BladedFiles\performancemap_data.mat')
 Constant_variables
 
-% u_b = ones(4,N);
-% theta_f = 0;
-% [lamb_opt, cp_opt] = cp_max(theta_f,cp_l,lambdaVec,pitchVec);
-% K = 0.5*Ae.rho*Ae.Rr^5*pi*cp_opt/lamb_opt^3;
-% u_b = [theta_f; theta_f; theta_f; K].*u_b;
+u_b = ones(4,N);
+theta_f = 0;
+[lamb_opt, cp_opt] = cp_max(theta_f,cp_l,lambdaVec,pitchVec);
+K = 0.5*Ae.rho*Ae.Rr^5*pi*cp_opt/lamb_opt^3;
+u_b = [theta_f; theta_f; theta_f; K].*u_b;
 
 %% Before filter execution
 % Step 2: Define noise assumptions
@@ -30,7 +30,7 @@ lambi = @(x,i) (x(1)*Ae.Rr-x(15+i))/(vri(x,i)-x(9+i));
 cpi = @(x,i) cp_ct(lambi(x,i),x(18+i),cp_l,lambdaVec,pitchVec)/B.B;
 cti = @(x,i) cp_ct(lambi(x,i),x(18+i),ct_l,lambdaVec,pitchVec)/B.B;
 
-Tr = @(x,d) (x(12)+x(13)+x(14))*B.ky*2*B.l/3;
+Tr = @(x,d) -(x(12)+x(13)+x(14))*B.ky*2*B.l/3;
 % Tr = @(x) 0.5*Ae.rho*Ae.Ar*(vr(x)-mean(x(9:11)))^3*cp(x)/x(1);
 % Tr = @(x) (0.5*Ae.rho*Ae.Ar*((vri(x,0)-x(9))^3*cpi(x,0)+(vri(x,1)-x(10))^3*cpi(x,1)+(vri(x,2)-x(11))^3*cpi(x,2))/x(1));
 Fxi = @(x,i) 0.5*Ae.rho*Ae.Ar*(vri(x,i)-x(9+i))^2*cti(x,i); % Thrust coefficient
@@ -71,8 +71,8 @@ f21 = @(x,u) Ac.omega^2*u(1) - 2*Ac.omega*Ac.xi*x(21) - Ac.omega^2*x(18); % Pitc
 f22 = @(x,u) Ac.omega^2*u(2) - 2*Ac.omega*Ac.xi*x(22) - Ac.omega^2*x(19); % Pitch 2 acceleration
 f23 = @(x,u) Ac.omega^2*u(3) - 2*Ac.omega*Ac.xi*x(23) - Ac.omega^2*x(20); % Pitch 3 acceleration
 
-f24 = @(x,u) (u(4)-x(24))/Ac.tau; % Torque change in time
-% f24 = @(x,u) (u(4)*x(1)^2-x(24))/Ac.tau; % Torque change in time
+% f24 = @(x,u) (u(4)-x(24))/Ac.tau; % Torque change in time
+f24 = @(x,u) (u(4)*x(1)^2-x(24))/Ac.tau; % Torque change in time
 
 %% Wind
 f25 = @(x) -w_p(x)*x(25); % Wind turbulence acceleration
@@ -93,7 +93,7 @@ h = @(x) [x(1); f3(x); f5(x); -x(6)*B.kx*2*B.l/3; -x(7)*B.kx*2*B.l/3;
 a = @(x) 1 - w_p(x)*Ts; % Euler
 % a = @(x) exp(-(x(5)*pi/(2*L))*Ts); % Zero Order Hold
 sigma_t = @(x) W.ti*x(26)*sqrt((1-a(x)^2)/(1-a(x))^2);
-sigma_m = sqrt(Ts*W.q);
+sigma_m = sqrt(W.q);
 Q = @(x) diag([zeros(Lk-3,1); sigma_t(x)^2*w_p(x)^2; sigma_m^2; 0]); % Covariance matrix of the process noise
 
 temp = [M.sigma_enc; M.sigma_acc; M.sigma_acc; M.sigma_root; M.sigma_root;...
@@ -179,7 +179,7 @@ end
 % title("Mx")
 % legend(["Us" "Bladed"])
 
-%% Execute Unscented Kalman Filter
+%% Unscented Kalman Filter
 % Initialize state and covariance
 xk = zeros(Lk, N); % Initialize size of state estimate for all k
 xk(:,1) = x_i;

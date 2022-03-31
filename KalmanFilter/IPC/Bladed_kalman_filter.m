@@ -26,7 +26,7 @@ cpi = @(x,d,i) cp_ct(lambi(x,d,i),x(18+i),cp_l,lambdaVec,pitchVec)/B.B;
 cti = @(x,d,i) cp_ct(lambi(x,d,i),x(18+i),ct_l,lambdaVec,pitchVec)/B.B;
 
 
-Tr = @(x,d) (x(12)+x(13)+x(14))*B.ky*2*B.l/3;
+Tr = @(x,d) -(x(12)+x(13)+x(14))*B.ky*2*B.l/3;
 % Tr = @(x,d) 0.5*Ae.rho*Ae.Ar*(d(1)-x(3)-mean(x(9:11)))^3*cp(x,d)/x(1);
 % Tr = @(x,d) (0.5*Ae.rho*Ae.Ar*((vri(x,d,0)-x(9))^3*cpi(x,d,0) +...
 %      (vri(x,d,1)-x(10))^3*cpi(x,d,1) + (vri(x,d,2)-x(11))^3*cpi(x,d,2)))/x(1);
