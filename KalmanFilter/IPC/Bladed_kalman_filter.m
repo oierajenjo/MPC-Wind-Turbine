@@ -7,12 +7,6 @@ Bladed_variables_IPC
 load('BladedFiles\performancemap_data.mat')
 Constant_variables
 
-% u_b = ones(4,N);
-% theta_f = 0;
-% [lamb_opt, cp_opt] = cp_max(theta_f,cp_l,lambdaVec,pitchVec);
-% K = 0.5*Ae.rho*Ae.Rr^5*pi*cp_opt/lamb_opt^3;
-% u_b = [theta_f; theta_f; theta_f; K].*u_b;
-
 %% State transition functions
 vei = @(x,d,i) d(1)*(To.r^2*(Ae.Rr^2*(sin((x(25)+2*pi*i/3)))^2-To.xh^2)/(To.xh^2+Ae.Rr^2*(sin((x(25)+2*pi*i/3)))^2)^2 +...
     ((Ae.Rr*cos((x(25)+2*pi*i/3))+To.H)/To.H)^W.alpha);
@@ -70,7 +64,6 @@ f22 = @(x,u) Ac.omega^2*u(2) - 2*Ac.omega*Ac.xi*x(22) - Ac.omega^2*x(19); % Pitc
 f23 = @(x,u) Ac.omega^2*u(3) - 2*Ac.omega*Ac.xi*x(23) - Ac.omega^2*x(20); % Pitch 3 acceleration
 
 f24 = @(x,u) (u(4)-x(24))/Ac.tau; % Torque change in time
-% f24 = @(x,u) (u(4)*x(1)^2-x(24))/Ac.tau; % Torque change in time
 
 %% Azimuth
 f25 = @(x) x(1); % Azimuth velocity
@@ -80,9 +73,9 @@ f = @(x,u,d) [f1(x,d); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x);...
     f16(x,d); f17(x,d); f18(x); f19(x); f20(x); f21(x,u); f22(x,u);...
     f23(x,u); f24(x,u); f25(x)]; % Nonlinear prediction
 
-h = @(x,d) [x(1); f3(x); f5(x); -x(6)*B.kx*2*B.l/3; -x(7)*B.kx*2*B.l/3;
-    -x(8)*B.kx*2*B.l/3; -x(12)*B.ky*2*B.l/3; -x(13)*B.ky*2*B.l/3; ...
-    -x(14)*B.ky*2*B.l/3; D.eta*x(24)*x(1); d(1); x(25)];
+h = @(x,d) [x(1); f3(x); f5(x); x(6)*B.kx*2*B.l/3; x(7)*B.kx*2*B.l/3;
+    x(8)*B.kx*2*B.l/3; x(12)*B.ky*2*B.l/3; x(13)*B.ky*2*B.l/3; ...
+    x(14)*B.ky*2*B.l/3; D.eta*x(24)*x(1); d(1); x(25)];
 
 Q = diag(zeros(Lk,1)); % Covariance matrix of the process noise
 
@@ -95,7 +88,7 @@ R = diag(temp); % Covariance matrix of measurement noise
 % Simulation Only: Calculate true state trajectory for comparison
 % Also calculate measurement vector
 % Var(QX) = QVar(X)Q' = sigma^4 -> Var(sqrt(Q)X) = sqrt(Q)Var(X)sqrt(Q)' = sigma^2
-n = sqrt(Q)*randn(Lk, 1); % Generate random process noise (from assumed Q)
+n = sqrt(Q)*randn(Lk, N); % Generate random process noise (from assumed Q)
 v = sqrt(R)*randn(Yk, N); % Generate random measurement noise (from assumed R)
 
 % Initialize matrices
@@ -175,7 +168,7 @@ P0 = [M.sigma_enc; M.sigma_tdef; M.sigma_tvel; M.sigma_tdef; M.sigma_tvel;...
 P0 = diag(P0);
 % P0 = 0.01*eye(Lk,Lk); % Set initial error covariance
 
-[xk,P,e] = BUKF(f,h,Q,R,xk,y_me,u_b,d_b,Lk,Yk,N,P0,Ts);
+[xk,P,e] = BUKF(f,h,Q,R,xk,y_me,u_b,d_b,Lk,Yk,N,P0,Ts,v,n);
 
 %% Display results
 result_display(t,Lk,xk,xt,x_ul,x_vl)

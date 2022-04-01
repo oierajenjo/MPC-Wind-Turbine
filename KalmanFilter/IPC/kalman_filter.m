@@ -214,7 +214,7 @@ P0 = [M.sigma_enc; M.sigma_tdef; M.sigma_tvel; M.sigma_tdef; M.sigma_tvel;...
 P0 = diag(P0);
 % P0 = 0.01*eye(Lk,Lk); 
 
-[xk,P,e] = UKF(f,h,Q,R,xk,yt,u_b,Lk,Yk,N,P0,Ts,v,n);
+[xk,P,e] = UKF(f,h,Q,R,xk,y_me,u_b,Lk,Yk,N,P0,Ts,v,n);
 
 
 % % Construct the filter

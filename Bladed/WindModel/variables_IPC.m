@@ -60,7 +60,7 @@ vm = mean(data.Data(:,59));
 x_i = [omega_r(1) xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta theta_dot...
     tg vt vm psi(1)]';
 
-clearvars -except x_i y_me u_b N data d_b
+clearvars -except x_i y_me u_b N data d_b x_me
 
 %% Plotting variables
 x_vl = {'$\omega_r$', '$x_t$', '$\dot{x}_t$', '$y_t$', '$\dot{y}_t$', ...
