@@ -65,10 +65,10 @@ Ac.xi = 0.8; % Damping factor of pitch actuator model
 Ac.tau = 0.1; % Generator time constant
 
 %% Measurement constants
-M.sigma_enc = 0.01;
-M.sigma_acc = 0.02;
+M.sigma_enc = 0.017;
+M.sigma_acc = 0.04;
 M.sigma_root = 0.01; % ¿?
-M.sigma_pow = 0.01; % ¿?
+M.sigma_pow = 0.035; % ¿?
 M.sigma_vane = 1;
 M.sigma_azim = 0.01;
 

@@ -89,6 +89,7 @@ f = @(x,u) [f1(x); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x);...
 h = @(x) [x(1); f3(x); f5(x); x(6)*B.kx*2*B.l/3; x(7)*B.kx*2*B.l/3;
     x(8)*B.kx*2*B.l/3; x(12)*B.ky*2*B.l/3; x(13)*B.ky*2*B.l/3; ...
     x(14)*B.ky*2*B.l/3; D.eta*x(24)*x(1); vr(x); x(27)];
+
 rng(1);
 a = @(x) 1 - w_p(x)*Ts; % Euler
 % a = @(x) exp(-(x(5)*pi/(2*L))*Ts); % Zero Order Hold
@@ -109,91 +110,96 @@ n = @(x) sqrt(Q(x))*randn(Lk, 1); % Generate random process noise (from assumed 
 % v = sqrt(R)*randn(Yk, N); % Generate random measurement noise (from assumed R)
 v = zeros(Yk, N);
 
+%% Runge-Kutta 4th order method
 % Initialize matrices
 xt = zeros(Lk, N); % Initialize size of true state for all k
 xt(:,1) = x_i; % Set true initial state
 yt = zeros(Yk, N); % Initialize size of output vector for all k
 [xt,yt] = RK4(f,xt,h,yt,u_b,N,n,v,Ts);
 
-for k=1:N
-    p(k) = vr(xt(:,k));
-    p1(k) = vri(xt(:,k),1);
-    p2(k) = vri(xt(:,k),2);
-    p3(k) = vri(xt(:,k),3);
-    tr(k) = (1-D.mu)*Tr(xt(:,k));
-end
-
 figure
 plot(t,yt(1,:)',t,y_me(1,:));
 legend('yt','y_me')
 % ylim([-2.6 2.6]);
-ylabel('wr');
+title('wr');
+xlabel('s')
 
 figure
 plot(t,yt(2,:)',t,y_me(2,:));
 legend('yt','y_me')
 % ylim([-2.6 2.6]);
-ylabel('xtddot');
+title('xtddot');
+xlabel('s')
 
 figure
 plot(t,yt(3,:)',t,y_me(3,:));
 legend('yt','y_me')
 % ylim([-2.6 2.6]);
-ylabel('ytddot');
+title('ytddot');
+xlabel('s')
 
 figure
 plot(t,yt(4,:)',t,y_me(4,:));
-legend('yt','y_me')
+legend('yt','y_{me}')
 % ylim([-2.6 2.6]);
-ylabel('My1');
+title('My1');
+xlabel('s')
 
 figure
 plot(t,yt(7,:)',t,y_me(7,:));
-legend('yt','y_me')
+legend('yt','y_{me}')
 % ylim([-2.6 2.6]);
-ylabel('Mx1');
+title('Mx1');
+xlabel('s')
 
 figure
 plot(t,yt(10,:)',t,y_me(10,:));
-legend('yt','y_me')
+legend('yt','y_{me}')
 % ylim([-2.6 2.6]);
-ylabel('Pe');
+title('Pe');
+xlabel('s')
 
 figure
 plot(t,yt(11,:)',t,y_me(11,:));
-legend('yt','y_me')
+legend('yt','y_{me}')
 % ylim([-2.6 2.6]);
-ylabel('vr');
+title('vr');
+xlabel('s')
 
 figure
 plot(t,xt(2,:)',t,data.Data(:,224));
 legend('xt','Bladed')
 % ylim([-2.6 2.6]);
-ylabel('xt');
+title('xt');
+xlabel('s')
 
 figure
 plot(t,xt(4,:)',t,data.Data(:,225));
 legend('xt','Bladed')
 % ylim([-2.6 2.6]);
-ylabel('yt');
+title('yt');
+xlabel('s')
 
 figure
 plot(t,xt(6,:)',t,data.Data(:,85));
 legend('xt','Bladed')
 % ylim([-2.6 2.6]);
-ylabel('xb1');
+title('xb1');
+xlabel('s')
 
 figure
 plot(t,xt(12,:)',t,data.Data(:,86));
 legend('xt','Bladed')
 % ylim([-2.6 2.6]);
-ylabel('yb1');
+title('yb1');
+xlabel('s')
 
 figure
 plot(t,xt(24,:)',t,data.Data(:,20));
 legend('xt','Bladed')
 % ylim([-2.6 2.6]);
-ylabel('Tg');
+title('Tg');
+xlabel('s')
 
 %% Unscented Kalman Filter
 % Initialize state and covariance
@@ -204,14 +210,45 @@ P0 = [M.sigma_enc; M.sigma_tdef; M.sigma_tvel; M.sigma_tdef; M.sigma_tvel;...
     M.sigma_bvel; M.sigma_bdef; M.sigma_bdef; M.sigma_bdef; M.sigma_bvel;...
     M.sigma_bvel; M.sigma_bvel; M.sigma_pit; M.sigma_pit; M.sigma_pit;...
     M.sigma_pitvel; M.sigma_pitvel; M.sigma_pitvel; M.sigma_pow;...
-    M.sigma_vane; M.sigma_vane; M.sigma_azim].^2;
+    M.sigma_vane; 0.01; M.sigma_azim].^2;
 P0 = diag(P0);
-% P0 = 0.01*eye(Lk,Lk); % Set initial error covariance
+% P0 = 0.01*eye(Lk,Lk); 
 
-[xk,P,e] = UKF(f,h,Q,R,xk,yt,u_b,Lk,Yk,N,P0,Ts);
+[xk,P,e] = UKF(f,h,Q,R,xk,yt,u_b,Lk,Yk,N,P0,Ts,v,n);
+
+
+% % Construct the filter
+% ukf = unscentedKalmanFilter(f,... % State transition function
+%     h,... % Measurement function
+%     x_i,...
+%     'HasAdditiveMeasurementNoise',true);
+% 
+% ukf.MeasurementNoise = R;
+% ukf.ProcessNoise = Q;
+% % Preallocate space for data to analyze later
+% xCorrectedUKF = zeros(N,Lk); % Corrected state estimates
+% P = zeros(N,Lk,Lk); % Corrected state estimation error covariances
+% P(1,:,:) = P0;
+% e = zeros(Yk,N); % Residuals (or innovations)
+% for k=1:N-1
+%     % Let k denote the current time.
+%     %
+%     % Residuals (or innovations): Measured output - Predicted output
+%     e(:,k) = y_me(:,k) - h(ukf.State); % ukf.State is x[k|k-1] at this point
+%     % Incorporate the measurements at time k into the state estimates by
+%     % using the "correct" command. This updates the State and StateCovariance
+%     % properties of the filter to contain x[k|k] and P[k|k]. These values
+%     % are also produced as the output of the "correct" command.
+%     [xk(:,k+1), P(k+1,:,:)] = correct(ukf,y_me(:,k));
+%     % Predict the states at next time step, k+1. This updates the State and
+%     % StateCovariance properties of the filter to contain x[k+1|k] and
+%     % P[k+1|k]. These will be utilized by the filter at the next time step.
+%     predict(ukf,u_b(:,k));
+% end
+
 
 %% Display results
-% result_display(t,Lk,xk,xt,x_ul,x_vl)
+result_display(t,Lk,xk,xt,x_ul,x_vl)
 
 % figure
 % plot(t,vr(xk),'b-',t,vr(xt),'r-');
