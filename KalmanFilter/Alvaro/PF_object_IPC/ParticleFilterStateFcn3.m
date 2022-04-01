@@ -44,7 +44,7 @@ a = 1 - w_p*Ts; % Turbulent wind filter parameter using Euler
 % a = @(x) exp(-w_p(x)*Ts); % Turbulent wind filter parameter using Zero Order Hold
 sigma_t = W.ti*v_m*sqrt((1-a^2)/(1-a)^2); % Standard deviation turbulent wind
 sigma_m = sqrt(W.q); % Standard deviation mean wind
-Q = diag([zeros(numberOfStates-2,1); sigma_t^2*w_p^2; sigma_m^2]); % Covariance matrix of the process noise
+Q = diag([zeros(numberOfStates-3,1); sigma_t^2*w_p^2; sigma_m^2; 0]); % Covariance matrix of the process noise
 n = sqrt(Q)*randn(size(particles));
 particles = particles + n;
 

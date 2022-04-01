@@ -70,61 +70,71 @@ yMeas = y_me';
 figure
 plot(timeVector,yTrue(1,:)',timeVector,yMeas(:,1));
 legend('yTrue','yMeas')
-% ylim([-2.6 2.6]);
+title('wr');
+xlabel('s');
 ylabel('wr');
 
 figure
 plot(timeVector,yTrue(2,:)',timeVector,yMeas(:,2));
 legend('yTrue','yMeas')
-% ylim([-2.6 2.6]);
+title('xtddot');
+xlabel('s');
 ylabel('xtddot');
 
 figure
 plot(timeVector,yTrue(3,:)',timeVector,yMeas(:,3));
 legend('yTrue','yMeas')
-% ylim([-2.6 2.6]);
+title('ytddot');
+xlabel('s');
 ylabel('ytddot');
 
 figure
 plot(timeVector,yTrue(4,:)',timeVector,yMeas(:,4));
 legend('yTrue','yMeas')
-% ylim([-2.6 2.6]);
+title('My1');
+xlabel('s');
 ylabel('My1');
 
 figure
 plot(timeVector,yTrue(7,:)',timeVector,yMeas(:,7));
 legend('yTrue','yMeas')
-% ylim([-2.6 2.6]);
+title('Mx1');
+xlabel('s');
 ylabel('Mx1');
 
 figure
 plot(timeVector,yTrue(10,:)',timeVector,yMeas(:,10));
 legend('yTrue','yMeas')
-% ylim([-2.6 2.6]);
+title('Pe');
+xlabel('s');
 ylabel('Pe');
 
 figure
 plot(timeVector,yTrue(11,:)',timeVector,yMeas(:,11));
 legend('yTrue','yMeas')
-% ylim([-2.6 2.6]);
+title('vr');
+xlabel('s');
 ylabel('vr');
 
 figure
 plot(timeVector,xTrue(2,:)',timeVector,data.Data(:,224));
 legend('xTrue','Bladed')
-% ylim([-2.6 2.6]);
+title('xt');
+xlabel('s');
 ylabel('xt');
 
 figure
 plot(timeVector,xTrue(4,:)',timeVector,data.Data(:,225));
 legend('xTrue','Bladed')
-% ylim([-2.6 2.6]);
+title('yt');
+xlabel('s');
 ylabel('yt');
 
 figure
 plot(timeVector,xTrue(6,:)',timeVector,data.Data(:,85));
 legend('xTrue','Bladed')
-% ylim([-2.6 2.6]);
+title('xb1');
+xlabel('s');
 ylabel('xb1');
 
 figure
@@ -136,14 +146,15 @@ ylabel('yb1');
 figure
 plot(timeVector,xTrue(24,:)',timeVector,data.Data(:,20));
 legend('xTrue','Bladed')
-% ylim([-2.6 2.6]);
+title('Tg');
+xlabel('s');
 ylabel('Tg');
 
 % Estimate
 xCorrectedPF = zeros(N,Lk);
 for k=1:size(xTrue,2)
     % Use measurement y[k] to correct the particles for time k
-    xCorrectedPF(k,:) = correct(pf,yMeas(k,:),B,D,To); % Filter updates and stores Particles[k|k], Weights[k|k]
+    xCorrectedPF(k,:) = correct(pf,yMeas(k,:),B,D,To,M); % Filter updates and stores Particles[k|k], Weights[k|k]
     % The result is x[k|k]: Estimate of states at time k, utilizing
     % measurements up to time k. This estimate is the mean of all particles
     % because StateEstimationMethod was 'mean'.
@@ -157,96 +168,97 @@ end
 figure
 plot(timeVector,xTrue(1,:)',timeVector,xCorrectedPF(:,1));
 legend('True','PF estimate')
-% ylim([-2.6 2.6]);
+title('wr');
+xlabel('Time [s]');
 ylabel('wr');
 
 figure
 plot(timeVector,xTrue(2,:)',timeVector,xCorrectedPF(:,2));
 legend('True','PF estimate')
-% ylim([-3 1.5]);
+title('xt');
 xlabel('Time [s]');
 ylabel('xt');
 
 figure
 plot(timeVector,xTrue(3,:)',timeVector,xCorrectedPF(:,3));
 legend('True','PF estimate')
-% ylim([-3 1.5]);
+title('xtdot');
 xlabel('Time [s]');
 ylabel('xtdot');
 
 figure
 plot(timeVector,xTrue(4,:)',timeVector,xCorrectedPF(:,4));
 legend('True','PF estimate')
-% ylim([-3 1.5]);
+title('yt');
 xlabel('Time [s]');
 ylabel('yt');
 
 figure
 plot(timeVector,xTrue(5,:)',timeVector,xCorrectedPF(:,5));
 legend('True','PF estimate')
-% ylim([-3 1.5]);
+title('ytdot');
 xlabel('Time [s]');
 ylabel('ytdot');
 
 figure
 plot(timeVector,xTrue(6,:)',timeVector,xCorrectedPF(:,6));
 legend('True','PF estimate')
-% ylim([-3 1.5]);
+title('xb1');
 xlabel('Time [s]');
-ylabel('xb');
-
-figure
-plot(timeVector,xTrue(7,:)',timeVector,xCorrectedPF(:,7));
-legend('True','PF estimate')
-% ylim([-3 1.5]);
-xlabel('Time [s]');
-ylabel('xbdot');
-
-figure
-plot(timeVector,xTrue(8,:)',timeVector,xCorrectedPF(:,8));
-legend('True','PF estimate')
-% ylim([-3 1.5]);
-xlabel('Time [s]');
-ylabel('yb');
+ylabel('xb1');
 
 figure
 plot(timeVector,xTrue(9,:)',timeVector,xCorrectedPF(:,9));
 legend('True','PF estimate')
-% ylim([-3 1.5]);
+title('xb1dot');
 xlabel('Time [s]');
-ylabel('ybdot');
-
-figure
-plot(timeVector,xTrue(10,:)',timeVector,xCorrectedPF(:,10));
-legend('True','PF estimate')
-% ylim([-3 1.5]);
-xlabel('Time [s]');
-ylabel('theta');
-
-figure
-plot(timeVector,xTrue(11,:)',timeVector,xCorrectedPF(:,11));
-legend('True','PF estimate')
-% ylim([-3 1.5]);
-xlabel('Time [s]');
-ylabel('theta_dot');
+ylabel('xb1dot');
 
 figure
 plot(timeVector,xTrue(12,:)',timeVector,xCorrectedPF(:,12));
 legend('True','PF estimate')
-% ylim([-3 1.5]);
+title('yb1');
+xlabel('Time [s]');
+ylabel('yb1');
+
+figure
+plot(timeVector,xTrue(15,:)',timeVector,xCorrectedPF(:,15));
+legend('True','PF estimate')
+title('yb1dot');
+xlabel('Time [s]');
+ylabel('yb1dot');
+
+figure
+plot(timeVector,xTrue(18,:)',timeVector,xCorrectedPF(:,18));
+legend('True','PF estimate')
+title('theta1');
+xlabel('Time [s]');
+ylabel('theta1');
+
+figure
+plot(timeVector,xTrue(21,:)',timeVector,xCorrectedPF(:,21));
+legend('True','PF estimate')
+title('theta_dot');
+xlabel('Time [s]');
+ylabel('theta1_dot');
+
+figure
+plot(timeVector,xTrue(24,:)',timeVector,xCorrectedPF(:,24));
+legend('True','PF estimate')
+title('Tg');
 xlabel('Time [s]');
 ylabel('Tg');
 
 figure
-plot(timeVector,xTrue(13,:)',timeVector,xCorrectedPF(:,13));
+plot(timeVector,xTrue(25,:)',timeVector,xCorrectedPF(:,25));
 legend('True','PF estimate')
-% ylim([-3 1.5]);
+title('vt');
 xlabel('Time [s]');
 ylabel('vt');
 
 figure
-plot(timeVector,xTrue(14,:)',timeVector,xCorrectedPF(:,14));
+plot(timeVector,xTrue(26,:)',timeVector,xCorrectedPF(:,26));
 legend('True','PF estimate')
-% ylim([-3 1.5]);
+title('vm');
 xlabel('Time [s]');
 ylabel('vm');

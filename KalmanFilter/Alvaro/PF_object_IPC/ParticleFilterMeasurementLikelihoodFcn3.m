@@ -1,4 +1,4 @@
-function likelihood = ParticleFilterMeasurementLikelihoodFcn3(particles,measurement,B,D,To)
+function likelihood = ParticleFilterMeasurementLikelihoodFcn3(particles,measurement,B,D,To,M)
 % ParticleFilterMeasurementLikelihoodFcn Measurement likelihood function
 %
 % likelihood = ParticleFilterMeasurementLikelihoodFcn(particles, measurement)
@@ -38,10 +38,11 @@ end
 % Assume the ratio of the error between predicted and actual measurements
 % follow a Gaussian distribution with zero mean, variance 0.2
 mu = 0; % mean
-sigma = 0.1 * eye(numberOfMeasurements); % variance
+sigma = 1 * eye(numberOfMeasurements); % variance
 % R = [M.sigma_enc; M.sigma_acc; M.sigma_acc; M.sigma_root; M.sigma_root;...
-%     M.sigma_pow; M.sigma_vane].^2;
-% R = diag(R);
+%     M.sigma_root; M.sigma_root; M.sigma_root; M.sigma_root; M.sigma_pow;...
+%     M.sigma_vane; M.sigma_azim].^2;
+% sigma = diag(R);
 
 % Use multivariate Gaussian probability density function, calculate
 % likelihood of each particle

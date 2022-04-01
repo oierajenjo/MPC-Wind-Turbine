@@ -29,7 +29,7 @@ f(1) = (1-D.mu)*Tr/(D.Jr+D.Jg) - x(24)/(D.Jr+D.Jg);
 
 %% Tower
 f(2) = x(3); % Tower foreafter velocity
-f(3) = -(B.B*B.kx + To.k)*x(2)/To.m - (B.B*B.cx + To.c)*x(3)/To.m + B.kx*sum(x(6:8))/To.m + B.cx*sum(x(9:11))/To.m; % Tower foreafter acceleration
+f(3) = -(B.B*B.kx + To.k)*(x(2))/To.m - (B.B*B.cx + To.c)*x(3)/To.m + B.kx*sum(x(6:8))/To.m + B.cx*sum(x(9:11))/To.m; % Tower foreafter acceleration
 
 f(4) = x(5); % Tower edgewise velocity
 f(5) = -3*x(24)/(2*To.H*To.m) - (B.B*B.ky + To.k)*x(4)/To.m - (B.B*B.cy + To.c)*x(5)/To.m + B.ky*sum(x(12:14))/To.m + B.cy*sum(x(15:17))/To.m ; % Tower edgewise acceleration
