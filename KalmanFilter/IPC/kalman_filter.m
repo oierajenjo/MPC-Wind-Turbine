@@ -89,6 +89,7 @@ f = @(x,u) [f1(x); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x);...
 h = @(x) [x(1); f3(x); f5(x); x(6)*B.kx*2*B.l/3; x(7)*B.kx*2*B.l/3;
     x(8)*B.kx*2*B.l/3; x(12)*B.ky*2*B.l/3; x(13)*B.ky*2*B.l/3; ...
     x(14)*B.ky*2*B.l/3; D.eta*x(24)*x(1); vr(x); x(27)];
+
 rng(1);
 a = @(x) 1 - w_p(x)*Ts; % Euler
 % a = @(x) exp(-(x(5)*pi/(2*L))*Ts); % Zero Order Hold
@@ -109,83 +110,96 @@ n = @(x) sqrt(Q(x))*randn(Lk, 1); % Generate random process noise (from assumed 
 % v = sqrt(R)*randn(Yk, N); % Generate random measurement noise (from assumed R)
 v = zeros(Yk, N);
 
+%% Runge-Kutta 4th order method
 % Initialize matrices
 xt = zeros(Lk, N); % Initialize size of true state for all k
 xt(:,1) = x_i; % Set true initial state
 yt = zeros(Yk, N); % Initialize size of output vector for all k
 [xt,yt] = RK4(f,xt,h,yt,u_b,N,n,v,Ts);
 
-% figure
-% plot(t,yt(1,:)',t,y_me(1,:));
-% legend('yt','y_me')
-% % ylim([-2.6 2.6]);
-% ylabel('wr');
-% 
-% figure
-% plot(t,yt(2,:)',t,y_me(2,:));
-% legend('yt','y_me')
-% % ylim([-2.6 2.6]);
-% ylabel('xtddot');
-% 
-% figure
-% plot(t,yt(3,:)',t,y_me(3,:));
-% legend('yt','y_me')
-% % ylim([-2.6 2.6]);
-% ylabel('ytddot');
-% 
-% figure
-% plot(t,yt(4,:)',t,y_me(4,:));
-% legend('yt','y_me')
-% % ylim([-2.6 2.6]);
-% ylabel('My1');
-% 
-% figure
-% plot(t,yt(7,:)',t,y_me(7,:));
-% legend('yt','y_me')
-% % ylim([-2.6 2.6]);
-% ylabel('Mx1');
-% 
-% figure
-% plot(t,yt(10,:)',t,y_me(10,:));
-% legend('yt','y_me')
-% % ylim([-2.6 2.6]);
-% ylabel('Pe');
-% 
-% figure
-% plot(t,yt(11,:)',t,y_me(11,:));
-% legend('yt','y_me')
-% % ylim([-2.6 2.6]);
-% ylabel('vr');
-% 
-% figure
-% plot(t,xt(2,:)',t,data.Data(:,224));
-% legend('xt','Bladed')
-% % ylim([-2.6 2.6]);
-% ylabel('xt');
-% 
-% figure
-% plot(t,xt(4,:)',t,data.Data(:,225));
-% legend('xt','Bladed')
-% % ylim([-2.6 2.6]);
-% ylabel('yt');
-% 
-% figure
-% plot(t,xt(6,:)',t,data.Data(:,85));
-% legend('xt','Bladed')
-% % ylim([-2.6 2.6]);
-% ylabel('xb1');
-% 
-% figure
-% plot(t,xt(12,:)',t,data.Data(:,86));
-% legend('xt','Bladed')
-% % ylim([-2.6 2.6]);
-% ylabel('yb1');
-% 
-% figure
-% plot(t,xt(24,:)',t,data.Data(:,20));
-% legend('xt','Bladed')
-% % ylim([-2.6 2.6]);
-% ylabel('Tg');
+figure
+plot(t,yt(1,:)',t,y_me(1,:));
+legend('yt','y_me')
+% ylim([-2.6 2.6]);
+title('wr');
+xlabel('s')
+
+figure
+plot(t,yt(2,:)',t,y_me(2,:));
+legend('yt','y_me')
+% ylim([-2.6 2.6]);
+title('xtddot');
+xlabel('s')
+
+figure
+plot(t,yt(3,:)',t,y_me(3,:));
+legend('yt','y_me')
+% ylim([-2.6 2.6]);
+title('ytddot');
+xlabel('s')
+
+figure
+plot(t,yt(4,:)',t,y_me(4,:));
+legend('yt','y_{me}')
+% ylim([-2.6 2.6]);
+title('My1');
+xlabel('s')
+
+figure
+plot(t,yt(7,:)',t,y_me(7,:));
+legend('yt','y_{me}')
+% ylim([-2.6 2.6]);
+title('Mx1');
+xlabel('s')
+
+figure
+plot(t,yt(10,:)',t,y_me(10,:));
+legend('yt','y_{me}')
+% ylim([-2.6 2.6]);
+title('Pe');
+xlabel('s')
+
+figure
+plot(t,yt(11,:)',t,y_me(11,:));
+legend('yt','y_{me}')
+% ylim([-2.6 2.6]);
+title('vr');
+xlabel('s')
+
+figure
+plot(t,xt(2,:)',t,data.Data(:,224));
+legend('xt','Bladed')
+% ylim([-2.6 2.6]);
+title('xt');
+xlabel('s')
+
+figure
+plot(t,xt(4,:)',t,data.Data(:,225));
+legend('xt','Bladed')
+% ylim([-2.6 2.6]);
+title('yt');
+xlabel('s')
+
+figure
+plot(t,xt(6,:)',t,data.Data(:,85));
+legend('xt','Bladed')
+% ylim([-2.6 2.6]);
+title('xb1');
+xlabel('s')
+
+figure
+plot(t,xt(12,:)',t,data.Data(:,86));
+legend('xt','Bladed')
+% ylim([-2.6 2.6]);
+title('yb1');
+xlabel('s')
+
+figure
+plot(t,xt(24,:)',t,data.Data(:,20));
+legend('xt','Bladed')
+% ylim([-2.6 2.6]);
+title('Tg');
+xlabel('s')
 
 %% Unscented Kalman Filter
 % Initialize state and covariance
@@ -196,11 +210,11 @@ P0 = [M.sigma_enc; M.sigma_tdef; M.sigma_tvel; M.sigma_tdef; M.sigma_tvel;...
     M.sigma_bvel; M.sigma_bdef; M.sigma_bdef; M.sigma_bdef; M.sigma_bvel;...
     M.sigma_bvel; M.sigma_bvel; M.sigma_pit; M.sigma_pit; M.sigma_pit;...
     M.sigma_pitvel; M.sigma_pitvel; M.sigma_pitvel; M.sigma_pow;...
-    M.sigma_vane; M.sigma_vane; M.sigma_azim].^2;
+    M.sigma_vane; 0.01; M.sigma_azim].^2;
 P0 = diag(P0);
-% P0 = 0.01*eye(Lk,Lk); % Set initial error covariance
+% P0 = 0.01*eye(Lk,Lk); 
 
-[xk,P,e] = UKF(f,h,Q,R,xk,yt,u_b,Lk,Yk,N,P0,Ts);
+[xk,P,e] = UKF(f,h,Q,R,xk,yt,u_b,Lk,Yk,N,P0,Ts,v,n);
 
 
 % % Construct the filter
@@ -234,7 +248,7 @@ P0 = diag(P0);
 
 
 %% Display results
-% result_display(t,Lk,xk,xt,x_ul,x_vl)
+result_display(t,Lk,xk,xt,x_ul,x_vl)
 
 % figure
 % plot(t,vr(xk),'b-',t,vr(xt),'r-');
