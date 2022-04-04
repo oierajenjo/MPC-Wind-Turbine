@@ -40,6 +40,10 @@ a = 1 - w_p*Ts; % Turbulent wind filter parameter using Euler
 sigma_t = W.ti*v_m*sqrt((1-a^2)/(1-a)^2); % Standard deviation turbulent wind
 sigma_m = sqrt(W.q); % Standard deviation mean wind
 Q = diag([zeros(Lk-3,1); sigma_t^2*w_p^2; sigma_m^2; 0]);
+R = [M.sigma_enc; M.sigma_acc; M.sigma_acc; M.sigma_root; M.sigma_root;...
+    M.sigma_root; M.sigma_root; M.sigma_root; M.sigma_root; M.sigma_pow;...
+    M.sigma_vane; M.sigma_azim].^2;
+R = diag(R);
 n = sqrt(Q)*randn(Lk, N); % Generate random process noise (from assumed Q)
 % v = sqrt(R)*randn(Yk, N); % Generate random measurement noise (from assumed R)
 
@@ -64,8 +68,9 @@ yTrue = zeros(Yk, N); % Initialize size of output vector for all k
 for k = 1:N
     yTrue(:,k) = MeasurementFcn3(xTrue(:,k),B,D,To);
 end
-% yMeas = yt .* (1+sqrt(R)*randn(size(yt))); % sqrt(R): Standard deviation of noise
-yMeas = y_me';
+yMeas = yTrue .* (1+sqrt(R)*randn(size(yTrue))); % sqrt(R): Standard deviation of noise
+yMeas = yMeas';
+% yMeas = y_me';
 
 figure
 plot(timeVector,yTrue(1,:)',timeVector,yMeas(:,1));
