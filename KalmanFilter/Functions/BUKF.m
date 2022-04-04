@@ -1,4 +1,4 @@
-function [xk,P,e] = BUKF(f,h,Q,R,xk,y_me,u_b,d_b,Lk,Yk,N,P0,Ts)
+function [xk,P,e] = BUKF(f,h,Q,R,xk,y_me,u_b,d_b,Lk,Yk,N,P0,Ts,v,n)
 %% Kalman variables
 alpha = 1; % Primary scaling parameter
 beta = 2; % Secondary scaling parameter (Gaussian assumption)
@@ -30,7 +30,7 @@ for k = 1:N-1
     % chi_m = "chi minus" = chi(k|k-1)
     chi_m = zeros(Lk,n_sigma_p); % Transformed sigma points
     for j=1:n_sigma_p
-        chi_m(:,j) = chi_p(:,j) + Ts*f(chi_p(:,j),u_b(:,k),d_b(:,k));
+        chi_m(:,j) = chi_p(:,j) + Ts*f(chi_p(:,j),u_b(:,k),d_b(:,k)) + Ts*n(:,k);
     end
     
     x_m = chi_m*wm; % Calculate mean of predicted state
@@ -46,9 +46,10 @@ for k = 1:N-1
     % obtaining the acceleration
     psi_m = zeros(Yk,n_sigma_p);
     for j=1:n_sigma_p
-        psi_m(:,j) = h(chi_m(:,j),d_b(:,k));
+        psi_m(:,j) = h(chi_m(:,j),d_b(:,k)) + v(:,k);
     end
     y_m = psi_m*wm; % Calculate mean of predicted output
+
     
     % Calculate covariance of predicted output
     % and cross-covariance between state and output

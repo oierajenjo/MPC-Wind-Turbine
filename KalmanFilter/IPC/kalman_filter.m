@@ -201,6 +201,14 @@ legend('xt','Bladed')
 title('Tg');
 xlabel('s')
 
+for k=1:N
+    tr(k) = Tr(xt(:,k));
+end
+figure
+plot(t,tr/(D.Jr+D.Jg), t,xt(24,:)/(D.Jr+D.Jg))
+legend('Tr','Tg')
+xlim([0 10])
+
 %% Unscented Kalman Filter
 % Initialize state and covariance
 xk = zeros(Lk, N); % Initialize size of state estimate for all k
@@ -248,7 +256,7 @@ P0 = diag(P0);
 
 
 %% Display results
-result_display(t,Lk,xk,xt,x_ul,x_vl)
+result_display(t,Lk,xk,xt,x_me,x_ul,x_vl)
 
 % figure
 % plot(t,vr(xk),'b-',t,vr(xt),'r-');
