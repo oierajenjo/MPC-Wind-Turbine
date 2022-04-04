@@ -60,7 +60,27 @@ vm = mean(data.Data(:,59));
 x_i = [omega_r(1) xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta theta_dot...
     tg vt vm psi(1)]';
 
-clearvars -except x_i y_me u_b N data d_b x_me
+%% Initial state vector
+xt = data.Data(:,224);
+xt_dot = data.Data(:,230);
+yt = data.Data(:,225);
+yt_dot = data.Data(:,231);
+
+xb = [data.Data(:,85) data.Data(:,91) data.Data(:,97)];
+xb_dot = zeros(N,3);
+yb = [data.Data(:,86) data.Data(:,92) data.Data(:,98)];
+yb_dot = zeros(N,3);
+
+theta = theta_ref;
+theta_dot = data.Data(:,37:39);
+tg = tg_ref;
+vt = zeros(N,1);
+vm = data.Data(:,59);
+
+x_me = [omega_r xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta theta_dot...
+    tg vt vm psi]';
+
+clearvars -except x_i y_me u_b d_b N data x_me
 
 %% Plotting variables
 x_vl = {'$\omega_r$', '$x_t$', '$\dot{x}_t$', '$y_t$', '$\dot{y}_t$', ...

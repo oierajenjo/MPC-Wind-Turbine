@@ -3,7 +3,7 @@ function result_display(t, Lk, xk, xt, x_me, x_ul, x_vl)
         figure
         subplot(1,2,1);
         %     plot(t,xt(i,:),'r-','LineWidth', 2);
-        plot(t,xk(i,:),'b-', t,xt(i,:),'r-', t,x_me(i,:));
+        plot(t,xk(i,:),'b-', t,xt(i,:),'r-', t,x_me(i,:),'y-');
         xlabel('Time (s)', 'Interpreter', 'latex', 'FontSize', 14);
         ylabel(x_ul(i), 'Interpreter', 'latex', 'FontSize', 14);
         grid on;

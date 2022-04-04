@@ -7,14 +7,19 @@ D.mu = 0.05; % Drive train mechanical losses (friction)
 D.eta = 0.93; % Generator efficiency
 
 %% Blades model constants
-B.m = 65566/3; % Blade mass
+B.Mb = 65566; % Blade mass
+B.m = B.Mb; % Blade equivalent mass
 B.d = 0.03; % Blade damping ratio
+B.fx = 0.541*sqrt(1-B.d^2); % Blade freq. flapwise
+B.fy = 0.636*sqrt(1-B.d^2); % Blade freq. edgewise
 B.fx = 0.541; % Blade freq. flapwise
 B.fy = 0.636; % Blade freq. edgewise
-B.cx = B.d*2*B.m*2*pi*B.fx; % Blade damping x direction
-B.kx = (2*pi*B.fx)^2*B.m; % Blade stiffness x direction
-B.cy = B.d*2*B.m*2*pi*B.fy; % Blade damping y direction
-B.ky = (2*pi*B.fy)^2*B.m; % Blade stiffness y direction
+B.wx = 2*pi*B.fx; % Blade x direction natural pulsation
+B.wy = 2*pi*B.fy; % Blade y direction natural pulsation
+B.cx = B.d*2*B.Mb*B.wx; % Blade damping x direction
+B.kx = B.wx^2*B.Mb; % Blade stiffness x direction
+B.cy = B.d*2*B.Mb*B.wy; % Blade damping y direction
+B.ky = B.wy^2*B.Mb; % Blade stiffness y direction
 B.l = 117.1836; % Blade length
 B.B = 3; % Blade amount
 B.cc = 1/5; % Correction coefficient Fx
@@ -26,8 +31,8 @@ B.ydd_max = 0;
 %% Tower model constants
 To.Mn = 630888; % Nacelle mass
 To.Mt = 1086002; % Tower mass
-To.Mr = 387198;
-To.m = To.Mn + To.Mt/3; % Tower mass
+To.Mr = 387198; % Rotor mass
+To.m = To.Mn + To.Mt/3; % Tower equivalent mass
 % To.m = 2475680-B.m*B.B; % Tower mass
 To.d = 0.005; % Tower damping ratio
 To.f = 0.18; % Tower freq. flapwise
