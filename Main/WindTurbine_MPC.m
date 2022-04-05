@@ -8,9 +8,10 @@ load('BladedFiles\performancemap_data.mat')
 Constant_variables
 addpath('functions');
 
+% UNCOMMENT
 % kAns = questdlg('Execute Kalman Filter with Bladed measurements', ...
 % 	'Kalman Filter');
-kAns = 'Yes';
+kAns = 'No';
 kAns = convertCharsToStrings(kAns);
 if kAns=="Cancel"
     return
