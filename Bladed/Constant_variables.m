@@ -6,8 +6,10 @@ D.Jg = 3.223e6; % Generator moment of inertia
 D.mu = 0.05; % Drive train mechanical losses (friction)
 D.eta = 0.93; % Generator efficiency
 
+var.D = D;
+
 %% Blades model constants
-B.Mb = 65566; % Blade mass
+B.Mb = 65566/3; % Blade mass % CHECK THE /3
 B.m = B.Mb; % Blade equivalent mass
 B.d = 0.03; % Blade damping ratio
 B.fx = 0.541*sqrt(1-B.d^2); % Blade freq. flapwise
@@ -27,6 +29,8 @@ B.xdd_min = 0;
 B.xdd_max = 0;
 B.ydd_min = 0;
 B.ydd_max = 0;
+
+var.B = B;
 
 %% Tower model constants
 To.Mn = 630888; % Nacelle mass
@@ -51,10 +55,14 @@ alpha_r = sin(acos(To.H/sqrt(To.xh^2+To.H^2)));
 alpha_n = sin(acos(To.H/sqrt(3.945^2+To.H^2)));
 To.xtoff = (rr*To.Mr*9.807*alpha_r+rn*To.Mn*9.807*alpha_n)/(To.k*(rr*0.37+rn*0.63)*sin(alpha_n*0.37+alpha_r*0.63));
 
+var.To = To;
+
 %% Aerodynamic model constants
 Ae.rho = 1.225; % Density of the air
 Ae.Rr = 241.996/2; % Rotor radius
 Ae.Ar = pi*Ae.Rr^2; % Rotor area
+
+var.Ae = Ae;
 
 %% Wind model constants
 Ts = 0.05; % Sampling time
@@ -64,10 +72,14 @@ W.mu_m = 6; % Fixed mean wind speed: 10 m/s
 W.L = 340.2;
 W.alpha = 0.15; % Wind shear exponent for smooth terrain
 
+var.W = W;
+
 %% Actuator constants
 Ac.omega = 2.4*pi; % Natural frequency of pitch actuator model
 Ac.xi = 0.8; % Damping factor of pitch actuator model
 Ac.tau = 0.1; % Generator time constant
+
+var.Ac = Ac;
 
 %% Measurement constants
 M.sigma_enc = 0.017;
@@ -83,6 +95,8 @@ M.sigma_bdef = 0.01; % ¿?
 M.sigma_bvel = 0.01; % ¿?
 M.sigma_pit = 0.01; % ¿?
 M.sigma_pitvel = 0.01; % ¿?
+
+var.M = M;
 
 %% Vector Sizes
 Lk = size(x_i,1); % Size of state vector
