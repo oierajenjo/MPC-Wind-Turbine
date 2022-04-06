@@ -25,10 +25,10 @@ lamb = @(x) (x(1)*Ae.Rr-x(9))/(vr(x)-x(7)); % Lambda
 cp = @(x) cp_ct(lamb(x),x(10),cp_l,lambdaVec,pitchVec);
 ct = @(x) cp_ct(lamb(x),x(10),ct_l,lambdaVec,pitchVec);
 
-Tr = @(x,d) x(8)*B.ky*2*B.l/3; % Rotor aerodynamic torque force
-% Tr = @(x) 0.5*Ae.rho*Ae.Ar*(vr(x)-x(7))^3*cp(x)/x(1);
+% Tr = @(x) x(8)*B.ky*2*B.l/3; % Rotor aerodynamic torque force
+Tr = @(x) 0.5*Ae.rho*Ae.Ar*(vr(x)-x(7))^3*cp(x)/x(1);
 Fx = @(x) 0.5*Ae.rho*Ae.Ar*(vr(x)-x(7))^2*ct(x); % Rotor out-of-plane aerodynamic thrust force
-Fy = @(x) (0.5*Ae.rho*Ae.Ar*(vr(x)-x(7))^3*cp(x)*3)/(2*x(1)*B.l); % Rotor in-plane aerodynamic thrust force
+% Fy = @(x) (0.5*Ae.rho*Ae.Ar*(vr(x)-x(7))^3*cp(x)*3)/(2*x(1)*B.l); % Rotor in-plane aerodynamic thrust force
 
 %% Drive train
 f1 = @(x) (1-D.mu)*Tr(x)/(D.Jr+D.Jg) - x(12)/(D.Jr+D.Jg); % angular acceleration
@@ -45,7 +45,7 @@ f6 = @(x) x(7); % Blade foreafter velocity
 f7 = @(x) Fx(x)/(B.B*B.m) + B.kx*x(2)/B.m + B.cx*x(3)/B.m - B.kx*x(6)/B.m - B.cx*x(7)/B.m; % Blade foreafter acceleration
 
 f8 = @(x) x(9); % Blade edgewise velocity
-f9 = @(x) + B.ky*x(4)/B.m + B.cy*x(5)/B.m - B.ky*x(8)/B.m - B.cy*x(9)/B.m; % Blade edgewise acceleration
+f9 = @(x) B.ky*x(4)/B.m + B.cy*x(5)/B.m - B.ky*x(8)/B.m - B.cy*x(9)/B.m; % Blade edgewise acceleration
 
 %% Actuators BIEN
 f10 = @(x) x(11); % Pitch velocity
@@ -60,7 +60,7 @@ f14 = 0; % Mean wind acceleration
 f = @(x,u) [f1(x); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x);...
     f8(x); f9(x); f10(x); f11(x,u); f12(x,u); f13(x); f14]; % Nonlinear prediction
 
-h = @(x) [x(1); f3(x); f5(x); -B.B*x(6)*B.kx*2*B.l/3; -B.B*x(8)*B.ky*2*B.l/3;...
+h = @(x) [x(1); f3(x); f5(x); B.B*x(6)*B.kx*2*B.l/3; B.B*x(8)*B.ky*2*B.l/3;...
     D.eta*x(12)*x(1); vr(x)];
 
 
@@ -92,7 +92,6 @@ yt = zeros(Yk, N); % Initialize size of output vector for all k
 for k=1:N
     p(k) = vr(xt(:,k));
     fx(k) = Fx(xt(:,k))/(B.B*B.m);
-    fy(k) = Fy(xt(:,k))/(B.B*B.m);
     tr(k) = (1-D.mu)*Tr(xt(:,k))/(D.Jr+D.Jg);
 end
 
@@ -102,31 +101,33 @@ plot(t,xt(1,:), t,y_me(1,:));
 title("wr")
 legend(["Us" "Bladed"])
 % xlim([1 50])
-% figure
-% plot(t,xt(2,:), t,-data.Data(:,224));
-% title("xt")
-% legend(["Us" "Bladed"])
-% % xlim([1 50])
+figure
+plot(t,xt(2,:), t,data.Data(:,224));
+title("xt")
+legend(["Us" "Bladed"])
+% xlim([1 50])
 % % figure
 % % plot(xt(3,:));
 % % title("xtdot")
-% figure
-% plot(t,xt(6,:));
-% title("xb")
-% % xlim([1 50])
+figure
+plot(t,xt(6,:),t,mean([data.Data(:,85) data.Data(:,91) data.Data(:,97)],2));
+title("xb")
+legend(["Us" "Bladed"])
+% xlim([1 50])
 %
-% figure
-% plot(t,xt(4,:), t,data.Data(:,225));
-% title("yt")
-% legend(["Us" "Bladed"])
-% % xlim([1 50])
+figure
+plot(t,xt(4,:), t,data.Data(:,225));
+title("yt")
+legend(["Us" "Bladed"])
+% xlim([1 50])
 % % figure
 % % plot(xt(5,:));
 % % title("ytdot")
-% figure
-% plot(t,xt(8,:));
-% title("yb")
-% % xlim([1 50])
+figure
+plot(t,xt(8,:),t,mean([data.Data(:,86) data.Data(:,92) data.Data(:,98)],2));
+title("yb")
+legend(["Us" "Bladed"])
+% xlim([1 50])
 
 figure
 plot(t,p(:),t,y_me(7,:))
@@ -136,13 +137,13 @@ legend(["Us" "Bladed"])
 
 figure
 plot(t,yt(4,:),t,y_me(4,:));
-title("Mx")
+title("My")
 legend(["Us" "Bladed"])
 % xlim([1 50])
 
 figure
 plot(t,yt(5,:),t,y_me(5,:));
-title("My")
+title("Mx")
 legend(["Us" "Bladed"])
 % xlim([1 50])
 

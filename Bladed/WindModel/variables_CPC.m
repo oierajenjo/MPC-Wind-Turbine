@@ -22,15 +22,16 @@ u_b = [theta_ref tg_ref]';
 omega_r = data.Data(:,10); % Rotor speed
 xt_ddot = data.Data(:,236); % Tower fore-aft acceleration
 yt_ddot = data.Data(:,237); % Tower edgewise acceleration
-% Mx = mean([data.Data(:,111) data.Data(:,119) data.Data(:,127)], 2); % Mx in the principal axis
-% My = mean([data.Data(:,112) data.Data(:,120) data.Data(:,128)], 2); % My in the principal axis
+% Mx = sum([data.Data(:,111) data.Data(:,119) data.Data(:,127)], 2); % Mx in the principal axis
+My = sum([data.Data(:,112) data.Data(:,120) data.Data(:,128)], 2); % My in the principal axis
 Mx = sum([data.Data(:,61) data.Data(:,69) data.Data(:,77)], 2); % Mx in the principal axis
-My = sum([data.Data(:,62) data.Data(:,70) data.Data(:,78)], 2); % My in the principal axis
+% My = sum([data.Data(:,62) data.Data(:,70) data.Data(:,78)], 2); % My in the principal axis
 Pe = data.Data(:,28);
-vr = data.Data(:,26); % Wind speed magnitud at the hub
+vr = data.Data(:,54); % Wind speed magnitud at the hub
 psi = data.Data(:,11);
 
 y_me = [omega_r xt_ddot yt_ddot My Mx Pe vr]';
+y_me_rigid = [omega_r xt_ddot yt_ddot Pe vr]';
 
 %% Initial state vector
 xt_dot = data.Data(1,230);
@@ -38,10 +39,11 @@ xt = data.Data(1,224);
 yt_dot = data.Data(1,231);
 yt = data.Data(1,225);
 
+Ts = 0.05;
 xb = mean([data.Data(1,85) data.Data(1,91) data.Data(1,97)], 2);
-xb_dot = 0;
+xb_dot = mean([(data.Data(2,85)-data.Data(1,85))/Ts (data.Data(2,91)-data.Data(1,91))/Ts (data.Data(2,97)-data.Data(1,97))/Ts],2);
 yb = mean([data.Data(1,86) data.Data(1,92) data.Data(1,98)], 2);
-yb_dot = 0;
+yb_dot = mean([(data.Data(2,86)-data.Data(1,86))/Ts (data.Data(2,92)-data.Data(1,92))/Ts (data.Data(2,98)-data.Data(1,98))/Ts],2);
 
 theta = theta_ref(1);
 theta_dot = mean(data.Data(1,37:39), 2);
@@ -50,8 +52,9 @@ vt = 0;
 vm = data.Data(1,59);
 
 x_i = [omega_r(1) xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta theta_dot Tg vt vm]';
+x_i_rigid = [omega_r(1) xt xt_dot yt yt_dot theta theta_dot Tg vt vm]';
 
-clearvars -except x_i y_me u_b d_b N data
+clearvars -except x_i x_i_rigid y_me y_me_rigid u_b d_b N data
 
 %% Plotting variables
 x_vl = {'$\omega_r$', '$x_t$', '$\dot{x}_t$', '$y_t$', '$\dot{y}_t$', ...
