@@ -5,7 +5,7 @@ close all
 %% Vector Sizes
 
 Ts = 0.05;
-N = 15/0.05;
+N = 150/0.05;
 
 x_i = [2; 0]';
 
@@ -87,8 +87,8 @@ for k = 1:N-1
         k_2 = f(chi_p(:,j)+0.5*Ts*k_1);
         k_3 = f(chi_p(:,j)+0.5*Ts*k_2);
         k_4 = f(chi_p(:,j)+Ts*k_3);
-        chi_m(:,j) = chi_p(:,j) + (1/6)*(k_1+2*k_2+2*k_3+k_4)*Ts + Ts*n(:,k);
-%         chi_m(:,j) = chi_p(:,j) + (1/6)*(k_1+2*k_2+2*k_3+k_4)*Ts;
+%         chi_m(:,j) = chi_p(:,j) + (1/6)*(k_1+2*k_2+2*k_3+k_4)*Ts + Ts*n(:,k);
+        chi_m(:,j) = chi_p(:,j) + (1/6)*(k_1+2*k_2+2*k_3+k_4)*Ts;
 %         chi_m(:,j) = chi_p(:,j) + Ts*f(chi_p(:,j),u_b(:,k));
     end
     
@@ -105,8 +105,8 @@ for k = 1:N-1
     % obtaining the acceleration
     psi_m = zeros(Yk,n_sigma_p);
     for j=1:n_sigma_p
-        psi_m(:,j) = h(chi_m(:,j)) + v(:,k);
-%         psi_m(:,j) = h(chi_m(:,j));
+%         psi_m(:,j) = h(chi_m(:,j)) + v(:,k);
+        psi_m(:,j) = h(chi_m(:,j));
     end
     y_m = psi_m*wm; % Calculate mean of predicted output
     
