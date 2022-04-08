@@ -1,6 +1,7 @@
 clc
 clear all
 close all
+rng(1);
 
 %% Obtain all variables
 variables_IPC
@@ -24,15 +25,15 @@ K = 0.5*Ae.rho*Ae.Rr^5*pi*cp_opt/lamb_opt^3;
 u_b = [theta_f; theta_f; theta_f; K].*u_b;
 
 
-[f,h,Q,R] = equationIPC(var,Ts,ct_l,cp_l,lambdaVec,pitchVec,Lk);
+[f,h,Q,R] = system_IPC(var,Ts,ct_l,cp_l,lambdaVec,pitchVec,Lk);
 
 % Step 3: Initialize state and covariance
 % Simulation Only: Calculate true state trajectory for comparison
 % Also calculate measurement vector
 % Var(QX) = QVar(X)Q' = sigma^4 -> Var(sqrt(Q)X) = sqrt(Q)Var(X)sqrt(Q)' = sigma^2
-n = @(x) sqrt(Q(x))*randn(Lk, 1); % Generate random process noise (from assumed Q)
-% v = sqrt(R)*randn(Yk, N); % Generate random measurement noise (from assumed R)
-v = zeros(Yk, N);
+n = sqrt(Q)*randn(Lk, N); % Generate random process noise (from assumed Q)
+v = sqrt(R)*randn(Yk, N); % Generate random measurement noise (from assumed R)
+% v = zeros(Yk, N);
 
 %% Runge-Kutta 4th order method
 % Initialize matrices
@@ -63,7 +64,7 @@ elseif kAns == "No"
     disp("True values")
     [xk,P,e] = UKF(f,h,Q,R,xk,yt,u_b,Lk,Yk,P0,Ts,v,n);
 end
-rmpath('functions')
 
 %% Display results
 result_display(t,Lk,xk,xt,x_me,x_ul,x_vl)
+rmpath('functions')

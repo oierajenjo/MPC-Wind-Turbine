@@ -3,7 +3,7 @@ function [f,h,Q,R] = system_IPC(var,Ts,ct_l,cp_l,lambdaVec,pitchVec,Lk)
 
 %% Before filter execution
 % Step 2: Define noise assumptions
-w_p = @(x) W.mu_v*pi/(2*W.L);
+% w_p = @(x) W.mu_v*pi/(2*W.L);
 ve = @(x) x(26) + x(25);
 vr = @(x) ve(x) - x(3);
 
