@@ -1,3 +1,31 @@
+% Constraints limit values
+U_c.theta_min = 0;
+U_c.theta_max = pi/2;
+U_c.Tg_min = 1;
+U_c.Tg_max = 2.159e7;
+
+dU_c.theta_dot = deg2rad(9); % Pitch angle max and min angular speed
+
+Z_c.omega_r_min = convangvel(5,'rpm', 'rad/s');
+Z_c.omega_r_max = - convangvel(10,'rpm', 'rad/s');
+Z_c.xtdd_min = 0;
+Z_c.xtdd_max = -0;
+Z_c.ytdd_min = 0;
+Z_c.ytdd_max = -0;
+Z_c.My_min1 = B.m*B.l*B.xdd_min; Z_c.My_max1 = -B.m*B.l*B.xdd_max;
+Z_c.My_min2 = B.m*B.l*B.xdd_min; Z_c.My_max2 = -B.m*B.l*B.xdd_max;
+Z_c.My_min3 = B.m*B.l*B.xdd_min; Z_c.My_max3 = -B.m*B.l*B.xdd_max;
+Z_c.Mx_min1 = B.m*B.l*B.ydd_min; Z_c.Mx_max1 = -B.m*B.l*B.ydd_max;
+Z_c.Mx_min2 = B.m*B.l*B.ydd_min; Z_c.Mx_max2 = -B.m*B.l*B.ydd_max;
+Z_c.Mx_min3 = B.m*B.l*B.ydd_min; Z_c.Mx_max3 = -B.m*B.l*B.ydd_max;
+Z_c.Pe_min = D.eta*U_c.Tg_min*Z_c.omega_r_min;
+Z_c.Pe_max = -D.eta*U_c.Tg_max*Z_c.omega_r_max;
+Z_c.vr_min = 4;
+Z_c.vr_max = -25;
+Z_c.azim_min = 0;
+Z_c.azim_max = -0;
+
+
 % wr
 a1 = (1-D.mu)*2*B.ky*B.l/(3*(D.Jr+D.Jg));
 a2 = 1/(D.Jr+D.Jg);
@@ -22,6 +50,7 @@ c5 = (B.B*c2 + To.c/To.m);
 ws_ts = @(x,i) (To.r^2*(Ae.Rr^2*(sin(x(27)+2*pi*i/3))^2-To.xh^2)/(To.xh^2+Ae.Rr^2*(sin(x(27)+2*pi*i/3))^2)^2 +...
     ((Ae.Rr*cos(x(27)+2*pi*i/3)+To.H)/To.H)^W.alpha); % Wind Share and Tower Shadow
 vri_eq = @(x,i) x(26)*ws_ts(x,i) + x(25) - x(3)- x(9+i);
+lambi = @(x,i) (x(1)*Ae.Rr-x(15+i))/(vri_eq(x,i));
 cpi = @(x,i) cp_ct(lambi(x,i),x(18+i),cp_l,lambdaVec,pitchVec)/B.B;
 cti = @(x,i) cp_ct(lambi(x,i),x(18+i),ct_l,lambdaVec,pitchVec)/B.B;
 dct_dlamb = 1; % Gradient
@@ -55,7 +84,7 @@ d10 = @(x,i) Ae.rho*Ae.Ar*vri_eq(x,i)^2*dct_dlamb*dlamb_dwr(x,i)/(6*B.m); % dw_r
 
 % yb1_dot
 dcp_dlamb = 1; % Gradient
-dcp_dpitch = 1; % Gradientç
+dcp_dpitch = 1; % Gradient
 
 e1 = B.ky/B.m; % dy_bi
 e2 = @(x,i) Ae.rho*Ae.Ar*vri_eq(x,i)^3*(dcp_dlamb*dlamb_dydotbi(x,i) - B.cy/B.m)/(4*x(1)*B.l); % dydot_bi
@@ -78,5 +107,13 @@ f2 = Ac.omega^2;
 % Tg
 g1 = 1/Ac.tau;
 
+
 % vt
-h1 = W.w_p;
+h1 = @(x) W.w_p(x);
+
+
+p1 = B.kx*2*B.l/3;
+p2 = B.ky*2*B.l/3;
+
+q1 = @(x) D.eta*x(24);
+q2 = @(x) D.eta*x(1);

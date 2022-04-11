@@ -31,7 +31,7 @@ u_b = [theta_f; theta_f; theta_f; K].*u_b;
 % Simulation Only: Calculate true state trajectory for comparison
 % Also calculate measurement vector
 % Var(QX) = QVar(X)Q' = sigma^4 -> Var(sqrt(Q)X) = sqrt(Q)Var(X)sqrt(Q)' = sigma^2
-n = sqrt(Q)*randn(Lk, N); % Generate random process noise (from assumed Q)
+n = @(x) sqrt(Q(x))*randn(Lk, 1); % Generate random process noise (from assumed Q)
 v = sqrt(R)*randn(Yk, N); % Generate random measurement noise (from assumed R)
 % v = zeros(Yk, N);
 

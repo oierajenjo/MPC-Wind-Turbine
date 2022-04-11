@@ -73,9 +73,9 @@ W.mu_m = 6; % Fixed mean wind speed: 10 m/s
 W.L = 340.2;
 W.alpha = 0.15; % Wind shear exponent for smooth terrain
 W.mu_v = mean(data.Data(:,59));
-W.w_p = W.mu_v*pi/(2*W.L);
-W.a = 1 - W.w_p*Ts; % Euler
-W.sigma_t = W.ti*W.mu_v*sqrt((1-W.a^2)/(1-W.a)^2);
+W.w_p = @(x) W.mu_v*pi/(2*W.L);
+W.a = @(x) 1 - W.w_p(x)*Ts; % Euler
+W.sigma_t = @(x) W.ti*W.mu_v*sqrt((1-W.a(x)^2)/(1-W.a(x))^2);
 W.sigma_m = sqrt(W.q);
 
 var.W = W;
@@ -109,3 +109,16 @@ Lk = size(x_i,1); % Size of state vector
 Yk = size(y_me,1); % Size of measured vector
 Uk = size(u_b,1); % Size of imput vector
 t = Ts*(1:N);
+
+%% Kalman Variables
+
+%% Kalman variables
+alpha = 1; % Primary scaling parameter
+beta = 2; % Secondary scaling parameter (Gaussian assumption)
+kappa = 0; % Tertiary scaling parameter
+lambda = alpha^2*(Lk+kappa) - Lk;
+n_sigma_p = 2*Lk + 1; % Number of sigma points
+wm = ones(n_sigma_p,1)*1/(2*(Lk+lambda)); % Weight for transformed mean
+wc = wm; % Weight for transformed covariance
+wm(1) = lambda/(lambda+Lk);
+wc(1) = lambda/(lambda+Lk) + 1 - alpha^2 + beta;

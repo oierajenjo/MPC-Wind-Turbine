@@ -39,13 +39,13 @@ for k = 1:N-1
         k_2 = f(chi_p(:,j)+0.5*Ts*k_1, u_b(:,k)+0.5*Ts);
         k_3 = f(chi_p(:,j)+0.5*Ts*k_2, u_b(:,k)+0.5*Ts);
         k_4 = f(chi_p(:,j)+Ts*k_3, u_b(:,k)+Ts);
-        chi_m(:,j) = chi_p(:,j) + (1/6)*(k_1+2*k_2+2*k_3+k_4)*Ts + Ts*n(:,k); 
+        chi_m(:,j) = chi_p(:,j) + (1/6)*(k_1+2*k_2+2*k_3+k_4)*Ts + Ts*n(chi_p(:,j)); 
         % chi_m(:,j) = chi_p(:,j) + Ts*f(chi_p(:,j),u_b(:,k)) + Ts*n(:,k);
     end
     
     x_m = chi_m*wm; % Calculate mean of predicted state
     % Calculate covariance of predicted state
-    P_m = Q(:,k); % A priori covariance estimate
+    P_m = Q(xk(:,k)); % A priori covariance estimate
     for j = 1:n_sigma_p
         P_m = P_m + wc(j)*(chi_m(:,j) - x_m)*(chi_m(:,j) - x_m)';
     end

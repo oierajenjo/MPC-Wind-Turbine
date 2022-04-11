@@ -64,7 +64,7 @@ f23 = @(x,u) Ac.omega^2*u(3) - 2*Ac.omega*Ac.xi*x(23) - Ac.omega^2*x(20); % Pitc
 f24 = @(x,u) (u(4)*x(1)^2-x(24))/Ac.tau; % Torque change in time
 
 %% Wind
-f25 = @(x) -W.w_p*x(25); % Wind turbulence acceleration
+f25 = @(x) -W.w_p(x)*x(25); % Wind turbulence acceleration
 f26 = 0; % Mean wind acceleration
 
 %% Azimuth
@@ -79,7 +79,7 @@ h = @(x) [x(1); f3(x); f5(x); x(6)*B.kx*2*B.l/3; x(7)*B.kx*2*B.l/3;
     x(8)*B.kx*2*B.l/3; x(12)*B.ky*2*B.l/3; x(13)*B.ky*2*B.l/3; ...
     x(14)*B.ky*2*B.l/3; D.eta*x(24)*x(1); vr(x); x(27)];
 
-Q = diag([zeros(Lk-3,1); W.sigma_t^2*W.w_p^2; W.sigma_m^2; 0]); % Covariance matrix of the process noise
+Q = @(x) diag([zeros(Lk-3,1); W.sigma_t(x)^2*W.w_p(x)^2; W.sigma_m^2; 0]); % Covariance matrix of the process noise
 
 temp = [M.sigma_enc; M.sigma_acc; M.sigma_acc; M.sigma_root; M.sigma_root;...
     M.sigma_root; M.sigma_root; M.sigma_root; M.sigma_root; M.sigma_pow;...

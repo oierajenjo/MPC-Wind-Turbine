@@ -2,42 +2,17 @@
 clear all
 clc
 variables_IPC
-% Constraints limit values
-U_c.theta_min = 0;
-U_c.theta_max = pi/2;
-U_c.Tg_min = 1;
-U_c.Tg_max = 2.159e7;
+load('BladedFiles\performancemap_data.mat')
+Constant_variables
+addpath('functions');
+MPCconstants
 
-dU_c.theta_dot = deg2rad(9); % Pitch angle max and min angular speed
-
-Z_c.omega_r_min = convangvel(5,'rpm', 'rad/s');
-Z_c.omega_r_max = - convangvel(10,'rpm', 'rad/s');
-Z_c.xtdd_min = 0;
-Z_c.xtdd_max = -0;
-Z_c.ytdd_min = 0;
-Z_c.ytdd_max = -0;
-Z_c.My_min1 = B.m*B.l*B.xdd_min; Z_c.My_max1 = -B.m*B.l*B.xdd_max;
-Z_c.My_min2 = B.m*B.l*B.xdd_min; Z_c.My_max2 = -B.m*B.l*B.xdd_max;
-Z_c.My_min3 = B.m*B.l*B.xdd_min; Z_c.My_max3 = -B.m*B.l*B.xdd_max;
-Z_c.Mx_min1 = B.m*B.l*B.ydd_min; Z_c.Mx_max1 = -B.m*B.l*B.ydd_max;
-Z_c.Mx_min2 = B.m*B.l*B.ydd_min; Z_c.Mx_max2 = -B.m*B.l*B.ydd_max;
-Z_c.Mx_min3 = B.m*B.l*B.ydd_min; Z_c.Mx_max3 = -B.m*B.l*B.ydd_max;
-Z_c.Pe_min = D.eta*U_c.Tg_min*Z_c.omega_r_min;
-Z_c.Pe_max = -D.eta*U_c.Tg_max*Z_c.omega_r_max;
-Z_c.vr_min = 4;
-Z_c.vr_max = -25;
-Z_c.azim_min = 0;
-Z_c.azim_max = -0;
-
+xeq = ones(Lk,1);
 % Ts = Ts; % Sample time for the MPC controller
 Ts = 0.05;
 Hp = 10; % Prediction Horizon
 Hu = 10; % Control Horizon
 Hw = 1; % Window parameter
-
-Lk = 27;
-Uk = 4;
-Yk = 12;
 
 refht=sdpvar(Yk,Hp);      % P_{ref}: The window containing the pos-reference
 P0=sdpvar(Lk,1);          % P(k):    The current state
@@ -51,32 +26,59 @@ deltaU = sdpvar(Uk*Hu,1); % DeltaU
 %%% System Variables %%%
 %%%%%%%%%%%%%%%%%%%%%%%%
 A1 = [zeros(1,11), -a1*ones(1,3);
-    0, 0, 1, zeros(1,11);
-    0, -b3, -b4, 0, 0, b1*ones(1,3), b2*ones(1,3), zeros(1,3);
+    zeros(1,2), 1, zeros(1,11);
+    0, -b3, -b4, zeros(1,2), b1*ones(1,3), b2*ones(1,3), zeros(1,3);
     zeros(1,4), 1, zeros(1,9);
-    zeros(1,3), -c4, -c5, zeros(1,3), zeros(1,3), c2*ones(1,3);
+    zeros(1,3), -c4, -c5, zeros(1,6), c2*ones(1,3);
     zeros(3,8), eye(3), zeros(3,3);
-    d10(xeq,0), d3, d4(xeq,0), 0, 0, -d1*ones(1,3), d2(xeq,0)(xeq,0), d2(xeq,1), d2(xeq,2), zeros(1,3);
-    d10(xeq,1), d3, d4, 0, 0, -d1*ones(1,3), d2(xeq,0), d2(xeq,1), d2(xeq,2), zeros(1,3);
-    d10(xeq,2), d3, d4, 0, 0, -d1*ones(1,3), d2(xeq,0), d2(xeq,1), d2(xeq,2), zeros(1,3);
-    zeros(1,14)];
+    d10(xeq,0), d3, d4(xeq,0), zeros(1,2), -d1, zeros(1,2), d2(xeq,0), zeros(1,5);
+    d10(xeq,1), d3, d4(xeq,1), zeros(1,3), -d1, zeros(1,2), d2(xeq,1), zeros(1,4);
+    d10(xeq,2), d3, d4(xeq,2), zeros(1,4), -d1, zeros(1,2), d2(xeq,2), zeros(1,3);
+    zeros(3,14)];
 
 A2 = [zeros(1,9), -a2, zeros(1,3);
     zeros(3,13);
     c3*ones(1,3), zeros(1,6), c1, zeros(1,3);
-    zeros(1,13);
-    d8*ones(1,3), d7*ones(1,3), zeros(1,2), d6, d5, d9;
-    ones(3,1), zeros(3,12)];
+    zeros(3,13);
+    d8(xeq,0), zeros(1,2), d7(xeq,0), zeros(1,6), d6(xeq,0), d5(xeq,0), d9(xeq,0);
+    0, d8(xeq,1), zeros(1,2), d7(xeq,1), zeros(1,5), d6(xeq,1), d5(xeq,1), d9(xeq,1);
+    0, 0, d8(xeq,2), zeros(1,2), d7(xeq,2), zeros(1,4), d6(xeq,2), d5(xeq,2), d9(xeq,2);
+    eye(3), zeros(3,10)];
 
-A = [A1 A2];
+A3 = [e9(xeq,0), 0, e7(xeq,0), e3, e4, e8(xeq,0), zeros(1,5), -e1, 0, 0;
+    e9(xeq,1), 0, e7(xeq,1), e3, e4, 0, e8(xeq,1), zeros(1,5), -e1, 0;
+    e9(xeq,2), 0, e7(xeq,2), e3, e4, 0, 0, e8(xeq,2), zeros(1,5), -e1;
+    zeros(9,14);
+    1, zeros(1,13)];
+
+A4 = [e2(xeq,0), zeros(1,2), e11(xeq,0), zeros(1,6), e6(xeq,0), e5(xeq,0), e10(xeq,0);
+    0, e2(xeq,1), zeros(1,2), e11(xeq,1), zeros(1,5), e6(xeq,1), e5(xeq,1), e10(xeq,1);
+    0, 0, e2(xeq,2), zeros(1,2), e11(xeq,2), zeros(1,4), e6(xeq,2), e5(xeq,2), e10(xeq,2);
+    zeros(3,6), eye(3), zeros(3,4);
+    zeros(3), -f2*eye(3), -f1*eye(3), zeros(3,4);
+    zeros(1,9), -g1, zeros(1,3);
+    zeros(1,10), -W.w_p(xeq), zeros(1,2);
+    zeros(2,13)];
+
+Ampc = [A1 A2;
+    A3 A4];
+% Ampc = eye(Lk); % State Matrix
+
+Bmpc = [zeros(3,Lk-7), f2^2*eye(3), zeros(3,4);
+    zeros(1,Lk-4), g1, zeros(1,3)]';
+% Bmpc = Ts*eye(Lk,Uk); % Input Matrix
 
 
+Cmpc = [1, zeros(1,Lk-1);
+    0, -b3, -b4, zeros(1,2), b1*ones(1,3), b2*ones(1,3), zeros(1,16);
+    zeros(1,3), -c4, -c5, zeros(1,6), c2*ones(1,3), c3*ones(1,3), zeros(1,6), c1, zeros(1,3);
+    zeros(3,9), p1*eye(3), zeros(3,Lk-12);
+    zeros(3,15), p2*eye(3), zeros(3,Lk-18);
+    q1(xeq), zeros(1,Lk-5), q2(xeq), zeros(1,3);
+    0, 0, -1, zeros(1,Lk-6), 1, 1, 0;
+    zeros(1,Lk-1), 1];
 
-Ampc = eye(Lk); % State Matrix
-
-Bmpc = Ts*eye(Lk,Uk); % Input Matrix
-
-Cmpc = eye(Yk,Lk);
+% Cmpc = eye(Yk,Lk);
 
 Q_c = 1; % Error Weight
 Qmpc = Q_c*eye(Yk);
@@ -95,13 +97,13 @@ Ai = Ampc;
 Bcal_u = [];
 Bi = zeros(Lk,Uk);
 for i=1:Hp
-    if i~=1
-        Ai = Ai*Ampc;
-    end
-    Acal = [Acal; Ai];
-    
-    Bi = Ampc*Bi+Bmpc;
-    Bcal_u = [Bcal_u; Bi];
+if i~=1
+    Ai = Ai*Ampc;
+end
+Acal = [Acal; Ai];
+
+Bi = Ampc*Bi+Bmpc;
+Bcal_u = [Bcal_u; Bi];
 end
 
 Bcal_du = Bcal_u;
