@@ -77,6 +77,8 @@ for k=1:N-1
         [xk(:,k+1),P,e(:,k+1)] = UKF(f,h,Q,R,xk(:,k),yt(:,k+1),u_b(:,k),kal,P,Ts,v(:,k),n);
     end
 end
+xk(end,:) = wrapToPi(xk(end,:))+pi;
+xt(end,:) = wrapToPi(xt(end,:))+pi;
 
 %% Display results
 true_plots(yt,y_me,xt,data,t)
