@@ -110,15 +110,13 @@ Yk = size(y_me,1); % Size of measured vector
 Uk = size(u_b,1); % Size of imput vector
 t = Ts*(1:N);
 
-%% Kalman Variables
-
 %% Kalman variables
-alpha = 1; % Primary scaling parameter
-beta = 2; % Secondary scaling parameter (Gaussian assumption)
-kappa = 0; % Tertiary scaling parameter
-lambda = alpha^2*(Lk+kappa) - Lk;
-n_sigma_p = 2*Lk + 1; % Number of sigma points
-wm = ones(n_sigma_p,1)*1/(2*(Lk+lambda)); % Weight for transformed mean
-wc = wm; % Weight for transformed covariance
-wm(1) = lambda/(lambda+Lk);
-wc(1) = lambda/(lambda+Lk) + 1 - alpha^2 + beta;
+kal.alpha = 1; % Primary scaling parameter
+kal.beta = 2; % Secondary scaling parameter (Gaussian assumption)
+kal.kappa = 0; % Tertiary scaling parameter
+kal.lambda = kal.alpha^2*(Lk+kal.kappa) - Lk;
+kal.n_sigma_p = 2*Lk + 1; % Number of sigma points
+kal.wm = ones(kal.n_sigma_p,1)*1/(2*(Lk+kal.lambda)); % Weight for transformed mean
+kal.wc = kal.wm; % Weight for transformed covariance
+kal.wm(1) = kal.lambda/(kal.lambda+Lk);
+kal.wc(1) = kal.lambda/(kal.lambda+Lk) + 1 - kal.alpha^2 + kal.beta;
