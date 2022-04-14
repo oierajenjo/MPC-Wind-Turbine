@@ -51,14 +51,12 @@ xb_dot = [(data.Data(2,85)-data.Data(1,85))/Ts (data.Data(2,91)-data.Data(1,91))
 yb = [data.Data(1,86) data.Data(1,92) data.Data(1,98)];
 yb_dot = [(data.Data(2,86)-data.Data(1,86))/Ts (data.Data(2,92)-data.Data(1,92))/Ts (data.Data(2,98)-data.Data(1,98))/Ts];
 
-theta = theta_ref(1,:);
 theta_dot = data.Data(1,37:39);
-tg = tg_ref(1);
 vt = 0;
 vm = mean(data.Data(:,59));
 
-x_i = [omega_r(1) xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta theta_dot...
-    tg vt vm psi(1)]';
+x_i = [omega_r(1) xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta_ref(1,:) theta_dot...
+    tg_ref(1) vt vm psi(1)]';
 
 %% Initial state vector
 xt = data.Data(:,224);
@@ -67,17 +65,19 @@ yt = data.Data(:,225);
 yt_dot = data.Data(:,231);
 
 xb = [data.Data(:,85) data.Data(:,91) data.Data(:,97)];
-xb_dot = zeros(N,3);
 yb = [data.Data(:,86) data.Data(:,92) data.Data(:,98)];
-yb_dot = zeros(N,3);
-
-theta = theta_ref;
+for i=1:N-1
+    xb_dot(i,:) = [(data.Data(i+1,85)-data.Data(i,85))/Ts (data.Data(i+1,91)-data.Data(i,91))/Ts (data.Data(i+1,97)-data.Data(i,97))/Ts];
+    yb_dot(i,:) = [(data.Data(i+1,86)-data.Data(i,86))/Ts (data.Data(i+1,92)-data.Data(i,92))/Ts (data.Data(i+1,98)-data.Data(i,98))/Ts];
+end
+xb_dot(end+1,:) =  xb_dot(end,:);
+yb_dot(end+1,:) =  yb_dot(end,:);
 theta_dot = data.Data(:,37:39);
 tg = tg_ref;
 vt = zeros(N,1);
 vm = data.Data(:,59);
 
-x_me = [omega_r xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta theta_dot...
+x_me = [omega_r xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta_ref theta_dot...
     tg vt vm psi]';
 
 clearvars -except x_i y_me u_b d_b N data x_me

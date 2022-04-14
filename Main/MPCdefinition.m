@@ -1,21 +1,15 @@
 %Define the MPC object with Yalmip:
-clear all
-clc
-variables_IPC
-load('BladedFiles\performancemap_data.mat')
-Constant_variables
-addpath('functions');
-MPCconstants
+% clear all
+% clc
+% variables_IPC
+% load('BladedFiles\performancemap_data.mat')
+% Constant_variables
+% addpath('functions');
+% MPCconstants
+% xeq = x_i;
 
-xeq = ones(Lk,1);
-% Ts = Ts; % Sample time for the MPC controller
-Ts = 0.05;
-Hp = 10; % Prediction Horizon
-Hu = 10; % Control Horizon
-Hw = 1; % Window parameter
-
-refht=sdpvar(Yk,Hp);      % P_{ref}: The window containing the pos-reference
-P0=sdpvar(Lk,1);          % P(k):    The current state
+refht=sdpvar(Zk,Hp);      % Z_{ref}: The window containing the pos-reference
+X0=sdpvar(Lk,1);          % X(k):    The current state
 Uprev=sdpvar(Uk,1);       % U(k-1):  The previous input command.
 deltaU = sdpvar(Uk*Hu,1); % DeltaU
 
@@ -68,26 +62,35 @@ Bmpc = [zeros(3,Lk-7), f2^2*eye(3), zeros(3,4);
     zeros(1,Lk-4), g1, zeros(1,3)]';
 % Bmpc = Ts*eye(Lk,Uk); % Input Matrix
 
-
+% CHANGE
 Cmpc = [1, zeros(1,Lk-1);
-    0, -b3, -b4, zeros(1,2), b1*ones(1,3), b2*ones(1,3), zeros(1,16);
-    zeros(1,3), -c4, -c5, zeros(1,6), c2*ones(1,3), c3*ones(1,3), zeros(1,6), -c1, zeros(1,3);
-    zeros(3,9), p1*eye(3), zeros(3,Lk-12);
-    zeros(3,15), p2*eye(3), zeros(3,Lk-18);
-    q1(xeq), zeros(1,Lk-5), q2(xeq), zeros(1,3);
-    0, 0, -1, zeros(1,Lk-6), 1, 1, 0;
-    zeros(1,Lk-1), 1];
+    0, 1, zeros(1,Lk-2);
+    zeros(1,4), 1, zeros(1,Lk-5);
+    zeros(3,8), eye(3), zeros(3,Lk-8-3);
+    zeros(3,14), eye(3), zeros(3,Lk-14-3);
+    zeros(3,Lk-7-3), eye(3), zeros(3,7);
+    zeros(3,Lk-4-3), eye(3), zeros(3,4);
+    q1(xeq), zeros(1,Lk-5), q2(xeq), zeros(1,3)];
 
-% Cmpc = eye(Yk,Lk);
+% Cmpc = [1, zeros(1,Lk-1);
+%     0, -b3, -b4, zeros(1,2), b1*ones(1,3), b2*ones(1,3), zeros(1,16);
+%     zeros(1,3), -c4, -c5, zeros(1,6), c2*ones(1,3), c3*ones(1,3), zeros(1,6), -c1, zeros(1,3);
+%     zeros(3,9), p1*eye(3), zeros(3,Lk-12);
+%     zeros(3,15), p2*eye(3), zeros(3,Lk-18);
+%     q1(xeq), zeros(1,Lk-5), q2(xeq), zeros(1,3);
+%     0, 0, -1, zeros(1,Lk-6), 1, 1, 0;
+%     zeros(1,Lk-1), 1];
 
-Q_c = 1; % Error Weight
-Qmpc = Q_c*eye(Yk);
+% Cmpc = eye(Zk,Lk);
 
-R_c = 0; % Input Weight
+Q_c = [20 5 5 5*ones(1,3) 5*ones(1,3) 0*ones(1,3) 0*ones(1,3) 20]; % Error Weight
+Qmpc = diag(Q_c);
+
+R_c = 0.1; % Input Weight
 Rmpc = R_c*eye(Uk);
 
-% R_d = 10; % Change Input Weight
-% R_del = R_d*eye(Uk);
+R_d = 10; % Change Input Weight
+R_del = R_d*eye(Uk);
 
 %%%%%%%%%%%%%%%
 %%% Lifting %%%
@@ -114,34 +117,33 @@ end
 
 Ccal = repmat({Cmpc}, 1, Hp);
 Ccal = blkdiag(Ccal{:});
-Ccal = Ccal(Yk*(Hw-1)+1:end,:);
+Ccal = Ccal(Zk*(Hw-1)+1:end,:); % CHANGE
 
 Psi = Ccal*Acal;
 Upsilon = Ccal*Bcal_u;
 Theta = Ccal*Bcal_du;
 
-Tau = reshape(refht,[Yk*Hp 1]); % Convert to column vector
-Tau = Tau(Yk*(Hw-1)+1:end,:);
+Tau = reshape(refht,[Zk*Hp 1]); % Convert to column vector
+Tau = Tau(Zk*(Hw-1)+1:end,:);
 
 Qcal = repmat({Qmpc}, 1, Hp);
 Qcal = blkdiag(Qcal{:});
-Qcal = Qcal(Yk*(Hw-1)+1:end,:);
+Qcal = Qcal(Zk*(Hw-1)+1:end,:);
 
 Rcal = repmat({Rmpc}, 1, Hu);
 Rcal = blkdiag(Rcal{:});
-% Rcal_del = repmat({R_del}, 1, Hu);
-% Rcal_del = blkdiag(Rcal_del{:});
+Rcal_del = repmat({R_del}, 1, Hu);
+Rcal_del = blkdiag(Rcal_del{:});
 
-Epsilon = Tau - Psi*P0 - Upsilon*Uprev;
+Epsilon = Tau - Psi*X0 - Upsilon*Uprev;
 
-P = Acal*P0 + Bcal_u*Uprev + Bcal_du*deltaU; % P: P*: Optimal states in prediction window
+Xcal = Acal*X0 + Bcal_u*Uprev + Bcal_du*deltaU; % P: P*: Optimal states in prediction window
 
 ident = eye(Uk);
 for i=1:Hu-1
     ident = [ident; eye(Uk)];
 end
 
-deltaU_full = [Uprev; deltaU];
 V = [ident ident];
 for i=1:Hu-1
     temp = [zeros(i*Uk,Uk); ident(1:end-Uk*i,:)];
@@ -159,6 +161,11 @@ Hcal = Theta'*Qcal*Theta + Rcal;
 
 Cost = Epsilon'*Qcal*Epsilon - deltaU'*Gcal + deltaU'*Hcal*deltaU;
 
+% refht_col = reshape(refht,[Zk*size(refht,2) 1]); % Convert to column vector
+% 
+% Cost = Ts*((Xcal-refht_col)'*Qcal*(Xcal-refht_col) + deltaU'*Rcal_del*deltaU +...
+%        U'*Rcal*U);
+
 %%%%%%%%%%%%%%%%%%%
 %%% Constraints %%%
 %%%%%%%%%%%%%%%%%%%
@@ -166,8 +173,8 @@ Cost = Epsilon'*Qcal*Epsilon - deltaU'*Gcal + deltaU'*Hcal*deltaU;
 f = [-1; 1];
 f_rep = repmat({f}, 1, Uk*Hu);
 F_L = blkdiag(f_rep{:});
-u_cons = [U_c.theta_min; -U_c.theta_max; U_c.theta_min; -U_c.theta_max;
-    U_c.theta_min; -U_c.theta_max; U_c.Tg_min; -U_c.Tg_max];
+u_cons = [Ac.pitch_min; -Ac.pitch_max; Ac.pitch_min; -Ac.pitch_max;
+    Ac.pitch_min; -Ac.pitch_max; Ac.Tg_min; -Ac.Tg_max];
 U_L = u_cons;
 for i=1:Hu-1
     U_L = [U_L; u_cons];
@@ -182,16 +189,16 @@ e_L = blkdiag(e_rep{:});
 
 e_L = repmat({e_L}, 1, Hu);
 E_L = blkdiag(e_L{:});
-du_cons = [-dU_c.theta_dot*ones(6,1); zeros(2,1)];
+du_cons = [-Ac.pitch_dot*ones(6,1); zeros(2,1)];
 dU_L = du_cons;
 for i=1:Hu-1
     dU_L = [dU_L; du_cons];
 end
 E = [E_L dU_L];
 
-% Actuator Range Constraints
+% Constraints in Actuator Variables
 g = [-1; 1];
-g_rep = repmat({g}, 1, Yk-1);
+g_rep = repmat({g}, 1, Zk-1);
 g_rep{end+1} = [-1;0];
 g_L = blkdiag(g_rep{:});
 
@@ -203,7 +210,7 @@ for i=1:Hu-1
     Z_L = [Z_L; z_cons];
 end
 G = [G_L Z_L];
-Zcal = Psi*P0 + Upsilon*Uprev + Theta*deltaU;
+Zcal = Psi*X0 + Upsilon*Uprev + Theta*deltaU;
 
 Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0; G*[Zcal;1]<=0];
 
@@ -213,7 +220,7 @@ Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0; G*[Zcal;1]<=0];
 
 % The Yalmip optimizer-object used for simulation and TurtleBot3 control
 ops = sdpsettings('solver','sedumi');
-MPCobj=optimizer(Constraints,Cost,ops,{P0,Uprev,refht},{U,P});
+MPCobj=optimizer(Constraints,Cost,ops,{X0,Uprev,refht},{U,Xcal});
 % U: u*: The optimal control window
 % P: P*: Optimal states in prediction window
 

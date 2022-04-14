@@ -1,4 +1,4 @@
-function [f,h,Q,R] = system_IPC(var,Ts,ct_l,cp_l,lambdaVec,pitchVec,Lk)
+function [f,h,Q,R] = system_IPC(var,ct_l,cp_l,lambdaVec,pitchVec,Lk)
 [Ac,Ae,M,W,B,D,To] = extract_struct(var);
 
 %% Before filter execution
