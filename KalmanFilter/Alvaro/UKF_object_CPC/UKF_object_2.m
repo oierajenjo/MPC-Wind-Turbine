@@ -70,7 +70,15 @@ for k = 1:N
     yTrue(:,k) = MeasurementFcn2(xTrue(:,k),B,D,To);
 end
 % yMeas = yt .* (1+sqrt(R)*randn(size(yt))); % sqrt(R): Standard deviation of noise
-yMeas = y_me';
+yMeas = yTrue + sqrt(R)*randn(size(yTrue));
+yMeas = yMeas';
+% yMeas = y_me';
+
+figure
+plot(timeVector,yTrue(1,:)',timeVector,yMeas(:,1));
+legend('yTrue','yMeas')
+% ylim([-2.6 2.6]);
+ylabel('wr');
 
 % Preallocate space for data to analyze later
 xCorrectedUKF = zeros(N,Lk); % Corrected state estimates

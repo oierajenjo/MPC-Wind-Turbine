@@ -15,7 +15,7 @@ u_b = [theta_f; theta_f; theta_f; K].*u_b;
 
 %% Before filter execution
 % Step 2: Define noise assumptions
-w_p = @(x) x(26)*pi/(2*W.L);
+w_p = @(x) 6*pi/(2*W.L);
 ve = @(x) x(26) + x(25);
 vr = @(x) ve(x) - x(3);
 
@@ -93,7 +93,7 @@ h = @(x) [x(1); f3(x); f5(x); x(6)*B.kx*2*B.l/3; x(7)*B.kx*2*B.l/3;
 rng(1);
 a = @(x) 1 - w_p(x)*Ts; % Euler
 % a = @(x) exp(-(x(5)*pi/(2*L))*Ts); % Zero Order Hold
-sigma_t = @(x) W.ti*x(26)*sqrt((1-a(x)^2)/(1-a(x))^2);
+sigma_t = @(x) W.ti*6*sqrt((1-a(x)^2)/(1-a(x))^2);
 sigma_m = sqrt(W.q);
 Q = @(x) diag([zeros(Lk-3,1); sigma_t(x)^2*w_p(x)^2; sigma_m^2; 0]); % Covariance matrix of the process noise
 
@@ -107,8 +107,8 @@ R = diag(temp); % Covariance matrix of measurement noise
 % Also calculate measurement vector
 % Var(QX) = QVar(X)Q' = sigma^4 -> Var(sqrt(Q)X) = sqrt(Q)Var(X)sqrt(Q)' = sigma^2
 n = @(x) sqrt(Q(x))*randn(Lk, 1); % Generate random process noise (from assumed Q)
-% v = sqrt(R)*randn(Yk, N); % Generate random measurement noise (from assumed R)
-v = zeros(Yk, N);
+v = sqrt(R)*randn(Yk, N); % Generate random measurement noise (from assumed R)
+% v = zeros(Yk, N);
 
 %% Runge-Kutta 4th order method
 % Initialize matrices
@@ -188,10 +188,24 @@ title('xb1');
 xlabel('s')
 
 figure
+plot(t,xt(9,:)');
+legend('xt')
+% ylim([-2.6 2.6]);
+title('xb1dot');
+xlabel('s')
+
+figure
 plot(t,xt(12,:)',t,data.Data(:,86));
 legend('xt','Bladed')
 % ylim([-2.6 2.6]);
 title('yb1');
+xlabel('s')
+
+figure
+plot(t,xt(15,:)');
+legend('xt')
+% ylim([-2.6 2.6]);
+title('yb1dot');
 xlabel('s')
 
 figure

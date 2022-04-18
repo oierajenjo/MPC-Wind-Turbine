@@ -61,7 +61,7 @@ a = @(x) 1- w_p(x)*Ts; % Euler
 sigma_t = @(x) W.ti*x(10)*sqrt((1-a(x)^2)/(1-a(x))^2);
 sigma_m = sqrt(W.q);
 Q = @(x) diag([zeros(Lk-2,1); sigma_t(x)^2*w_p(x)^2; sigma_m^2]); % Covariance matrix of the process noise
-temp = [M.sigma_enc; M.sigma_acc; M.sigma_acc; M.sigma_pow; M.sigma_vane].^2;
+temp = [M.sigma_enc; M.sigma_acc; M.sigma_acc; M.sigma_pow; 0.1].^2;
 R = diag(temp); % Covariance matrix of measurement noise
 
 % Step 3: Initialize state and covariance
@@ -70,8 +70,8 @@ R = diag(temp); % Covariance matrix of measurement noise
 % Also calculate measurement vector
 % Var(QX) = QVar(X)Q' = sigma^4 -> Var(sqrt(Q)X) = sqrt(Q)Var(X)sqrt(Q)' = sigma^2
 n = @(x) sqrt(Q(x))*randn(Lk, 1); % Generate random process noise (from assumed Q) 
-% v = sqrt(R)*randn(Yk, N); % Generate random measurement noise (from assumed R)
-v = zeros(Yk, N);
+v = sqrt(R)*randn(Yk, N); % Generate random measurement noise (from assumed R)
+% v = zeros(Yk, N);
 
 %% Runge-Kutta 4th order method
 % Initialize matrices
@@ -133,77 +133,77 @@ ylabel('Tg');
 xk = zeros(Lk, N); % Initialize size of state estimate for all k
 xk(:,1) = x_i_rigid;
 P0 = [M.sigma_enc; M.sigma_tdef; M.sigma_tvel; M.sigma_tdef; M.sigma_tvel;...
-    M.sigma_pit; M.sigma_pitvel; M.sigma_pow; M.sigma_vane; 0.01].^2;
+    M.sigma_pit; M.sigma_pitvel; M.sigma_pow; 0.1; M.sigma_vane].^2;
 P0 = diag(P0);
-% P0 = 0.01*eye(Lk,Lk); 
+% P0 = 0.01*eye(Lk,Lk);
 
-[xk,P,e] = UKF(f,h,Q,R,xk,y_me_rigid,u_b,Lk,Yk,N,P0,Ts,v,n);
+[xk,P,e] = UKF(f,h,Q,R,xk,yt,u_b,Lk,Yk,N,P0,Ts,v,n);
 
 %% Display results
 figure
-plot(t,xt(1,:)',t,xk(:,1));
+plot(t,xt(1,:)',t,xk(1,:));
 legend('True','UKF estimate')
 % ylim([-2.6 2.6]);
 ylabel('wr');
 
 figure
-plot(t,xt(2,:)',t,xk(:,2));
+plot(t,xt(2,:)',t,xk(2,:));
 legend('True','UKF estimate')
 % ylim([-3 1.5]);
 xlabel('Time [s]');
 ylabel('xt');
 
 figure
-plot(t,xt(3,:)',t,xk(:,3));
+plot(t,xt(3,:)',t,xk(3,:));
 legend('True','UKF estimate')
 % ylim([-3 1.5]);
 xlabel('Time [s]');
 ylabel('xtdot');
 
 figure
-plot(t,xt(4,:)',t,xk(:,4));
+plot(t,xt(4,:)',t,xk(4,:));
 legend('True','UKF estimate')
 % ylim([-3 1.5]);
 xlabel('Time [s]');
 ylabel('yt');
 
 figure
-plot(t,xt(5,:)',t,xk(:,5));
+plot(t,xt(5,:)',t,xk(5,:));
 legend('True','UKF estimate')
 % ylim([-3 1.5]);
 xlabel('Time [s]');
 ylabel('ytdot');
 
 figure
-plot(t,xt(6,:)',t,xk(:,6));
+plot(t,xt(6,:)',t,xk(6,:));
 legend('True','UKF estimate')
 % ylim([-3 1.5]);
 xlabel('Time [s]');
 ylabel('theta');
 
 figure
-plot(t,xt(7,:)',t,xk(:,7));
+plot(t,xt(7,:)',t,xk(7,:));
 legend('True','UKF estimate')
 % ylim([-3 1.5]);
 xlabel('Time [s]');
 ylabel('theta_dot');
 
 figure
-plot(t,xt(8,:)',t,xk(:,8));
+plot(t,xt(8,:)',t,xk(8,:));
 legend('True','UKF estimate')
 % ylim([-3 1.5]);
 xlabel('Time [s]');
 ylabel('Tg');
 
 figure
-plot(t,xt(9,:)',t,xk(:,9));
+plot(t,xt(9,:)',t,xk(9,:));
 legend('True','UKF estimate')
 % ylim([-3 1.5]);
 xlabel('Time [s]');
 ylabel('vt');
 
 figure
-plot(t,xt(10,:)',t,xk(:,10));
+plot(t,xt(10,:)',t,xk(10,:));
 legend('True','UKF estimate')
 % ylim([-3 1.5]);
 xlabel('Time [s]');

@@ -153,10 +153,10 @@ xk = zeros(Lk, N); % Initialize size of state estimate for all k
 xk(:,1) = x_i;
 P0 = [M.sigma_enc; M.sigma_tdef; M.sigma_tvel; M.sigma_tdef; M.sigma_tvel;...
     M.sigma_bdef; M.sigma_bvel; M.sigma_bdef; M.sigma_bvel;... 
-    M.sigma_pit; M.sigma_pitvel; M.sigma_pow; M.sigma_vane; M.sigma_vane].^2;
+    M.sigma_pit; M.sigma_pitvel; M.sigma_pow; 0.01; M.sigma_vane].^2;
 P0 = diag(P0); % Initial error covariance
 
-xk = UKF(f,h,Q,R,xk,y_me,u_b,Lk,Yk,N,P0,Ts);
+xk = UKF(f,h,Q,R,xk,yt,u_b,Lk,Yk,N,P0,Ts,v,n);
 
 %% Display results
 result_display(t,Lk,xk,xt,x_ul,x_vl)
