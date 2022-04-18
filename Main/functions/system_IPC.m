@@ -1,14 +1,15 @@
-function [f,h,Q,R] = equationIPC(var,Ts,ct_l,cp_l,lambdaVec,pitchVec,Lk)
+function [f,h,Q,R] = system_IPC(var,ct_l,cp_l,lambdaVec,pitchVec,Lk)
 [Ac,Ae,M,W,B,D,To] = extract_struct(var);
 
 %% Before filter execution
 % Step 2: Define noise assumptions
-w_p = @(x) x(26)*pi/(2*W.L);
+% w_p = @(x) W.mu_v*pi/(2*W.L);
 ve = @(x) x(26) + x(25);
 vr = @(x) ve(x) - x(3);
 
-vei = @(x,i) x(26)*(var.To.r^2*(var.Ae.Rr^2*(sin(wrapTo2Pi(x(27)+2*pi*i/3)))^2-To.xh^2)/(To.xh^2+Ae.Rr^2*(sin(wrapTo2Pi(x(27)+2*pi*i/3)))^2)^2 +...
-    ((var.Ae.Rr*cos(wrapTo2Pi(x(27)+2*pi*i/3))+To.H)/To.H)^W.alpha) + x(25);
+ws_ts = @(x,i) (To.r^2*(Ae.Rr^2*(sin(wrapTo2Pi(x(27)+2*pi*i/3)))^2-To.xh^2)/(To.xh^2+Ae.Rr^2*(sin(wrapTo2Pi(x(27)+2*pi*i/3)))^2)^2 +...
+    ((Ae.Rr*cos(wrapTo2Pi(x(27)+2*pi*i/3))+To.H)/To.H)^W.alpha); % Wind Share and Tower Shadow
+vei = @(x,i) x(26)*ws_ts(x,i) + x(25);
 vri = @(x,i) vei(x,i) - x(3);
 
 % lamb = @(x) (x(1)*Ae.Rr-mean(x(15:17)))/(vr(x)-mean(x(9:11)));
@@ -63,7 +64,7 @@ f23 = @(x,u) Ac.omega^2*u(3) - 2*Ac.omega*Ac.xi*x(23) - Ac.omega^2*x(20); % Pitc
 f24 = @(x,u) (u(4)*x(1)^2-x(24))/Ac.tau; % Torque change in time
 
 %% Wind
-f25 = @(x) -w_p(x)*x(25); % Wind turbulence acceleration
+f25 = @(x) -W.w_p(x)*x(25); % Wind turbulence acceleration
 f26 = 0; % Mean wind acceleration
 
 %% Azimuth
@@ -78,12 +79,7 @@ h = @(x) [x(1); f3(x); f5(x); x(6)*B.kx*2*B.l/3; x(7)*B.kx*2*B.l/3;
     x(8)*B.kx*2*B.l/3; x(12)*B.ky*2*B.l/3; x(13)*B.ky*2*B.l/3; ...
     x(14)*B.ky*2*B.l/3; D.eta*x(24)*x(1); vr(x); x(27)];
 
-rng(1);
-a = @(x) 1 - w_p(x)*Ts; % Euler
-% a = @(x) exp(-(x(5)*pi/(2*L))*Ts); % Zero Order Hold
-sigma_t = @(x) W.ti*x(26)*sqrt((1-a(x)^2)/(1-a(x))^2);
-sigma_m = sqrt(W.q);
-Q = @(x) diag([zeros(Lk-3,1); sigma_t(x)^2*w_p(x)^2; sigma_m^2; 0]); % Covariance matrix of the process noise
+Q = @(x) diag([zeros(Lk-3,1); W.sigma_t(x)^2*W.w_p(x)^2; W.sigma_m^2; 0]); % Covariance matrix of the process noise
 
 temp = [M.sigma_enc; M.sigma_acc; M.sigma_acc; M.sigma_root; M.sigma_root;...
     M.sigma_root; M.sigma_root; M.sigma_root; M.sigma_root; M.sigma_pow;...

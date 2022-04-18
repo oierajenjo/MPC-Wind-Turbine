@@ -12,7 +12,7 @@ dU_c.theta_dot = deg2rad(9); % Pitch angle max and min angular speed
 
 Z_c.omega_r_min = convangvel(5,'rpm', 'rad/s');
 Z_c.omega_r_max = - convangvel(10,'rpm', 'rad/s');
-Z_c.xtdd_min = 0; 
+Z_c.xtdd_min = 0;
 Z_c.xtdd_max = -0;
 Z_c.ytdd_min = 0;
 Z_c.ytdd_max = -0;
@@ -121,7 +121,7 @@ deltaU_full = [Uprev; deltaU];
 V = [ident ident];
 for i=1:Hu-1
     temp = [zeros(i*Uk,Uk); ident(1:end-Uk*i,:)];
-    V = [V temp]; 
+    V = [V temp];
 end
 
 deltaU_full = [Uprev; deltaU];
@@ -142,11 +142,11 @@ Cost = Epsilon'*Qcal*Epsilon - deltaU'*Gcal + deltaU'*Hcal*deltaU;
 f = [-1; 1];
 f_rep = repmat({f}, 1, Uk*Hu);
 F_L = blkdiag(f_rep{:});
-u_cons = [U_c.theta_min; -U_c.theta_max; U_c.theta_min; -U_c.theta_max; 
-        U_c.theta_min; -U_c.theta_max; U_c.Tg_min; -U_c.Tg_max];
+u_cons = [U_c.theta_min; -U_c.theta_max; U_c.theta_min; -U_c.theta_max;
+    U_c.theta_min; -U_c.theta_max; U_c.Tg_min; -U_c.Tg_max];
 U_L = u_cons;
 for i=1:Hu-1
-    U_L = [U_L; u_cons]; 
+    U_L = [U_L; u_cons];
 end
 F = [F_L U_L];
 
@@ -161,7 +161,7 @@ E_L = blkdiag(e_L{:});
 du_cons = [-dU_c.theta_dot*ones(6,1); zeros(2,1)];
 dU_L = du_cons;
 for i=1:Hu-1
-   dU_L = [dU_L; du_cons]; 
+    dU_L = [dU_L; du_cons];
 end
 E = [E_L dU_L];
 
@@ -176,7 +176,7 @@ G_L = blkdiag(g_L{:});
 z_cons = cell2mat(struct2cell(Z_c));
 Z_L = z_cons;
 for i=1:Hu-1
-    Z_L = [Z_L; z_cons]; 
+    Z_L = [Z_L; z_cons];
 end
 G = [G_L Z_L];
 Zcal = Psi*P0 + Upsilon*Uprev + Theta*deltaU;

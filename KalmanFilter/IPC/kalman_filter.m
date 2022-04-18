@@ -221,7 +221,7 @@ end
 figure
 plot(t,tr/(D.Jr+D.Jg), t,xt(24,:)/(D.Jr+D.Jg))
 legend('Tr','Tg')
-% xlim([0 10])
+xlim([0 10])
 
 %% Unscented Kalman Filter
 % Initialize state and covariance
