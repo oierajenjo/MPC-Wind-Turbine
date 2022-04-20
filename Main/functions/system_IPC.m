@@ -7,8 +7,8 @@ function [f,h,Q,R] = system_IPC(var,ct_l,cp_l,lambdaVec,pitchVec,Lk)
 ve = @(x) x(26) + x(25);
 vr = @(x) ve(x) - x(3);
 
-ws_ts = @(x,i) (To.r^2*(Ae.Rr^2*(sin(wrapTo2Pi(x(27)+2*pi*i/3)))^2-To.xh^2)/(To.xh^2+Ae.Rr^2*(sin(wrapTo2Pi(x(27)+2*pi*i/3)))^2)^2 +...
-    ((Ae.Rr*cos(wrapTo2Pi(x(27)+2*pi*i/3))+To.H)/To.H)^W.alpha); % Wind Share and Tower Shadow
+ws_ts = @(x,i) (To.r^2*(Ae.Rr^2*(sin(x(27)+2*pi*i/3))^2-To.xh^2)/(To.xh^2+Ae.Rr^2*(sin(x(27)+2*pi*i/3))^2)^2 +...
+    ((Ae.Rr*cos(x(27)+2*pi*i/3)+To.H)/To.H)^W.alpha); % Wind Share and Tower Shadow
 vei = @(x,i) x(26)*ws_ts(x,i) + x(25);
 vri = @(x,i) vei(x,i) - x(3);
 

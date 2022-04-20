@@ -1,4 +1,4 @@
-function [xt,yt] = RK4(f,xt,u_b,h,yt,n,v,Ts)
+function [xt,yt] = Copy_of_RK4(f,xt,u_b,h,yt,n,v,Ts)
 disp('Running True Values')
 % [Ac,Ae,M,W,B,D,To] = extract_struct(var);
 N = size(u_b,2);

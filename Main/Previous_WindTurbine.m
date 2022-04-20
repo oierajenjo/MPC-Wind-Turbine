@@ -25,7 +25,7 @@ K = 0.5*Ae.rho*Ae.Rr^5*pi*cp_opt/lamb_opt^3;
 u_b = [theta_f; theta_f; theta_f; K].*u_b;
 
 
-[f,h,Q,R] = system_IPC(var,Ts,ct_l,cp_l,lambdaVec,pitchVec,Lk);
+[f,h,Q,R] = system_IPC(var,ct_l,cp_l,lambdaVec,pitchVec,Lk);
 
 % Step 3: Initialize state and covariance
 % Simulation Only: Calculate true state trajectory for comparison
@@ -40,7 +40,7 @@ v = sqrt(R)*randn(Yk, N); % Generate random measurement noise (from assumed R)
 xt = zeros(Lk, N); % Initialize size of true state for all k
 xt(:,1) = x_i; % Set true initial state
 yt = zeros(Yk, N); % Initialize size of output vector for all k
-[xt,yt] = RK4(f,xt,u_b,h,yt,n,v,var,Ts);
+[xt,yt] = Copy_of_RK4(f,xt,u_b,h,yt,n,v,Ts);
 
 true_plots(yt,y_me,xt,data,t)
 
@@ -59,10 +59,10 @@ P0 = diag(P0);
 
 if kAns == "Yes"
     disp("Measured values")
-    [xk,P,e] = UKF(f,h,Q,R,xk,y_me,u_b,Lk,Yk,P0,Ts,v,n);
+    [xk,P,e] = Copy_of_UKF(f,h,Q,R,xk,y_me,u_b,Lk,Yk,P0,Ts,v,n);
 elseif kAns == "No"
     disp("True values")
-    [xk,P,e] = UKF(f,h,Q,R,xk,yt,u_b,Lk,Yk,P0,Ts,v,n);
+    [xk,P,e] = Copy_of_UKF(f,h,Q,R,xk,yt,u_b,Lk,Yk,P0,Ts,v,n);
 end
 
 %% Display results
