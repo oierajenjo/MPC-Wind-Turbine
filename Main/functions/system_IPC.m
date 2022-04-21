@@ -23,7 +23,7 @@ Tr = @(x,d) -(x(12)+x(13)+x(14))*B.ky*2*B.l/3;
 % Tr = @(x) 0.5*Ae.rho*Ae.Ar*(vr(x)-mean(x(9:11)))^3*cp(x)/x(1);
 % Tr = @(x) (0.5*Ae.rho*Ae.Ar*((vri(x,0)-x(9))^3*cpi(x,0)+(vri(x,1)-x(10))^3*cpi(x,1)+(vri(x,2)-x(11))^3*cpi(x,2))/x(1));
 Fxi = @(x,i) 0.5*Ae.rho*Ae.Ar*(vri(x,i)-x(9+i))^2*cti(x,i); % Thrust coefficient
-Fyi = @(x,i) (0.5*Ae.rho*Ae.Ar*(vri(x,i)-x(9+i))^3*cpi(x,i)*3)/(2*x(1)*B.l);
+Fyi = @(x,i) 0.5*Ae.rho*Ae.Ar*(vri(x,i)-x(9+i))^3*cpi(x,i)*3/(2*x(1)*B.l);
 
 %% Drive train
 f1 = @(x) (1-D.mu)*Tr(x)/(D.Jr+D.Jg) - x(24)/(D.Jr+D.Jg);
