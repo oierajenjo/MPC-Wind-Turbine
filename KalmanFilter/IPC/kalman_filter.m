@@ -300,7 +300,7 @@ P0 = diag(P0);
 
 
 %% Display results
-result_display(t,Lk,xk,xt,x_me,x_ul,x_vl)
+result_display(t,Lk,xk,xt,x_ul,x_vl)
 
 % figure
 % plot(t,vr(xk),'b-',t,vr(xt),'r-');

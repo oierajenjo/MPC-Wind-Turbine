@@ -77,13 +77,13 @@ f = @(x,u) [f1(x); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x);...
 
 h = @(x) [x(1); f3(x); f5(x); x(6)*B.kx*2*B.l/3; x(7)*B.kx*2*B.l/3;
     x(8)*B.kx*2*B.l/3; x(12)*B.ky*2*B.l/3; x(13)*B.ky*2*B.l/3; ...
-    x(14)*B.ky*2*B.l/3; D.eta*x(24)*x(1); vr(x); x(27)];
+    x(14)*B.ky*2*B.l/3; x(18); x(19); x(20);D.eta*x(24)*x(1); vr(x); x(27)];
 
 Q = @(x) diag([zeros(Lk-3,1); W.sigma_t(x)^2*W.w_p(x)^2; W.sigma_m^2; 0]); % Covariance matrix of the process noise
 
 temp = [M.sigma_enc; M.sigma_acc; M.sigma_acc; M.sigma_root; M.sigma_root;...
-    M.sigma_root; M.sigma_root; M.sigma_root; M.sigma_root; M.sigma_pow;...
-    M.sigma_vane; M.sigma_azim].^2;
+    M.sigma_root; M.sigma_root; M.sigma_root; M.sigma_root; M.sigma_pit;...
+    M.sigma_pit; M.sigma_pit; M.sigma_pow; M.sigma_vane; M.sigma_azim].^2;
 R = diag(temp); % Covariance matrix of measurement noise
 end
 

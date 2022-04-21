@@ -101,5 +101,5 @@ x_tv(end,:) = wrapToPi(x_tv(end,:))+pi;
 
 %% Display results
 true_plots(yt,y_me,x_tv,data,t)
-result_display(t,Lk,x_kf,x_tv,x_me,x_ul,x_vl)
+result_display(t,Lk,x_kf,x_tv,x_ul,x_vl)
 rmpath('functions')
