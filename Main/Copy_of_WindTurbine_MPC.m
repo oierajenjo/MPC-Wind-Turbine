@@ -102,7 +102,7 @@ for k=1:N-1
         0, -e2(xeq,1), zeros(1,2), -e11(xeq,1), zeros(1,5), -e6(xeq,1), -e5(xeq,1), -e10(xeq,1);
         0, 0, -e2(xeq,2), zeros(1,2), -e11(xeq,2), zeros(1,4), e6(xeq,2), e5(xeq,2), -e10(xeq,2);
         zeros(3,6), eye(3), zeros(3,4);
-        zeros(3), -f2*eye(3), -f1*eye(3), zeros(3,4);
+        zeros(3), -f1*eye(3), -f2*eye(3), zeros(3,4);
         zeros(1,9), -g1, zeros(1,3);
         zeros(1,10), -W.w_p(xeq), zeros(1,2);
         zeros(2,13)];
@@ -111,7 +111,7 @@ for k=1:N-1
         A3 A4];
     % Ampc = eye(Lk); % State Matrix
 
-    Bmpc = [zeros(3,Lk-7), f2^2*eye(3), zeros(3,4);
+    Bmpc = [zeros(3,Lk-7), f1*eye(3), zeros(3,4);
         zeros(1,Lk-4), g1, zeros(1,3)]';
     % Bmpc = Ts*eye(Lk,Uk); % Input Matrix
 
@@ -123,7 +123,7 @@ for k=1:N-1
         zeros(3,14), eye(3), zeros(3,Lk-14-3);
         zeros(3,Lk-7-3), eye(3), zeros(3,7);
         zeros(3,Lk-4-3), eye(3), zeros(3,4);
-        q1(xeq), zeros(1,Lk-5), q2(xeq), zeros(1,3)];
+        q2(xeq), zeros(1,Lk-5), q1(xeq), zeros(1,3)];
     
     xmpc(:,k+1) = xmpc(:,k) + Ts*(Ampc*xmpc(:,k) + Bmpc*u_b(:,k));
     ympc(:,k+1) = Cmpc*xmpc(:,k+1);

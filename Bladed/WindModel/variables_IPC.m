@@ -33,11 +33,12 @@ My = [data.Data(:,112) data.Data(:,120) data.Data(:,128)]; % My in the root axis
 % Mx = [data.Data(:,111) data.Data(:,119) data.Data(:,127)]; % Mx in the root axis
 % My = [data.Data(:,62) data.Data(:,70) data.Data(:,78)]; % My in the principal axis
 Mx = [data.Data(:,61) data.Data(:,69) data.Data(:,77)]; % Mx in the principal axis
+pitch = [data.Data(:,34) data.Data(:,35) data.Data(:,36)]; % Pitch angle
 Pe = data.Data(:,28);
 vr = data.Data(:,54); % Wind speed magnitud at the hub
 psi = data.Data(:,11);
 
-y_me = [omega_r xt_ddot yt_ddot My Mx Pe vr psi]';
+y_me = [omega_r xt_ddot yt_ddot My Mx pitch Pe vr psi]';
 
 %% Initial state vector
 xt_dot = data.Data(1,230);
@@ -93,7 +94,8 @@ x_vl = {'$\omega_r$', '$x_t$', '$\dot{x}_t$', '$y_t$', '$\dot{y}_t$', ...
 
 
 y_vl = {'$\omega_r$', '$\ddot{x}_t$', '$\ddot{y}_t$', '$M_{x_1}$', '$M_{x_2}$',...
-    '$M_{x_3}$', '$M_{y_1}$', '$M_{y_2}$', '$M_{y_3}$', '$P_e$', '$v_r$', '$psi$'};
+    '$M_{x_3}$', '$M_{y_1}$', '$M_{y_2}$', '$M_{y_3}$', '$\theta_1$', '$\theta_2$',...
+    '$\theta_3$', '$P_e$', '$v_r$', '$psi$'};
 
 x_ul = {'$Angular\, velocity [\frac{rad}{s}]$', ...
     '$Position [m]$', '$Velocity [\frac{m}{s}]$', ...

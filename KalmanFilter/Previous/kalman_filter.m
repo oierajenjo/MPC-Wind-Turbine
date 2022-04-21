@@ -78,7 +78,12 @@ v = sqrt(R)*randn(Yk, N); % Generate random measurement noise (from assumed R)
 xt = zeros(Lk, N); % Initialize size of true state for all k
 xt(:,1) = x_i_rigid; % Set true initial state
 yt = zeros(Yk, N); % Initialize size of output vector for all k
-[xt,yt] = RK4(f,xt,h,yt,u_b,N,n,v,Ts);
+% [xt,yt] = RK4(f,xt,h,yt,u_b,N,n,v,Ts);
+for k = 1:N-1
+    xt(:,k+1) = xt(:,k) + Ts*f(xt(:,k),u_b(:,k)) + Ts*n(xt(:,k));
+    yt(:,k) = h(xt(:,k)) + v(:,k);
+end
+yt(:,N) = h(xt(:,N)) + v(:,N);
 
 figure
 plot(t,yt(1,:)',t,y_me_rigid(1,:));

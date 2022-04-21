@@ -88,7 +88,7 @@ f = @(x,u) [f1(x); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x);...
 
 h = @(x) [x(1); f3(x); f5(x); x(6)*B.kx*2*B.l/3; x(7)*B.kx*2*B.l/3;
     x(8)*B.kx*2*B.l/3; x(12)*B.ky*2*B.l/3; x(13)*B.ky*2*B.l/3; ...
-    x(14)*B.ky*2*B.l/3; D.eta*x(24)*x(1); vr(x); x(27)];
+    x(14)*B.ky*2*B.l/3; x(18); x(19); x(20); D.eta*x(24)*x(1); vr(x); x(27)];
 
 rng(1);
 a = @(x) 1 - w_p(x)*Ts; % Euler
@@ -98,8 +98,8 @@ sigma_m = sqrt(W.q);
 Q = @(x) diag([zeros(Lk-3,1); sigma_t(x)^2*w_p(x)^2; sigma_m^2; 0]); % Covariance matrix of the process noise
 
 temp = [M.sigma_enc; M.sigma_acc; M.sigma_acc; M.sigma_root; M.sigma_root;...
-    M.sigma_root; M.sigma_root; M.sigma_root; M.sigma_root; M.sigma_pow;...
-    M.sigma_vane; M.sigma_azim].^2;
+    M.sigma_root; M.sigma_root; M.sigma_root; M.sigma_root; M.sigma_pit;...
+    M.sigma_pit; M.sigma_pit; M.sigma_pow; M.sigma_vane; M.sigma_azim].^2;
 R = diag(temp); % Covariance matrix of measurement noise
 
 % Step 3: Initialize state and covariance
@@ -119,101 +119,131 @@ yt = zeros(Yk, N); % Initialize size of output vector for all k
 
 figure
 plot(t,yt(1,:)',t,y_me(1,:));
-legend('yt','y_me')
+legend('$\omega_r$ (sim.)','$\omega_r$ (Bladed)','Interpreter','latex')
 % ylim([-2.6 2.6]);
-title('wr');
-xlabel('s')
+title('Rotor speed');
+ylabel('$\omega_r$ [rad/s]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
 
 figure
 plot(t,yt(2,:)',t,y_me(2,:));
-legend('yt','y_me')
+legend('$\ddot{x}_{t}$ (sim.)','$\ddot{x}_{t}$ (Bladed)','Interpreter','latex')
 % ylim([-2.6 2.6]);
-title('xtddot');
-xlabel('s')
+title('Tower fore-aft acceleration');
+ylabel('$\ddot{x}_{t}$ [m/$s^2$]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
 
 figure
 plot(t,yt(3,:)',t,y_me(3,:));
-legend('yt','y_me')
+legend('$\ddot{y}_{t}$ (sim.)','$\ddot{y}_{t}$ (Bladed)','Interpreter','latex')
 % ylim([-2.6 2.6]);
-title('ytddot');
-xlabel('s')
+title('Tower sidewards acceleration');
+ylabel('$\ddot{y}_{t}$ [m/$s^2$]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
 
 figure
 plot(t,yt(4,:)',t,y_me(4,:));
-legend('yt','y_{me}')
+legend('$M_{y_1}$ (sim.)','$M_{y_1}$ (Bladed)','Interpreter','latex')
 % ylim([-2.6 2.6]);
-title('My1');
-xlabel('s')
+title('Flapwise root bending moment (blade 1)');
+ylabel('$M_{y_1}$ [Nm]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
 
 figure
 plot(t,yt(7,:)',t,y_me(7,:));
-legend('yt','y_{me}')
+legend('$M_{x_1}$ (sim.)','$M_{x_1}$ (Bladed)','Interpreter','latex')
 % ylim([-2.6 2.6]);
-title('Mx1');
-xlabel('s')
+title('Edgewise root bending moment (blade 1)');
+ylabel('$M_{x_1}$ [Nm]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
 
 figure
 plot(t,yt(10,:)',t,y_me(10,:));
-legend('yt','y_{me}')
+legend('$P_e$ (sim.)','$P_e$ (Bladed)','Interpreter','latex')
 % ylim([-2.6 2.6]);
-title('Pe');
-xlabel('s')
+title('Electrical power');
+ylabel('$P_e$ [W]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
 
 figure
 plot(t,yt(11,:)',t,y_me(11,:));
-legend('yt','y_{me}')
+legend('$v_r$ (sim.)','$v_r$ (Bladed)','Interpreter','latex')
 % ylim([-2.6 2.6]);
-title('vr');
-xlabel('s')
+title('Relative wind speed at the rotor');
+ylabel('$v_r$ [m/s]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
 
 figure
 plot(t,xt(2,:)',t,data.Data(:,224));
-legend('xt','Bladed')
+legend('$x_t$ (sim.)','$x_t$ (Bladed)','Interpreter','latex')
 % ylim([-2.6 2.6]);
-title('xt');
-xlabel('s')
+title('Tower fore-aft deflection');
+ylabel('$x_t$ [m]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
 
 figure
 plot(t,xt(4,:)',t,data.Data(:,225));
-legend('xt','Bladed')
+legend('$y_t$ (sim.)','$y_t$ (Bladed)','Interpreter','latex')
 % ylim([-2.6 2.6]);
-title('yt');
-xlabel('s')
+title('Tower sidewards deflection');
+ylabel('$y_t$ [m]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
 
 figure
 plot(t,xt(6,:)',t,data.Data(:,85));
-legend('xt','Bladed')
+legend('$x_{b_1}$ (sim.)','$x_{b_1}$ (Bladed)','Interpreter','latex')
 % ylim([-2.6 2.6]);
-title('xb1');
-xlabel('s')
+title('Flapwise deflection (blade 1)');
+ylabel('$x_{b_1}$ [m]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
 
 figure
 plot(t,xt(9,:)');
-legend('xt')
+legend('$\dot{x}_{b_1}$ (sim.)','Interpreter','latex')
 % ylim([-2.6 2.6]);
-title('xb1dot');
-xlabel('s')
+title('Flapwise velocity (blade 1)');
+ylabel('$\dot{x}_{b_1}$ [m/s]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
 
 figure
 plot(t,xt(12,:)',t,data.Data(:,86));
-legend('xt','Bladed')
+legend('$y_{b_1}$ (sim.)','$y_{b_1}$ (Bladed)','Interpreter','latex')
 % ylim([-2.6 2.6]);
-title('yb1');
-xlabel('s')
+title('Edgewise deflection (blade 1)');
+ylabel('$y_{b_1}$ [m/s]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
 
 figure
 plot(t,xt(15,:)');
-legend('xt')
+legend('$\dot{y}_{b_1}$ (sim.)','Interpreter','latex')
 % ylim([-2.6 2.6]);
-title('yb1dot');
-xlabel('s')
+title('Edgewise velocity (blade 1)');
+ylabel('$\dot{y}_{b_1}$ [m/s]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
+
+figure
+plot(t,xt(18,:)',t,data.Data(:,34));
+legend('$\theta_1 (sim.)$','$\theta_1$ (Bladed)','Interpreter','latex')
+% ylim([-2.6 2.6]);
+title('Pitch angle (blade 1)');
+ylabel('$\theta_1$ [rad]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
+
+figure
+plot(t,xt(22,:)',t,data.Data(:,37));
+legend('$\dot{\theta}_1$ (sim.)','$\dot{\theta}_1$ (Bladed)','Interpreter','latex')
+% ylim([-2.6 2.6]);
+title('Pitch rate (blade 1)');
+ylabel('$\dot{\theta}_1$ [rad/s]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
 
 figure
 plot(t,xt(24,:)',t,data.Data(:,20));
-legend('xt','Bladed')
+legend('$T_g$ (sim.)','$T_g$ (Bladed)','Interpreter','latex')
 % ylim([-2.6 2.6]);
-title('Tg');
-xlabel('s')
+title('Generator torque');
+ylabel('$T_g$ [Nm]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
 
 for k=1:N
     tr(k) = Tr(xt(:,k));

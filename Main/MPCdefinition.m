@@ -40,37 +40,37 @@ A2 = [zeros(1,9), -a2, zeros(1,3);
     eye(3), zeros(3,10)];
 
 A3 = [-e9(xeq,0), 0, -e7(xeq,0), e3, e4, -e8(xeq,0), zeros(1,5), -e1, 0, 0;
-    -e9(xeq,1), 0, -e7(xeq,1), e3, e4, 0, -e8(xeq,1), zeros(1,5), -e1, 0;
-    -e9(xeq,2), 0, -e7(xeq,2), e3, e4, 0, 0, -e8(xeq,2), zeros(1,5), -e1;
-    zeros(9,14);
-    1, zeros(1,13)];
+        -e9(xeq,1), 0, -e7(xeq,1), e3, e4, 0, -e8(xeq,1), zeros(1,5), -e1, 0;
+        -e9(xeq,2), 0, -e7(xeq,2), e3, e4, 0, 0, -e8(xeq,2), zeros(1,5), -e1;
+        zeros(9,14);
+        1, zeros(1,13)];
 
 A4 = [-e2(xeq,0), zeros(1,2), -e11(xeq,0), zeros(1,6), -e6(xeq,0), -e5(xeq,0), -e10(xeq,0);
-    0, -e2(xeq,1), zeros(1,2), -e11(xeq,1), zeros(1,5), -e6(xeq,1), -e5(xeq,1), -e10(xeq,1);
-    0, 0, -e2(xeq,2), zeros(1,2), -e11(xeq,2), zeros(1,4), e6(xeq,2), e5(xeq,2), -e10(xeq,2);
-    zeros(3,6), eye(3), zeros(3,4);
-    zeros(3), -f2*eye(3), -f1*eye(3), zeros(3,4);
-    zeros(1,9), -g1, zeros(1,3);
-    zeros(1,10), -W.w_p(xeq), zeros(1,2);
-    zeros(2,13)];
+        0, -e2(xeq,1), zeros(1,2), -e11(xeq,1), zeros(1,5), -e6(xeq,1), -e5(xeq,1), -e10(xeq,1);
+        0, 0, -e2(xeq,2), zeros(1,2), -e11(xeq,2), zeros(1,4), e6(xeq,2), e5(xeq,2), -e10(xeq,2);
+        zeros(3,6), eye(3), zeros(3,4);
+        zeros(3), -f1*eye(3), -f2*eye(3), zeros(3,4);
+        zeros(1,9), -g1, zeros(1,3);
+        zeros(1,10), -W.w_p(xeq), zeros(1,2);
+        zeros(2,13)];
 
 Ampc = [A1 A2;
     A3 A4];
 % Ampc = eye(Lk); % State Matrix
 
-Bmpc = [zeros(3,Lk-7), f2^2*eye(3), zeros(3,4);
-    zeros(1,Lk-4), g1, zeros(1,3)]';
+Bmpc = [zeros(3,Lk-7), f1*eye(3), zeros(3,4);
+        zeros(1,Lk-4), g1, zeros(1,3)]';
 % Bmpc = Ts*eye(Lk,Uk); % Input Matrix
 
 % CHANGE
 Cmpc = [1, zeros(1,Lk-1);
-    0, 1, zeros(1,Lk-2);
-    zeros(1,4), 1, zeros(1,Lk-5);
-    zeros(3,8), eye(3), zeros(3,Lk-8-3);
-    zeros(3,14), eye(3), zeros(3,Lk-14-3);
-    zeros(3,Lk-7-3), eye(3), zeros(3,7);
-    zeros(3,Lk-4-3), eye(3), zeros(3,4);
-    q1(xeq), zeros(1,Lk-5), q2(xeq), zeros(1,3)];
+        0, 1, zeros(1,Lk-2);
+        zeros(1,4), 1, zeros(1,Lk-5);
+        zeros(3,8), eye(3), zeros(3,Lk-8-3);
+        zeros(3,14), eye(3), zeros(3,Lk-14-3);
+        zeros(3,Lk-7-3), eye(3), zeros(3,7);
+        zeros(3,Lk-4-3), eye(3), zeros(3,4);
+        q2(xeq), zeros(1,Lk-5), q1(xeq), zeros(1,3)];
 
 % Cmpc = [1, zeros(1,Lk-1);
 %     0, -b3, -b4, zeros(1,2), b1*ones(1,3), b2*ones(1,3), zeros(1,16);
@@ -170,8 +170,8 @@ Cost = Epsilon'*Qcal*Epsilon - deltaU'*Gcal + deltaU'*Hcal*deltaU;
 %%% Constraints %%%
 %%%%%%%%%%%%%%%%%%%
 % Actuator Range Constraints
-f = [-1; 1];
-f_rep = repmat({f}, 1, Uk*Hu);
+fc = [-1; 1];
+f_rep = repmat({fc}, 1, Uk*Hu);
 F_L = blkdiag(f_rep{:});
 u_cons = [Ac.pitch_min; -Ac.pitch_max; Ac.pitch_min; -Ac.pitch_max;
     Ac.pitch_min; -Ac.pitch_max; Ac.Tg_min; -Ac.Tg_max];
@@ -182,8 +182,8 @@ end
 F = [F_L U_L];
 
 % Actuator Slew Rate Constraints
-e = [-1; 1];
-e_rep = repmat({e}, 1, Uk-1);
+ec = [-1; 1];
+e_rep = repmat({ec}, 1, Uk-1);
 e_rep{end+1} = zeros(2,1);
 e_L = blkdiag(e_rep{:});
 
