@@ -1,43 +1,11 @@
-clc
-clear all
-close all
-rng(1);
+function [f,h,Q,R] = system_IPC(var,ct_l,cp_l,lambdaVec,pitchVec,Lk)
+[Ac,Ae,M,W,B,D,To] = extract_struct(var);
 
-variables_IPC
-load('BladedFiles\performancemap_data.mat')
-Constant_variables
-MPCconstants
-syms x [1 Lk]
-syms f [1 Lk]
-syms cp ct
-
-df1 = diff(f1,x12)*x12 + diff(f1,x13)*x13 + diff(f1,x14)*x14 + diff(f1,x24)*x24;
-% int(f1(x12,x13,x14,x24))
-
-lambda(x) = x(26)*(To.r^2*(Ae.Rr^2*(sin(x(27)))^2-To.xh^2)/(To.xh^2+Ae.Rr^2*(sin(x(27)))^2)^2 +...
-    ((Ae.Rr*cos(x(27))+To.H)/To.H)^W.alpha) + x(25) - x(3) -x(9);
-
-dlambda = diff(lambda,x26)*x26 + diff(lambda,x27)*x27 + diff(lambda,x25)*x25 ...
-    + diff(lambda,x3)*x3 + diff(lambda,x9)*x9;
-
-
-f9(x)= 0.5*Ae.rho*Ae.Ar*cp*(x(26)*(To.r^2*(Ae.Rr^2*(sin(x(27)))^2-To.xh^2) ...
-    /(To.xh^2+Ae.Rr^2*(sin(x(27)))^2)^2 + ((Ae.Rr*cos(x(27))+To.H)/To.H)^W.alpha) ...
-    + x(25) - x(3) - x(9))^2*1/B.m  + B.kx*x(2)/B.m + B.cx*x(3)/B.m ...
-    - B.kx*x(6)/B.m - B.cx*x(9)/B.m; % Blade 1 foreafter acceleration
-
-df9 = diff(f9,x26)*x26 + diff(f9,x27)*x27 + diff(f9,x25)*x25 + diff(f9,x3)*x3 + ...
-    diff(f9,x9)*x9 + diff(f9,x2)*x2 + diff(f9,x6)*x6;
-
-
-f15(x)= -0.5*Ae.rho*Ae.Ar*(x(26)*(To.r^2*(Ae.Rr^2*(sin(x(27)))^2-To.xh^2) ...
-    /(To.xh^2+Ae.Rr^2*(sin(x(27)))^2)^2 + ((Ae.Rr*cos(x(27))+To.H)/To.H)^W.alpha) ...
-    + x(25) - x(3)-x(9))^3*3/(2*x(1)*B.l)/B.m + B.ky*x(4)/B.m + ...
-    B.cy*x(5)/B.m - B.ky*x(12)/B.m - B.cy*x(15)/B.m;
-
-df15 = diff(f15,x26)*x26 + diff(f15,x27)*x27 + diff(f15,x25)*x25 + diff(f15,x3)*x3 + ...
-    diff(f15,x9)*x9 + diff(f15,x1)*x1 + diff(f15,x5)*x5 + diff(f15,x12)*x12 + ...
-    diff(f15,x15)*x15  + diff(f15,x4)*x4;
+%% Before filter execution
+% Step 2: Define noise assumptions
+% w_p = @(x) W.mu_v*pi/(2*W.L);
+ve = @(x) x(26) + x(25);
+vr = @(x) ve(x) - x(3);
 
 ws_ts = @(x,i) (To.r^2*(Ae.Rr^2*(sin(x(27)+2*pi*i/3))^2-To.xh^2)/(To.xh^2+Ae.Rr^2*(sin(x(27)+2*pi*i/3))^2)^2 +...
     ((Ae.Rr*cos(x(27)+2*pi*i/3)+To.H)/To.H)^W.alpha); % Wind Share and Tower Shadow
@@ -51,14 +19,14 @@ lambi = @(x,i) (x(1)*Ae.Rr-x(15+i))/(vri(x,i)-x(9+i));
 cpi = @(x,i) cp_ct(lambi(x,i),x(18+i),cp_l,lambdaVec,pitchVec)/B.B;
 cti = @(x,i) cp_ct(lambi(x,i),x(18+i),ct_l,lambdaVec,pitchVec)/B.B;
 
+Tr = @(x) -(x(12)+x(13)+x(14))*B.ky*2*B.l/3;
 % Tr = @(x) 0.5*Ae.rho*Ae.Ar*(vr(x)-mean(x(9:11)))^3*cp(x)/x(1);
 % Tr = @(x) (0.5*Ae.rho*Ae.Ar*((vri(x,0)-x(9))^3*cpi(x,0)+(vri(x,1)-x(10))^3*cpi(x,1)+(vri(x,2)-x(11))^3*cpi(x,2))/x(1));
 Fxi = @(x,i) 0.5*Ae.rho*Ae.Ar*(vri(x,i)-x(9+i))^2*cti(x,i); % Thrust coefficient
 Fyi = @(x,i) 0.5*Ae.rho*Ae.Ar*(vri(x,i)-x(9+i))^3*cpi(x,i)*3/(2*x(1)*B.l);
 
 %% Drive train
-f1(x) = (1-D.mu)*(-(x(12)+x(13)+x(14))*B.ky*2*B.l/3)/(D.Jr+D.Jg) - x(24)/(D.Jr+D.Jg);
-df1 = diff(f1,x12)*x12 + diff(f1,x13)*x13 + diff(f1,x14)*x14 + diff(f1,x24)*x24;
+f1 = @(x) (1-D.mu)*Tr(x)/(D.Jr+D.Jg) - x(24)/(D.Jr+D.Jg);
 
 %% Tower
 f2 = @(x) x(3); % Tower foreafter velocity
@@ -101,3 +69,21 @@ f26 = 0; % Mean wind acceleration
 
 %% Azimuth
 f27 = @(x) x(1); % Azimuth velocity
+
+f = @(x,u) [f1(x); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x);...
+    f8(x); f9(x); f10(x); f11(x); f12(x); f13(x); f14(x); f15(x);...
+    f16(x); f17(x); f18(x); f19(x); f20(x); f21(x,u); f22(x,u);...
+    f23(x,u); f24(x,u); f25(x); f26; f27(x)]; % Nonlinear prediction
+
+h = @(x) [x(1); f3(x); f5(x); x(6)*B.kx*2*B.l/3; x(7)*B.kx*2*B.l/3;
+    x(8)*B.kx*2*B.l/3; x(12)*B.ky*2*B.l/3; x(13)*B.ky*2*B.l/3; ...
+    x(14)*B.ky*2*B.l/3; x(18); x(19); x(20);D.eta*x(24)*x(1); vr(x); x(27)];
+
+Q = @(x) diag([zeros(Lk-3,1); W.sigma_t(x)^2*W.w_p(x)^2; W.sigma_m^2; 0]); % Covariance matrix of the process noise
+
+temp = [M.sigma_enc; M.sigma_acc; M.sigma_acc; M.sigma_root; M.sigma_root;...
+    M.sigma_root; M.sigma_root; M.sigma_root; M.sigma_root; M.sigma_pit;...
+    M.sigma_pit; M.sigma_pit; M.sigma_pow; M.sigma_vane; M.sigma_azim].^2;
+R = diag(temp); % Covariance matrix of measurement noise
+end
+
