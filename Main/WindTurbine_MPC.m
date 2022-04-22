@@ -63,11 +63,11 @@ uprev_mpc = u_b(:,1);
 
 xeq = x_i;
 
-disp('Running Loop')
 
 %% Reference trajectories
 ref_me = [Ac.omega_opt*ones(N,1) zeros(N,14) Ac.Pe_opt*ones(N,1)]';
 
+disp('Running Loop')
 for k=1:N-1-Hp
     %% MPC
     MPCdefinition

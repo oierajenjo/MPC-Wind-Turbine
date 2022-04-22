@@ -7,7 +7,7 @@ rng(1);
 variables_IPC
 load('BladedFiles\performancemap_data.mat')
 Constant_variables
-MPCconstants
+% MPCconstants
 addpath('functions');
 
 % UNCOMMENT
@@ -67,41 +67,41 @@ disp('Running Loop')
 
 Linearization
 
-% %% Reference trajectories
-% ref_me = [Ac.omega_opt*ones(N,1) zeros(N,14) Ac.Pe_opt*ones(N,1)]';
-% 
-% for k=1:N-1-Hp
-%     %% MPC
-%     MPCdefinition
-%     res = MPCobj({x_kf(:,k),uprev_mpc,ref_me(:,k+1:k+Hp)});
-% 
-%     u_L = res{1};
-%     u = reshape(u_L, [Uk, length(u_L)/Uk]);
-%     u_mpc{k} = u;
-%     uprev_mpc = u(:,1);
-% 
-%     x_L = res{2};
-%     x_mpc{k} = reshape(x_L, [Lk, length(x_L)/Lk]);
-% 
-%     %% Runge-Kutta 4th order method
-% %     disp('Running True Values')
-%     [x_tv(:,k+1),yt(:,k+1)] = RK4(f,x_tv(:,k),uprev_mpc,h,n(x_tv(:,k)),v(:,k+1),Ts);
-% 
-%     %% Unscented Kalman Filter
-%     if kAns == "Yes"
-% %         disp('Running Kalman Filter')
-%         [x_kf(:,k+1),P,e(:,k+1)] = UKF(f,h,Q,R,x_kf(:,k),y_me(:,k+1),uprev_mpc,kal,P,Ts,v(:,k+1),n);
-%     elseif kAns == "No"
-% %         disp('Running Kalman Filter')
-%         [x_kf(:,k+1),P,e(:,k+1)] = UKF(f,h,Q,R,x_kf(:,k),yt(:,k+1),uprev_mpc,kal,P,Ts,v(:,k+1),n);
-%     end
-%     
-%     xeq = x_kf(:,k+1);
-% end
-% x_kf(end,:) = wrapToPi(x_kf(end,:))+pi;
-% x_tv(end,:) = wrapToPi(x_tv(end,:))+pi;
-% 
-% %% Display results
-% true_plots(yt,y_me,x_tv,data,t)
-% result_display(t,Lk,x_kf,x_tv,x_ul,x_vl)
+%% Reference trajectories
+ref_me = [Ac.omega_opt*ones(N,1) zeros(N,14) Ac.Pe_opt*ones(N,1)]';
+
+for k=1:N-1-Hp
+    %% MPC
+    MPCdefinition
+    res = MPCobj({x_kf(:,k),uprev_mpc,ref_me(:,k+1:k+Hp)});
+
+    u_L = res{1};
+    u = reshape(u_L, [Uk, length(u_L)/Uk]);
+    u_mpc{k} = u;
+    uprev_mpc = u(:,1);
+
+    x_L = res{2};
+    x_mpc{k} = reshape(x_L, [Lk, length(x_L)/Lk]);
+
+    %% Runge-Kutta 4th order method
+%     disp('Running True Values')
+    [x_tv(:,k+1),yt(:,k+1)] = RK4(f,x_tv(:,k),uprev_mpc,h,n(x_tv(:,k)),v(:,k+1),Ts);
+
+    %% Unscented Kalman Filter
+    if kAns == "Yes"
+%         disp('Running Kalman Filter')
+        [x_kf(:,k+1),P,e(:,k+1)] = UKF(f,h,Q,R,x_kf(:,k),y_me(:,k+1),uprev_mpc,kal,P,Ts,v(:,k+1),n);
+    elseif kAns == "No"
+%         disp('Running Kalman Filter')
+        [x_kf(:,k+1),P,e(:,k+1)] = UKF(f,h,Q,R,x_kf(:,k),yt(:,k+1),uprev_mpc,kal,P,Ts,v(:,k+1),n);
+    end
+    
+    xeq = x_kf(:,k+1);
+end
+x_kf(end,:) = wrapToPi(x_kf(end,:))+pi;
+x_tv(end,:) = wrapToPi(x_tv(end,:))+pi;
+
+%% Display results
+true_plots(yt,y_me,x_tv,data,t)
+result_display(t,Lk,x_kf,x_tv,x_ul,x_vl)
 rmpath('functions')

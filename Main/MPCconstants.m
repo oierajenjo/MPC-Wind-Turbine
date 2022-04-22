@@ -46,7 +46,7 @@ dlamb_dazim = @(x,i) -(x(1)*Ae.Rr-x(15+i))*dvri_dazim(x,i)/vri_eq(x,i)^2;
 dlamb_dwr = @(x,i) Ae.Rr/vri_eq(x,i);
 
 d1 = B.kx/B.m; % dx_bi
-d2 = @(x,i) Ae.rho*Ae.Ar*(dCt_dLamb(x,i)*dlamb_dxdotbi(x,i)*vri_eq(x,i)^2 - 2*cti_eq(x,i)*vri_eq(x,i) - B.cx/B.m)/(6*B.m); % dxdot_bi
+d2 = @(x,i) Ae.rho*Ae.Ar*(dCt_dLamb(x,i)*dlamb_dxdotbi(x,i)*vri_eq(x,i)^2 - 2*cti_eq(x,i)*vri_eq(x,i))/(6*B.m) - B.cx/B.m; % dxdot_bi
 d3 = d1; % dx_t
 d4 = @(x,i) Ae.rho*Ae.Ar*(dCt_dLamb(x,i)*dlamb_dxdott(x,i)*vri_eq(x,i)^2 - 2*cti_eq(x,i)*vri_eq(x,i) - B.cx/B.m)/(6*B.m); % dxdot_t
 d5 = @(x,i) Ae.rho*Ae.Ar*(dCt_dLamb(x,i)*dlamb_dvm(x,i)*vri_eq(x,i)^2 + 2*cti_eq(x,i)*ws_ts(x,i)*vri_eq(x,i))/(6*B.m); % dv_m
@@ -58,7 +58,7 @@ d10 = @(x,i) Ae.rho*Ae.Ar*vri_eq(x,i)^2*dCt_dLamb(x,i)*dlamb_dwr(x,i)/(6*B.m); %
 
 % yb1_dot
 e1 = B.ky/B.m; % dy_bi
-e2 = @(x,i) Ae.rho*Ae.Ar*vri_eq(x,i)^3*(dCp_dLamb(x,i)*dlamb_dydotbi(x,i)/(4*x(1)*B.l) + B.cy/B.m); % dydot_bi
+e2 = @(x,i) Ae.rho*Ae.Ar*vri_eq(x,i)^3*(dCp_dLamb(x,i)*dlamb_dydotbi(x,i))/(4*x(1)*B.l) + B.cy/B.m; % dydot_bi
 e3 = e1; % dy_t
 e4 = B.cy/B.m; % dydot_t
 e5 = @(x,i) Ae.rho*Ae.Ar*(dCp_dLamb(x,i)*dlamb_dvm(x,i)*vri_eq(x,i)^3 + 3*cpi_eq(x,i)*ws_ts(x,i)*vri_eq(x,i)^2)/(4*x(1)*B.l); % dv_m
