@@ -72,6 +72,7 @@ disp('Running Loop')
 ref_me = [Ac.omega_opt*ones(N,1) zeros(N,14) Ac.Pe_opt*ones(N,1)]';
 
 for k=1:N-1
+    %% Linearized system
     A1 = [zeros(1,11), -a1*ones(1,3);
         zeros(1,2), 1, zeros(1,11);
         0, -b3, -b4, zeros(1,2), b1*ones(1,3), b2*ones(1,3), zeros(1,3);
@@ -126,8 +127,19 @@ for k=1:N-1
         q2(xeq), zeros(1,Lk-5), q1(xeq), zeros(1,3)];
     xmpc(:,k+1) = xmpc(:,k) + Ts*(Ampc*xmpc(:,k) + Bmpc*u_b(:,k));
     ympc(:,k+1) = Cmpc*xmpc(:,k+1);
+
+%     k_1 = Ampc*xmpc(:,k) + Bmpc*u_b(:,k);
+%     k_2 = Ampc*(xmpc(:,k)+0.5*Ts*k_1) + Bmpc*(u_b(:,k)+0.5*Ts);
+%     k_3 = Ampc*(xmpc(:,k)+0.5*Ts*k_2) + Bmpc*(u_b(:,k)+0.5*Ts);
+%     k_4 = Ampc*(xmpc(:,k)+Ts*k_3) + Bmpc*(u_b(:,k)+Ts);
+%     xmpc(:,k+1) = xmpc(:,k) + (1/6)*(k_1+2*k_2+2*k_3+k_4)*Ts; 
+%     ympc(:,k+1) = Cmpc*xmpc(:,k+1);
     
-    xeq = xmpc(:,k+1);
+    %% Runge-Kutta 4th order method
+    % disp('Running True Values')
+    [x_tv(:,k+1),yt(:,k+1)] = RK4(f,x_tv(:,k),u_b(:,k),h,n(x_tv(:,k)),v(:,k+1),Ts);
+    
+    xeq = x_tv(:,k+1);
 end
 xmpc(end,:) = wrapToPi(xmpc(end,:))+pi;
 
