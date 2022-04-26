@@ -29,7 +29,6 @@ end
 % K = 0.5*Ae.rho*Ae.Rr^5*pi*cp_opt/lamb_opt^3;
 % u_b = [theta_f; theta_f; theta_f; K].*u_b;
 
-
 [f,h,Q,R] = system_IPC(var,ct_l,cp_l,lambdaVec,pitchVec,Lk);
 
 % Step 3: Initialize state and covariance
@@ -60,9 +59,7 @@ P = P0;
 e = zeros(Yk, N);
 
 uprev_mpc = u_b(:,1);
-
 xeq = x_i;
-
 
 %% Reference trajectories
 ref_me = [Ac.omega_opt*ones(N,1) zeros(N,14) Ac.Pe_opt*ones(N,1)]';
