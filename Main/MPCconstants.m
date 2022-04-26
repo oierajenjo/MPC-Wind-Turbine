@@ -58,16 +58,16 @@ d10 = @(x,i) Ae.rho*Ae.Ar*vri_eq(x,i)^2*dCt_dLamb(x,i)*dlamb_dwr(x,i)/(6*B.m); %
 
 % yb1_dot
 e1 = B.ky/B.m; % dy_bi
-e2 = @(x,i) Ae.rho*Ae.Ar*vri_eq(x,i)^3*(dCp_dLamb(x,i)*dlamb_dydotbi(x,i))/(4*x(1)*B.l) + B.cy/B.m; % dydot_bi
+e2 = @(x,i) Ae.rho*Ae.Ar*vri_eq(x,i)^3*(dCp_dLamb(x,i)*dlamb_dydotbi(x,i))/(4*B.m*x(1)*B.l) + B.cy/B.m; % dydot_bi
 e3 = e1; % dy_t
 e4 = B.cy/B.m; % dydot_t
-e5 = @(x,i) Ae.rho*Ae.Ar*(dCp_dLamb(x,i)*dlamb_dvm(x,i)*vri_eq(x,i)^3 + 3*cpi_eq(x,i)*ws_ts(x,i)*vri_eq(x,i)^2)/(4*x(1)*B.l); % dv_m
-e6 = @(x,i) Ae.rho*Ae.Ar*(dCp_dLamb(x,i)*dlamb_dvt(x,i)*vri_eq(x,i)^3 + 3*cpi_eq(x,i)*vri_eq(x,i)^2)/(4*x(1)*B.l); % dv_t
-e7 = @(x,i) Ae.rho*Ae.Ar*(dCp_dLamb(x,i)*dlamb_dxdott(x,i)*vri_eq(x,i)^3 - 3*cpi_eq(x,i)*vri_eq(x,i)^2)/(4*x(1)*B.l); % dxdot_t
-e8 = @(x,i) Ae.rho*Ae.Ar*(dCp_dLamb(x,i)*dlamb_dxdotbi(x,i)*vri_eq(x,i)^3 - 3*cpi_eq(x,i)*vri_eq(x,i)^2)/(4*x(1)*B.l); % dxdot_bi
-e9 = @(x,i) Ae.rho*Ae.Ar*vri_eq(x,i)^3*(dCp_dLamb(x,i)*dlamb_dwr(x,i)-cpi_eq(x,i)/x(1))/(4*x(1)*B.l); % dw_r
-e10 = @(x,i) Ae.rho*Ae.Ar*(3*cpi_eq(x,i)*dvri_dazim(x,i)*vri_eq(x,i)^2 + dCp_dLamb(x,i)*dlamb_dazim(x,i)*vri_eq(x,i)^3)/(4*x(1)*B.l); % dazim
-e11 = @(x,i) Ae.rho*Ae.Ar*vri_eq(x,i)^3*dCp_dTheta(x,i)/(4*x(1)*B.l); % dpitch
+e5 = @(x,i) Ae.rho*Ae.Ar*(dCp_dLamb(x,i)*dlamb_dvm(x,i)*vri_eq(x,i)^3 + 3*cpi_eq(x,i)*ws_ts(x,i)*vri_eq(x,i)^2)/(4*B.m*x(1)*B.l); % dv_m
+e6 = @(x,i) Ae.rho*Ae.Ar*(dCp_dLamb(x,i)*dlamb_dvt(x,i)*vri_eq(x,i)^3 + 3*cpi_eq(x,i)*vri_eq(x,i)^2)/(4*B.m*x(1)*B.l); % dv_t
+e7 = @(x,i) Ae.rho*Ae.Ar*(dCp_dLamb(x,i)*dlamb_dxdott(x,i)*vri_eq(x,i)^3 - 3*cpi_eq(x,i)*vri_eq(x,i)^2)/(4*B.m*x(1)*B.l); % dxdot_t
+e8 = @(x,i) Ae.rho*Ae.Ar*(dCp_dLamb(x,i)*dlamb_dxdotbi(x,i)*vri_eq(x,i)^3 - 3*cpi_eq(x,i)*vri_eq(x,i)^2)/(4*B.m*x(1)*B.l); % dxdot_bi
+e9 = @(x,i) Ae.rho*Ae.Ar*vri_eq(x,i)^3*(dCp_dLamb(x,i)*dlamb_dwr(x,i)-cpi_eq(x,i)/x(1))/(4*B.m*x(1)*B.l); % dw_r
+e10 = @(x,i) Ae.rho*Ae.Ar*(3*cpi_eq(x,i)*dvri_dazim(x,i)*vri_eq(x,i)^2 + dCp_dLamb(x,i)*dlamb_dazim(x,i)*vri_eq(x,i)^3)/(4*B.m*x(1)*B.l); % dazim
+e11 = @(x,i) Ae.rho*Ae.Ar*vri_eq(x,i)^3*dCp_dTheta(x,i)/(4*B.m*x(1)*B.l); % dpitch
 
 % Theta_dot
 f1 = Ac.omega^2;
@@ -75,6 +75,7 @@ f2 = 2*Ac.omega*Ac.xi;
 
 % Tg
 g1 = 1/Ac.tau;
+g2 = @(x,u) 2*u(4)*x(1)/Ac.tau;
 
 % vt
 h1 = @(x) W.w_p(x);

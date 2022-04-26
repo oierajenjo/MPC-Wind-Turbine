@@ -93,15 +93,17 @@ for k=1:N-1
         0, 0, d8(xeq,2), zeros(1,2), d7(xeq,2), zeros(1,4), d6(xeq,2), d5(xeq,2), d9(xeq,2);
         eye(3), zeros(3,10)];
     
-    A3 = [-e9(xeq,0), 0, -e7(xeq,0), e3, e4, -e8(xeq,0), zeros(1,5), -e1, 0, 0;
-        -e9(xeq,1), 0, -e7(xeq,1), e3, e4, 0, -e8(xeq,1), zeros(1,5), -e1, 0;
-        -e9(xeq,2), 0, -e7(xeq,2), e3, e4, 0, 0, -e8(xeq,2), zeros(1,5), -e1;
-        zeros(9,14);
+    A3 = [-e9(xeq,0), 0, -e7(xeq,0), e3, e4, zeros(1,3), -e8(xeq,0), 0, 0, -e1, 0, 0;
+        -e9(xeq,1), 0, -e7(xeq,1), e3, e4, zeros(1,4), -e8(xeq,1), 0, 0, -e1, 0;
+        -e9(xeq,2), 0, -e7(xeq,2), e3, e4, zeros(1,5), -e8(xeq,2), 0, 0, -e1;
+        zeros(6,14);
+        g2(xeq,u_b(:,k)), zeros(1,13);
+        zeros(2,14);
         1, zeros(1,13)];
     
     A4 = [-e2(xeq,0), zeros(1,2), -e11(xeq,0), zeros(1,6), -e6(xeq,0), -e5(xeq,0), -e10(xeq,0);
         0, -e2(xeq,1), zeros(1,2), -e11(xeq,1), zeros(1,5), -e6(xeq,1), -e5(xeq,1), -e10(xeq,1);
-        0, 0, -e2(xeq,2), zeros(1,2), -e11(xeq,2), zeros(1,4), e6(xeq,2), e5(xeq,2), -e10(xeq,2);
+        0, 0, -e2(xeq,2), zeros(1,2), -e11(xeq,2), zeros(1,4), -e6(xeq,2), -e5(xeq,2), -e10(xeq,2);
         zeros(3,6), eye(3), zeros(3,4);
         zeros(3), -f1*eye(3), -f2*eye(3), zeros(3,4);
         zeros(1,9), -g1, zeros(1,3);
@@ -113,7 +115,9 @@ for k=1:N-1
     % Ampc = eye(Lk); % State Matrix
     
     Bmpc = [zeros(3,Lk-7), f1*eye(3), zeros(3,4);
-        zeros(1,Lk-4), g1, zeros(1,3)]';
+        zeros(1,Lk)]';
+%     Bmpc = [zeros(3,Lk-7), f1*eye(3), zeros(3,4);
+%         zeros(1,Lk-4), g1, zeros(1,3)]';
     % Bmpc = Ts*eye(Lk,Uk); % Input Matrix
     
     % CHANGE
@@ -125,15 +129,15 @@ for k=1:N-1
         zeros(3,Lk-7-3), eye(3), zeros(3,7);
         zeros(3,Lk-4-3), eye(3), zeros(3,4);
         q2(xeq), zeros(1,Lk-5), q1(xeq), zeros(1,3)];
-    xmpc(:,k+1) = xmpc(:,k) + Ts*(Ampc*xmpc(:,k) + Bmpc*u_b(:,k));
-    ympc(:,k+1) = Cmpc*xmpc(:,k+1);
-
-%     k_1 = Ampc*xmpc(:,k) + Bmpc*u_b(:,k);
-%     k_2 = Ampc*(xmpc(:,k)+0.5*Ts*k_1) + Bmpc*(u_b(:,k)+0.5*Ts);
-%     k_3 = Ampc*(xmpc(:,k)+0.5*Ts*k_2) + Bmpc*(u_b(:,k)+0.5*Ts);
-%     k_4 = Ampc*(xmpc(:,k)+Ts*k_3) + Bmpc*(u_b(:,k)+Ts);
-%     xmpc(:,k+1) = xmpc(:,k) + (1/6)*(k_1+2*k_2+2*k_3+k_4)*Ts; 
+%     xmpc(:,k+1) = xmpc(:,k) + Ts*(Ampc*xmpc(:,k) + Bmpc*u_b(:,k));
 %     ympc(:,k+1) = Cmpc*xmpc(:,k+1);
+
+    k_1 = Ampc*xmpc(:,k) + Bmpc*u_b(:,k);
+    k_2 = Ampc*(xmpc(:,k)+0.5*Ts*k_1) + Bmpc*(u_b(:,k)+0.5*Ts);
+    k_3 = Ampc*(xmpc(:,k)+0.5*Ts*k_2) + Bmpc*(u_b(:,k)+0.5*Ts);
+    k_4 = Ampc*(xmpc(:,k)+Ts*k_3) + Bmpc*(u_b(:,k)+Ts);
+    xmpc(:,k+1) = xmpc(:,k) + (1/6)*(k_1+2*k_2+2*k_3+k_4)*Ts; 
+    ympc(:,k+1) = Cmpc*xmpc(:,k+1);
     
     %% Runge-Kutta 4th order method
     % disp('Running True Values')
@@ -144,6 +148,151 @@ end
 xmpc(end,:) = wrapToPi(xmpc(end,:))+pi;
 
 %% Display results
-true_plots(ympc,y_me,xmpc,data,t)
+figure
+plot(t,xmpc(1,:),t,x_tv(1,:));
+legend('$\omega_r$ (linear)','$\omega_r$ (non-linear)','Interpreter','latex')
+% ylim([-2.6 2.6]);
+title('Rotor speed');
+ylabel('$\omega_r$ [rad/s]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
+
+figure
+plot(t,xmpc(3,:),t,x_tv(3,:));
+legend('$\dot{x}_{t}$ (linear)','$\dot{x}_{t}$ (non-linear)','Interpreter','latex')
+% ylim([-2.6 2.6]);
+title('Tower fore-aft velocity');
+ylabel('$\dot{x}_{t}$ [m/s]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
+
+figure
+plot(t,xmpc(5,:),t,x_tv(5,:));
+legend('$\dot{y}_{t}$ (linear)','$\dot{y}_{t}$ (non-linear)','Interpreter','latex')
+% ylim([-2.6 2.6]);
+title('Tower sidewards velocity');
+ylabel('$\dot{y}_{t}$ [m/s]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
+
+% figure
+% plot(t,xmpc(4,:)',t,x_tv(4,:));
+% legend('$M_{y_1}$ (sim.)','$M_{y_1}$ (Bladed)','Interpreter','latex')
+% % ylim([-2.6 2.6]);
+% title('Flapwise root bending moment (blade 1)');
+% ylabel('$M_{y_1}$ [Nm]','Interpreter','latex')
+% xlabel('time [s]','Interpreter','latex')
+
+% figure
+% plot(t,yt(7,:)',t,y_me(7,:));
+% legend('$M_{x_1}$ (sim.)','$M_{x_1}$ (Bladed)','Interpreter','latex')
+% % ylim([-2.6 2.6]);
+% title('Edgewise root bending moment (blade 1)');
+% ylabel('$M_{x_1}$ [Nm]','Interpreter','latex')
+% xlabel('time [s]','Interpreter','latex')
+
+figure
+plot(t,ympc(16,:),t,yt(13,:));
+legend('$P_e$ (linear)','$P_e$ (non-linear)','Interpreter','latex')
+% ylim([-2.6 2.6]);
+title('Electrical power');
+ylabel('$P_e$ [W]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
+
+% figure
+% plot(t,xmpc(11,:)',t,y_me(11,:));
+% legend('$v_r$ (sim.)','$v_r$ (Bladed)','Interpreter','latex')
+% % ylim([-2.6 2.6]);
+% title('Relative wind speed at the rotor');
+% ylabel('$v_r$ [m/s]','Interpreter','latex')
+% xlabel('time [s]','Interpreter','latex')
+
+figure
+plot(t,xmpc(2,:),t,x_tv(2,:));
+legend('$x_t$ (linear)','$x_t$ (non-linear)','Interpreter','latex')
+% ylim([-2.6 2.6]);
+title('Tower fore-aft deflection');
+ylabel('$x_t$ [m]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
+
+figure
+plot(t,xmpc(4,:),t,x_tv(4,:));
+legend('$y_t$ (linear)','$y_t$ (non-linear)','Interpreter','latex')
+% ylim([-2.6 2.6]);
+title('Tower sidewards deflection');
+ylabel('$y_t$ [m]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
+
+figure
+plot(t,xmpc(6,:),t,x_tv(6,:));
+legend('$x_{b_1}$ (linear)','$x_{b_1}$ (non-linear)','Interpreter','latex')
+% ylim([-2.6 2.6]);
+title('Flapwise deflection (blade 1)');
+ylabel('$x_{b_1}$ [m]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
+
+figure
+plot(t,xmpc(9,:),t,x_tv(9,:));
+legend('$\dot{x}_{b_1}$ (linear)','$\dot{x}_{b_1}$ (non-linear)','Interpreter','latex')
+% ylim([-2.6 2.6]);
+title('Flapwise velocity (blade 1)');
+ylabel('$\dot{x}_{b_1}$ [m/s]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
+
+figure
+plot(t,xmpc(12,:),t,x_tv(12,:));
+legend('$y_{b_1}$ (linear)','$y_{b_1}$ (non-linear)','Interpreter','latex')
+% ylim([-2.6 2.6]);
+title('Edgewise deflection (blade 1)');
+ylabel('$y_{b_1}$ [m/s]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
+
+figure
+plot(t,xmpc(15,:),t,x_tv(15,:));
+legend('$\dot{y}_{b_1}$ (linear)','$\dot{y}_{b_1}$ (non-linear)','Interpreter','latex')
+% ylim([-2.6 2.6]);
+title('Edgewise velocity (blade 1)');
+ylabel('$\dot{y}_{b_1}$ [m/s]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
+
+figure
+plot(t,xmpc(18,:),t,x_tv(18,:));
+legend('$\theta_1 (linear)$','$\theta_1$ (non-linear)','Interpreter','latex')
+% ylim([-2.6 2.6]);
+title('Pitch angle (blade 1)');
+ylabel('$\theta_1$ [rad]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
+
+figure
+plot(t,xmpc(22,:),t,x_tv(22,:));
+legend('$\dot{\theta}_1$ (linear)','$\dot{\theta}_1$ (non-linear)','Interpreter','latex')
+% ylim([-2.6 2.6]);
+title('Pitch rate (blade 1)');
+ylabel('$\dot{\theta}_1$ [rad/s]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
+
+figure
+plot(t,xmpc(24,:),t,x_tv(24,:));
+legend('$T_g$ (linear)','$T_g$ (non-linear)','Interpreter','latex')
+% ylim([-2.6 2.6]);
+title('Generator torque');
+ylabel('$T_g$ [Nm]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
+
+figure
+plot(t,xmpc(25,:),t,x_tv(25,:));
+legend('$v_t$ (linear)','$v_t$ (non-linear)','Interpreter','latex')
+% ylim([-2.6 2.6]);
+title('Turbulent wind speed');
+ylabel('$v_t$ [m/s]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
+
+figure
+plot(t,xmpc(26,:),t,x_tv(26,:));
+legend('$v_m$ (linear)','$v_m$ (non-linear)','Interpreter','latex')
+% ylim([-2.6 2.6]);
+title('Mean wind speed');
+ylabel('$v_m$ [m/s]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
+
+
+% true_plots(ympc,y_me,xmpc,data,t)
 % result_display(t,Lk,x_kf,x_tv,x_me,x_ul,x_vl)
 rmpath('functions')
