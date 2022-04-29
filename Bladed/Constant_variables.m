@@ -164,12 +164,12 @@ Z_c.ybid_max2 = -B.yd_max;
 Z_c.ybid_min3 = B.yd_min;
 Z_c.ybid_max3 = -B.yd_max;
 
-Z_c.pitchi_min1 = Ac.pitch_min;
-Z_c.pitchi_max1 = -Ac.pitch_max;
-Z_c.pitchi_min2 = Ac.pitch_min;
-Z_c.pitchi_max2 = -Ac.pitch_max;
-Z_c.pitchi_min3 = Ac.pitch_min;
-Z_c.pitchi_max3 = -Ac.pitch_max;
+% Z_c.pitchi_min1 = Ac.pitch_min;
+% Z_c.pitchi_max1 = -Ac.pitch_max;
+% Z_c.pitchi_min2 = Ac.pitch_min;
+% Z_c.pitchi_max2 = -Ac.pitch_max;
+% Z_c.pitchi_min3 = Ac.pitch_min;
+% Z_c.pitchi_max3 = -Ac.pitch_max;
 
 Z_c.pitchid_min1 = Ac.pitch_dot;
 Z_c.pitchid_max1 = -Ac.pitch_dot;

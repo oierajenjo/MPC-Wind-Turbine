@@ -87,3 +87,49 @@ p2 = B.ky*2*B.l/3;
 % Pe
 q1 = @(x) D.eta*x(1);
 q2 = @(x) D.eta*x(24);
+
+
+%%%%%%%%%%%%%%%
+% CONSTRAINTS %
+%%%%%%%%%%%%%%%
+% Actuator Range Constraints
+fc = [-1; 1];
+f_rep = repmat({fc}, 1, Uk*Hu);
+F_L = blkdiag(f_rep{:});
+u_cons = [Ac.pitch_min; -Ac.pitch_max; Ac.pitch_min; -Ac.pitch_max;
+    Ac.pitch_min; -Ac.pitch_max; Ac.Tg_min; -Ac.Tg_max];
+U_L = u_cons;
+for i=1:Hu-1
+    U_L = [U_L; u_cons];
+end
+F = [F_L U_L];
+
+% Actuator Slew Rate Constraints
+ec = [-1; 1];
+e_rep = repmat({ec}, 1, Uk-1);
+e_rep{end+1} = zeros(2,1);
+e_L = blkdiag(e_rep{:});
+
+e_L = repmat({e_L}, 1, Hu);
+E_L = blkdiag(e_L{:});
+du_cons = [-Ac.pitch_dot*ones(6,1); zeros(2,1)];
+dU_L = du_cons;
+for i=1:Hu-1
+    dU_L = [dU_L; du_cons];
+end
+E = [E_L dU_L];
+
+% Constraints in Actuator Variables
+g = [-1; 1];
+g_rep = repmat({g}, 1, Zk-1);
+g_rep{end+1} = [-1;0];
+g_L = blkdiag(g_rep{:});
+
+g_L = repmat({g_L}, 1, Hu);
+G_L = blkdiag(g_L{:});
+z_cons = cell2mat(struct2cell(Z_c));
+Z_L = z_cons;
+for i=1:Hu-1
+    Z_L = [Z_L; z_cons];
+end
+G = [G_L Z_L];

@@ -55,17 +55,17 @@ Bmpc = [zeros(3,Lk-7), f1*eye(3), zeros(3,4);
 
 % CHANGE
 Cmpc = [1, zeros(1,Lk-1);
-    0, 1, zeros(1,Lk-2);
+    0, 0, 1, zeros(1,Lk-3);
     zeros(1,4), 1, zeros(1,Lk-5);
-    zeros(3,8), eye(3), zeros(3,Lk-8-3);
-    zeros(3,14), eye(3), zeros(3,Lk-14-3);
-    zeros(3,Lk-7-3), eye(3), zeros(3,7);
+    zeros(3,8), eye(3), zeros(3,Lk-11);
+    zeros(3,14), eye(3), zeros(3,Lk-17);
+%     zeros(3,Lk-7-3), eye(3), zeros(3,7);
     zeros(3,Lk-4-3), eye(3), zeros(3,4);
     q2(xeq), zeros(1,Lk-5), q1(xeq), zeros(1,3)];
 
 % Cmpc = eye(Zk,Lk);
 
-Q_c = [20 5 5 5*ones(1,3) 5*ones(1,3) 0*ones(1,3) 0*ones(1,3) 20]; % Error Weight
+Q_c = [20 1 1 1*ones(1,3) 1*ones(1,3) 0*ones(1,3) 20]; % Error Weight
 Qmpc = diag(Q_c);
 
 R_c = 0.1; % Input Weight
@@ -117,10 +117,6 @@ Rcal = blkdiag(Rcal{:});
 Rcal_del = repmat({R_del}, 1, Hu);
 Rcal_del = blkdiag(Rcal_del{:});
 
-Epsilon = Tau - Psi*X0 - Upsilon*Uprev;
-
-Xcal = Acal*X0 + Bcal_u*Uprev + Bcal_du*deltaU; % P: P*: Optimal states in prediction window
-
 ident = eye(Uk);
 for i=1:Hu-1
     ident = [ident; eye(Uk)];
@@ -138,60 +134,22 @@ U = V*deltaU_full; % U: u*: The optimal control window
 %%%%%%%%%%%%
 %%% Cost %%%
 %%%%%%%%%%%%
+Xcal = Acal*X0 + Bcal_u*Uprev + Bcal_du*deltaU; % P: P*: Optimal states in prediction window
+Epsilon = Tau - Psi*X0 - Upsilon*Uprev;
+
 Gcal = 2*Theta'*Qcal*Epsilon;
 Hcal = Theta'*Qcal*Theta + Rcal;
 
 Cost = Epsilon'*Qcal*Epsilon - deltaU'*Gcal + deltaU'*Hcal*deltaU;
 
-% refht_col = reshape(refht,[Zk*size(refht,2) 1]); % Convert to column vector
-% 
+refht_col = reshape(refht,[Zk*size(refht,2) 1]); % Convert to column vector
+%
 % Cost = Ts*((Xcal-refht_col)'*Qcal*(Xcal-refht_col) + deltaU'*Rcal_del*deltaU +...
 %        U'*Rcal*U);
 
 %%%%%%%%%%%%%%%%%%%
 %%% Constraints %%%
 %%%%%%%%%%%%%%%%%%%
-% Actuator Range Constraints
-fc = [-1; 1];
-f_rep = repmat({fc}, 1, Uk*Hu);
-F_L = blkdiag(f_rep{:});
-u_cons = [Ac.pitch_min; -Ac.pitch_max; Ac.pitch_min; -Ac.pitch_max;
-    Ac.pitch_min; -Ac.pitch_max; Ac.Tg_min; -Ac.Tg_max];
-U_L = u_cons;
-for i=1:Hu-1
-    U_L = [U_L; u_cons];
-end
-F = [F_L U_L];
-
-% Actuator Slew Rate Constraints
-ec = [-1; 1];
-e_rep = repmat({ec}, 1, Uk-1);
-e_rep{end+1} = zeros(2,1);
-e_L = blkdiag(e_rep{:});
-
-e_L = repmat({e_L}, 1, Hu);
-E_L = blkdiag(e_L{:});
-du_cons = [-Ac.pitch_dot*ones(6,1); zeros(2,1)];
-dU_L = du_cons;
-for i=1:Hu-1
-    dU_L = [dU_L; du_cons];
-end
-E = [E_L dU_L];
-
-% Constraints in Actuator Variables
-g = [-1; 1];
-g_rep = repmat({g}, 1, Zk-1);
-g_rep{end+1} = [-1;0];
-g_L = blkdiag(g_rep{:});
-
-g_L = repmat({g_L}, 1, Hu);
-G_L = blkdiag(g_L{:});
-z_cons = cell2mat(struct2cell(Z_c));
-Z_L = z_cons;
-for i=1:Hu-1
-    Z_L = [Z_L; z_cons];
-end
-G = [G_L Z_L];
 Zcal = Psi*X0 + Upsilon*Uprev + Theta*deltaU;
 
 Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0; G*[Zcal;1]<=0];
@@ -201,8 +159,11 @@ Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0; G*[Zcal;1]<=0];
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % The Yalmip optimizer-object used for simulation and TurtleBot3 control
-ops = sdpsettings('solver','sedumi');
-MPCobj=optimizer(Constraints,Cost,ops,{X0,Uprev,refht},{U,Xcal});
+ops = sdpsettings('solver','mosek','showprogress',1,'verbose',2,...
+    'cachesolvers',1,'savedebug',1);
+% load('mosekdebug');mosekopt('min write(dump.task.gz)', prob, param)
+
+MPCobj = optimizer(Constraints,Cost,ops,{X0,Uprev,refht},{U,Xcal});
 % U: u*: The optimal control window
 % P: P*: Optimal states in prediction window
 
