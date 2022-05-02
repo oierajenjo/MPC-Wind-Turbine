@@ -10,6 +10,7 @@ deltaU = sdpvar(Uk*Hu,1); % DeltaU
 %%%%%%%%%%%%%%%%%%%%%%%%
 %%% System Variables %%%
 %%%%%%%%%%%%%%%%%%%%%%%%
+
 A1 = [zeros(1,11), -a1*ones(1,3);
     zeros(1,2), 1, zeros(1,11);
     0, -b3, -b4, zeros(1,2), b1*ones(1,3), b2*ones(1,3), zeros(1,3);
@@ -46,11 +47,14 @@ A4 = [-e2(xeq,0), zeros(1,2), -e11(xeq,0), zeros(1,6), -e6(xeq,0), -e5(xeq,0), -
     zeros(2,13)];
 
 Ampc = eye(Lk)+ Ts*[A1 A2; A3 A4];
-% Ampc = eye(Lk); % State Matrix
+% Atemp = Dx_scale\[A1 A2; A3 A4];
+% Ampc = eye(Lk)+ Ts*(Atemp); % State Matrix
+
 
 Bmpc = Ts*[zeros(3,Lk-7), f1*eye(3), zeros(3,4);
     zeros(1,Lk-4), g1, zeros(1,3)]';
-% Bmpc = Ts*eye(Lk,Uk); % Input Matrix
+% Bmpc = Ts*(Dx_scale\[zeros(3,Lk-7), f1*eye(3), zeros(3,4);
+%     zeros(1,Lk-4), g1, zeros(1,3)]'); % Input Matrix
 
 Cmpc = [1, zeros(1,Lk-1);
     0, 0, 1, zeros(1,Lk-3);
@@ -59,7 +63,8 @@ Cmpc = [1, zeros(1,Lk-1);
     zeros(3,14), eye(3), zeros(3,Lk-17);
     zeros(3,Lk-4-3), eye(3), zeros(3,4);
     q2(xeq), zeros(1,Lk-5), q1(xeq), zeros(1,3)];
-% Cmpc = eye(Zk,Lk);
+% Cmpc = Dz_scale\Cmpc_p;
+
 
 Q_c = [20 1 1 1*ones(1,3) 1*ones(1,3) 0*ones(1,3) 20]; % Error Weight
 Qmpc = diag(Q_c);
