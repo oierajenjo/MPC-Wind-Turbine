@@ -26,10 +26,14 @@ B.cy = B.d*2*B.m*B.wy; % Blade damping y direction
 B.ky = B.wy^2*B.m; % Blade stiffness y direction
 B.B = 3; % Blade amount
 B.cc = 1/5; % Correction coefficient Fx
-B.xd_min = -8.7;
-B.xd_max = 10;
-B.yd_min = -5.9;
-B.yd_max = 6.1;
+% B.xd_min = -8.7;
+% B.xd_max = 10;
+% B.yd_min = -5.9;
+% B.yd_max = 6.1;
+B.xd_min = -0;
+B.xd_max = 0;
+B.yd_min = -0;
+B.yd_max = 0;
 
 var.B = B;
 
@@ -55,10 +59,14 @@ rn = sqrt(3.945^2+To.H^2);
 alpha_r = sin(acos(To.H/sqrt(To.xh^2+To.H^2)));
 alpha_n = sin(acos(To.H/sqrt(3.945^2+To.H^2)));
 To.xtoff = (rr*To.Mr*9.807*alpha_r+rn*To.Mn*9.807*alpha_n)/(To.k*(rr*0.37+rn*0.63)*sin(alpha_n*0.37+alpha_r*0.63));
-To.xd_min = 0.20;
-To.xd_max = 0.20;
-To.yd_min = 0.15;
-To.yd_max = 0.15;
+% To.xd_min = -0.20;
+% To.xd_max = 0.20;
+% To.yd_min = -0.15;
+% To.yd_max = 0.15;
+To.xd_min = -0;
+To.xd_max = 0;
+To.yd_min = -0;
+To.yd_max = 0;
 
 var.To = To;
 
@@ -90,14 +98,15 @@ Ac.xi = 0.8; % Damping factor of pitch actuator model
 Ac.tau = 0.1; % Generator time constant
 Ac.pitch_min = 0;
 Ac.pitch_max = pi/2;
-Ac.Tg_min = 1;
+Ac.Tg_min = 0;
 Ac.Tg_max = 2.159e7;
-Ac.pitch_dot = deg2rad(9); % Pitch angle max and min angular speed
+Ac.pitch_dot_min = -deg2rad(9); % Pitch angle min angular speed
+Ac.pitch_dot_max = deg2rad(9); % Pitch angle max angular speed
 Ac.omega_min = convangvel(5,'rpm', 'rad/s');
 Ac.omega_opt = convangvel(7.56,'rpm', 'rad/s');
 Ac.omega_max = convangvel(10,'rpm', 'rad/s');
-
-Ac.Pe_min = D.eta*Ac.Tg_min*Ac.omega_min;
+% Ac.Pe_min = D.eta*Ac.Tg_min*Ac.omega_min;
+Ac.Pe_min = 0;
 Ac.Pe_opt = 15*10^6;
 Ac.Pe_max = D.eta*Ac.Tg_max*Ac.omega_max;
 
@@ -171,12 +180,12 @@ Z_c.ybid_max3 = -B.yd_max;
 % Z_c.pitchi_min3 = Ac.pitch_min;
 % Z_c.pitchi_max3 = -Ac.pitch_max;
 
-Z_c.pitchid_min1 = Ac.pitch_dot;
-Z_c.pitchid_max1 = -Ac.pitch_dot;
-Z_c.pitchid_min2 = Ac.pitch_dot;
-Z_c.pitchid_max2 = -Ac.pitch_dot;
-Z_c.pitchid_min3 = Ac.pitch_dot;
-Z_c.pitchid_max3 = -Ac.pitch_dot;
+Z_c.pitchid_min1 = Ac.pitch_dot_min;
+Z_c.pitchid_max1 = -Ac.pitch_dot_max;
+Z_c.pitchid_min2 = Ac.pitch_dot_min;
+Z_c.pitchid_max2 = -Ac.pitch_dot_max;
+Z_c.pitchid_min3 = Ac.pitch_dot_min;
+Z_c.pitchid_max3 = -Ac.pitch_dot_max;
 
 Z_c.Pe_min = Ac.Pe_min;
 Z_c.Pe_max = -Ac.Pe_opt;

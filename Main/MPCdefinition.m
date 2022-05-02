@@ -45,24 +45,20 @@ A4 = [-e2(xeq,0), zeros(1,2), -e11(xeq,0), zeros(1,6), -e6(xeq,0), -e5(xeq,0), -
     zeros(1,10), -W.w_p(xeq), zeros(1,2);
     zeros(2,13)];
 
-Ampc = [A1 A2;
-    A3 A4];
+Ampc = eye(Lk)+ Ts*[A1 A2; A3 A4];
 % Ampc = eye(Lk); % State Matrix
 
-Bmpc = [zeros(3,Lk-7), f1*eye(3), zeros(3,4);
+Bmpc = Ts*[zeros(3,Lk-7), f1*eye(3), zeros(3,4);
     zeros(1,Lk-4), g1, zeros(1,3)]';
 % Bmpc = Ts*eye(Lk,Uk); % Input Matrix
 
-% CHANGE
 Cmpc = [1, zeros(1,Lk-1);
     0, 0, 1, zeros(1,Lk-3);
     zeros(1,4), 1, zeros(1,Lk-5);
     zeros(3,8), eye(3), zeros(3,Lk-11);
     zeros(3,14), eye(3), zeros(3,Lk-17);
-%     zeros(3,Lk-7-3), eye(3), zeros(3,7);
     zeros(3,Lk-4-3), eye(3), zeros(3,4);
     q2(xeq), zeros(1,Lk-5), q1(xeq), zeros(1,3)];
-
 % Cmpc = eye(Zk,Lk);
 
 Q_c = [20 1 1 1*ones(1,3) 1*ones(1,3) 0*ones(1,3) 20]; % Error Weight
@@ -87,7 +83,7 @@ for i=1:Hp
     end
     Acal = [Acal; Ai];
     
-    Bi = Ampc*Bi+Bmpc;
+    Bi = Ampc*Bi + Bmpc;
     Bcal_u = [Bcal_u; Bi];
 end
 
@@ -114,6 +110,7 @@ Qcal = Qcal(Zk*(Hw-1)+1:end,:);
 
 Rcal = repmat({Rmpc}, 1, Hu);
 Rcal = blkdiag(Rcal{:});
+
 Rcal_del = repmat({R_del}, 1, Hu);
 Rcal_del = blkdiag(Rcal_del{:});
 
@@ -128,31 +125,30 @@ for i=1:Hu-1
     V = [V temp];
 end
 
-deltaU_full = [Uprev; deltaU];
-U = V*deltaU_full; % U: u*: The optimal control window
-
 %%%%%%%%%%%%
 %%% Cost %%%
 %%%%%%%%%%%%
+deltaU_full = [Uprev; deltaU];
+U = V*deltaU_full; % U: u*: The optimal control window
 Xcal = Acal*X0 + Bcal_u*Uprev + Bcal_du*deltaU; % P: P*: Optimal states in prediction window
-Epsilon = Tau - Psi*X0 - Upsilon*Uprev;
+Zcal = Psi*X0 + Upsilon*Uprev + Theta*deltaU;
 
+Epsilon = Tau - Psi*X0 - Upsilon*Uprev;
 Gcal = 2*Theta'*Qcal*Epsilon;
 Hcal = Theta'*Qcal*Theta + Rcal;
 
 Cost = Epsilon'*Qcal*Epsilon - deltaU'*Gcal + deltaU'*Hcal*deltaU;
 
-refht_col = reshape(refht,[Zk*size(refht,2) 1]); % Convert to column vector
-%
-% Cost = Ts*((Xcal-refht_col)'*Qcal*(Xcal-refht_col) + deltaU'*Rcal_del*deltaU +...
+% refht_col = reshape(refht,[Zk*Hp 1]); % Convert to column vector
+% Cost = Ts*((Zcal-refht_col)'*Qcal*(Zcal-refht_col) + deltaU'*Rcal_del*deltaU +...
 %        U'*Rcal*U);
 
 %%%%%%%%%%%%%%%%%%%
 %%% Constraints %%%
 %%%%%%%%%%%%%%%%%%%
-Zcal = Psi*X0 + Upsilon*Uprev + Theta*deltaU;
 
 Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0; G*[Zcal;1]<=0];
+% Constraints = [F*[U;1]<=0; G*[Zcal;1]<=0];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % PLACE YOUR CODE HERE (END)
@@ -161,6 +157,8 @@ Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0; G*[Zcal;1]<=0];
 % The Yalmip optimizer-object used for simulation and TurtleBot3 control
 ops = sdpsettings('solver','mosek','showprogress',1,'verbose',2,...
     'cachesolvers',1,'savedebug',1);
+% ops.mosek.MSK_IPAR_INTPNT_SCALING = 'MSK_SCALING_AGGRESSIVE';
+% ops.mosek.MSK_IPAR_SIM_SCALING = 'MSK_SCALING_AGGRESSIVE';
 % load('mosekdebug');mosekopt('min write(dump.task.gz)', prob, param)
 
 MPCobj = optimizer(Constraints,Cost,ops,{X0,Uprev,refht},{U,Xcal});

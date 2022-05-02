@@ -112,7 +112,8 @@ e_L = blkdiag(e_rep{:});
 
 e_L = repmat({e_L}, 1, Hu);
 E_L = blkdiag(e_L{:});
-du_cons = [-Ac.pitch_dot*ones(6,1); zeros(2,1)];
+du_cons = [Ac.pitch_dot_min; -Ac.pitch_dot_max; Ac.pitch_dot_min; ...
+    -Ac.pitch_dot_max; Ac.pitch_dot_min; -Ac.pitch_dot_max; zeros(2,1)];
 dU_L = du_cons;
 for i=1:Hu-1
     dU_L = [dU_L; du_cons];
@@ -120,9 +121,12 @@ end
 E = [E_L dU_L];
 
 % Constraints in Actuator Variables
-g = [-1; 1];
-g_rep = repmat({g}, 1, Zk-1);
-g_rep{end+1} = [-1;0];
+g = [0; 0];
+g_rep = repmat({g}, 1, Zk-4);
+g_rep{1} = [-1;1];
+for k=1:4
+    g_rep{end+1} = [-1;1];
+end
 g_L = blkdiag(g_rep{:});
 
 g_L = repmat({g_L}, 1, Hu);
