@@ -47,14 +47,12 @@ A4 = [-e2(xeq,0), zeros(1,2), -e11(xeq,0), zeros(1,6), -e6(xeq,0), -e5(xeq,0), -
     zeros(2,13)];
 
 Ampc = eye(Lk)+ Ts*[A1 A2; A3 A4];
-% Atemp = Dx_scale\[A1 A2; A3 A4];
-% Ampc = eye(Lk)+ Ts*(Atemp); % State Matrix
+Ampc = Sx\Ampc*Sx;% State Matrix
 
 
 Bmpc = Ts*[zeros(3,Lk-7), f1*eye(3), zeros(3,4);
     zeros(1,Lk-4), g1, zeros(1,3)]';
-% Bmpc = Ts*(Dx_scale\[zeros(3,Lk-7), f1*eye(3), zeros(3,4);
-%     zeros(1,Lk-4), g1, zeros(1,3)]'); % Input Matrix
+Bmpc = Sx\Bmpc; % Input Matrix
 
 
 lambda_rows = [
@@ -70,7 +68,7 @@ Cmpc = [1, zeros(1,Lk-1);
     lambda_rows;
     zeros(3,Lk-4-3), eye(3), zeros(3,4);
     q2(xeq), zeros(1,Lk-5), q1(xeq), zeros(1,3)];
-% Cmpc = Dz_scale\Cmpc_p;
+Cmpc = Sz\Cmpc*Sx;
 
 if xeq(26)<= W.rate_point
     Q_c = [0 1 1 1*ones(1,3) 1*ones(1,3) 20*ones(1,3) 0*ones(1,3) 5]; % Error Weight (lambda)    
@@ -162,16 +160,14 @@ Cost = Epsilon'*Qcal*Epsilon - deltaU'*Gcal + deltaU'*Hcal*deltaU;
 %%% Constraints %%%
 %%%%%%%%%%%%%%%%%%%
 
-Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0; G*[Zcal;1]<=0];
-% Constraints = [F*[U;1]<=0; G*[Zcal;1]<=0];
+% Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0; G*[Zcal;1]<=0];
+Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % PLACE YOUR CODE HERE (END)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % The Yalmip optimizer-object used for simulation and TurtleBot3 control
-ops = sdpsettings('solver','mosek','showprogress',1,'verbose',2,...
-    'cachesolvers',1,'savedebug',1);
 % ops.mosek.MSK_IPAR_INTPNT_SCALING = 'MSK_SCALING_AGGRESSIVE';
 % ops.mosek.MSK_IPAR_SIM_SCALING = 'MSK_SCALING_AGGRESSIVE';
 % load('mosekdebug');mosekopt('min write(dump.task.gz)', prob, param)

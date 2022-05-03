@@ -94,6 +94,13 @@ q2 = @(x) D.eta*x(24);
 %%%%%%%%%%%%%%%
 % CONSTRAINTS %
 %%%%%%%%%%%%%%%
+
+Sx = eye(Lk);
+Sx(end-3,end-3) = S_means(1); %Tg
+
+Sz = eye(Zk);
+Sx(end,end) = S_means(2); %Pe
+
 % Actuator Range Constraints
 fc = [-1; 1];
 f_rep = repmat({fc}, 1, Uk*Hu);
@@ -139,3 +146,8 @@ for i=1:Hu-1
     Z_L = [Z_L; z_cons];
 end
 G = [G_L Z_L];
+
+ops = sdpsettings('solver','mosek','showprogress',0,'verbose',1,...
+    'cachesolvers',1,'savedebug',0,'debug',1,'savesolverinput',0,'savesolveroutput',0);
+
+

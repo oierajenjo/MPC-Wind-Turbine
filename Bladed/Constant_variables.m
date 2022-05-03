@@ -202,8 +202,8 @@ Z_c.pitchid_max2 = -Ac.pitch_dot_max;
 Z_c.pitchid_min3 = Ac.pitch_dot_min;
 Z_c.pitchid_max3 = -Ac.pitch_dot_max;
 
-Z_c.Pe_min = Ac.Pe_min;
-Z_c.Pe_max = -Ac.Pe_opt;
+Z_c.Pe_min = Ac.Pe_min/S_means(2);
+Z_c.Pe_max = -Ac.Pe_opt/S_means(2);
 
 % Z_c.omega_r_min = convangvel(5,'rpm', 'rad/s');
 % Z_c.omega_r_max = - convangvel(10,'rpm', 'rad/s');

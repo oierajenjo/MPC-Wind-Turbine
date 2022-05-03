@@ -14,7 +14,7 @@ try
     %         disp('Matrix is symmetric positive definite.');
 catch ME
     disp('Matrix is not symmetric positive definite');
-    k
+%     k
     return
 end
 
