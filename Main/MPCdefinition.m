@@ -56,17 +56,27 @@ Bmpc = Ts*[zeros(3,Lk-7), f1*eye(3), zeros(3,4);
 % Bmpc = Ts*(Dx_scale\[zeros(3,Lk-7), f1*eye(3), zeros(3,4);
 %     zeros(1,Lk-4), g1, zeros(1,3)]'); % Input Matrix
 
+
+lambda_rows = [
+    r1(xeq,1), 0, r6(xeq,1), zeros(1,5), r7(xeq,1), zeros(1,5), r2(xeq,1), zeros(1,9), r5(xeq,1), r3(xeq,1), r4(xeq,1);
+    r1(xeq,2), 0, r6(xeq,2), zeros(1,6), r7(xeq,2), zeros(1,5), r2(xeq,2), zeros(1,8), r5(xeq,2), r3(xeq,1), r4(xeq,1);
+    r1(xeq,3), 0, r6(xeq,3), zeros(1,7), r7(xeq,3), zeros(1,5), r2(xeq,3), zeros(1,7), r5(xeq,3), r3(xeq,1), r4(xeq,1);];
+
 Cmpc = [1, zeros(1,Lk-1);
     0, 0, 1, zeros(1,Lk-3);
     zeros(1,4), 1, zeros(1,Lk-5);
     zeros(3,8), eye(3), zeros(3,Lk-11);
     zeros(3,14), eye(3), zeros(3,Lk-17);
+    lambda_rows;
     zeros(3,Lk-4-3), eye(3), zeros(3,4);
     q2(xeq), zeros(1,Lk-5), q1(xeq), zeros(1,3)];
 % Cmpc = Dz_scale\Cmpc_p;
 
-
-Q_c = [20 1 1 1*ones(1,3) 1*ones(1,3) 0*ones(1,3) 20]; % Error Weight
+if xeq(26)<= W.rate_point
+    Q_c = [0 1 1 1*ones(1,3) 1*ones(1,3) 20*ones(1,3) 0*ones(1,3) 5]; % Error Weight (lambda)    
+else
+    Q_c = [20 1 1 1*ones(1,3) 1*ones(1,3) 0*ones(1,3) 0*ones(1,3) 5]; % Error Weight (omega_r)
+end
 Qmpc = diag(Q_c);
 
 R_c = 0.1; % Input Weight

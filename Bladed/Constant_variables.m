@@ -77,21 +77,6 @@ Ae.Ar = pi*Ae.Rr^2; % Rotor area
 
 var.Ae = Ae;
 
-%% Wind model constants
-Ts = 0.05; % Sampling time
-W.ti = 0.15; % Turbulence intensity
-W.q = 2^2/600; % Incremental variance mean wind speed
-W.mu_m = 6; % Fixed mean wind speed: 10 m/s
-W.L = 340.2;
-W.alpha = 0.15; % Wind shear exponent for smooth terrain
-W.mu_v = mean(data.Data(:,59));
-W.w_p = @(x) W.mu_v*pi/(2*W.L);
-W.a = @(x) 1 - W.w_p(x)*Ts; % Euler
-W.sigma_t = @(x) W.ti*W.mu_v*sqrt((1-W.a(x)^2)/(1-W.a(x))^2);
-W.sigma_m = sqrt(W.q);
-
-var.W = W;
-
 %% Actuator constants
 Ac.omega = 2.4*pi; % Natural frequency of pitch actuator model
 Ac.xi = 0.8; % Damping factor of pitch actuator model
@@ -111,6 +96,29 @@ Ac.Pe_opt = 15*10^6;
 Ac.Pe_max = D.eta*Ac.Tg_max*Ac.omega_max;
 
 var.Ac = Ac;
+
+%% Wind model constants
+Ts = 0.05; % Sampling time
+W.ti = 0.15; % Turbulence intensity
+W.q = 2^2/600; % Incremental variance mean wind speed
+W.mu_m = 6; % Fixed mean wind speed: 10 m/s
+W.L = 340.2;
+W.alpha = 0.15; % Wind shear exponent for smooth terrain
+
+W.mu_v = mean(data.Data(:,59));
+W.w_p = @(x) W.mu_v*pi/(2*W.L);
+W.a = @(x) 1 - W.w_p(x)*Ts; % Euler
+W.sigma_t = @(x) W.ti*W.mu_v*sqrt((1-W.a(x)^2)/(1-W.a(x))^2);
+W.sigma_m = sqrt(W.q);
+
+W.w_min = 4;
+W.w_max = 25;
+W.rate_point = 10.5;
+W.TSR = 9.0621; % Optimal Tip Speed Ratio
+W.lambda_min = Ac.omega_min*Ae.Rr/W.w_max;
+W.lambda_max = Ac.omega_max*Ae.Rr/W.w_min;
+
+var.W = W;
 
 %% Measurement constants
 M.sigma_enc = 0.017;
@@ -179,6 +187,13 @@ Z_c.ybid_max3 = -B.yd_max;
 % Z_c.pitchi_max2 = -Ac.pitch_max;
 % Z_c.pitchi_min3 = Ac.pitch_min;
 % Z_c.pitchi_max3 = -Ac.pitch_max;
+
+Z_c.lambda_min1 = W.lambda_min;
+Z_c.lambda_max1 = -W.lambda_max;
+Z_c.lambda_min2 = W.lambda_min;
+Z_c.lambda_max2 = -W.lambda_max;
+Z_c.lambda_min3 = W.lambda_min;
+Z_c.lambda_max3 = -W.lambda_max;
 
 Z_c.pitchid_min1 = Ac.pitch_dot_min;
 Z_c.pitchid_max1 = -Ac.pitch_dot_max;

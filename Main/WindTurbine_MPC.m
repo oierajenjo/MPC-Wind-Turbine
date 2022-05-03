@@ -62,7 +62,7 @@ uprev_mpc = u_b(:,1);
 xeq = x_i;
 
 %% Reference trajectories
-ref_me = [Ac.omega_opt*ones(N,1) zeros(N,Zk-2) Ac.Pe_opt*ones(N,1)]';
+ref_me = [Ac.omega_opt*ones(N,1), zeros(N,8), W.TSR*ones(N,3) , zeros(N,3), Ac.Pe_opt*ones(N,1)]';
 
 disp('Running Loop')
 for k=1:N-1-Hp
