@@ -26,14 +26,14 @@ B.cy = B.d*2*B.m*B.wy; % Blade damping y direction
 B.ky = B.wy^2*B.m; % Blade stiffness y direction
 B.B = 3; % Blade amount
 B.cc = 1/5; % Correction coefficient Fx
-% B.xd_min = -8.7;
-% B.xd_max = 10;
-% B.yd_min = -5.9;
-% B.yd_max = 6.1;
-B.xd_min = -0;
-B.xd_max = 0;
-B.yd_min = -0;
-B.yd_max = 0;
+B.xd_min = -8.7;
+B.xd_max = 10;
+B.yd_min = -5.9;
+B.yd_max = 6.1;
+% B.xd_min = -0;
+% B.xd_max = 0;
+% B.yd_min = -0;
+% B.yd_max = 0;
 
 var.B = B;
 
@@ -59,14 +59,14 @@ rn = sqrt(3.945^2+To.H^2);
 alpha_r = sin(acos(To.H/sqrt(To.xh^2+To.H^2)));
 alpha_n = sin(acos(To.H/sqrt(3.945^2+To.H^2)));
 To.xtoff = (rr*To.Mr*9.807*alpha_r+rn*To.Mn*9.807*alpha_n)/(To.k*(rr*0.37+rn*0.63)*sin(alpha_n*0.37+alpha_r*0.63));
-% To.xd_min = -0.20;
-% To.xd_max = 0.20;
-% To.yd_min = -0.15;
-% To.yd_max = 0.15;
-To.xd_min = -0;
-To.xd_max = 0;
-To.yd_min = -0;
-To.yd_max = 0;
+To.xd_min = -0.20;
+To.xd_max = 0.20;
+To.yd_min = -0.15;
+To.yd_max = 0.15;
+% To.xd_min = -0;
+% To.xd_max = 0;
+% To.yd_min = -0;
+% To.yd_max = 0;
 
 var.To = To;
 
@@ -87,7 +87,7 @@ Ac.Tg_min = 0;
 Ac.Tg_max = 2.159e7;
 Ac.pitch_dot_min = -deg2rad(9); % Pitch angle min angular speed
 Ac.pitch_dot_max = deg2rad(9); % Pitch angle max angular speed
-Ac.omega_min = convangvel(5,'rpm', 'rad/s');
+Ac.omega_min = convangvel(0,'rpm', 'rad/s');
 Ac.omega_opt = convangvel(7.56,'rpm', 'rad/s');
 Ac.omega_max = convangvel(10,'rpm', 'rad/s');
 % Ac.Pe_min = D.eta*Ac.Tg_min*Ac.omega_min;
@@ -106,9 +106,9 @@ W.L = 340.2;
 W.alpha = 0.15; % Wind shear exponent for smooth terrain
 
 W.mu_v = mean(data.Data(:,59));
-W.w_p = @(x) W.mu_v*pi/(2*W.L);
-W.a = @(x) 1 - W.w_p(x)*Ts; % Euler
-W.sigma_t = @(x) W.ti*W.mu_v*sqrt((1-W.a(x)^2)/(1-W.a(x))^2);
+W.w_p = W.mu_v*pi/(2*W.L);
+W.a = 1 - W.w_p*Ts; % Euler
+W.sigma_t = W.ti*W.mu_v*sqrt((1-W.a^2)/(1-W.a)^2);
 W.sigma_m = sqrt(W.q);
 
 W.w_min = 4;

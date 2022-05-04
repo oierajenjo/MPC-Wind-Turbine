@@ -43,7 +43,7 @@ A4 = [-e2(xeq,0), zeros(1,2), -e11(xeq,0), zeros(1,6), -e6(xeq,0), -e5(xeq,0), -
     zeros(3,6), eye(3), zeros(3,4);
     zeros(3), -f1*eye(3), -f2*eye(3), zeros(3,4);
     zeros(1,9), -g1, zeros(1,3);
-    zeros(1,10), -W.w_p(xeq), zeros(1,2);
+    zeros(1,10), -W.w_p, zeros(1,2);
     zeros(2,13)];
 
 Ampc = eye(Lk)+ Ts*[A1 A2; A3 A4];
@@ -71,9 +71,9 @@ Cmpc = [1, zeros(1,Lk-1);
 Cmpc = Sz\Cmpc*Sx;
 
 if xeq(26)<= W.rate_point
-    Q_c = [0 1 1 1*ones(1,3) 1*ones(1,3) 20*ones(1,3) 0*ones(1,3) 5]; % Error Weight (lambda)    
+    Q_c = [0 1 1 ones(1,3) ones(1,3) 20*ones(1,3) ones(1,3) 5]; % Error Weight (lambda)    
 else
-    Q_c = [20 1 1 1*ones(1,3) 1*ones(1,3) 0*ones(1,3) 0*ones(1,3) 5]; % Error Weight (omega_r)
+    Q_c = [20 1 1 ones(1,3) ones(1,3) zeros(1,3) zeros(1,3) 5]; % Error Weight (omega_r)
 end
 Qmpc = diag(Q_c);
 
@@ -162,6 +162,7 @@ Cost = Epsilon'*Qcal*Epsilon - deltaU'*Gcal + deltaU'*Hcal*deltaU;
 
 % Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0; G*[Zcal;1]<=0];
 Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0];
+% Constraints = G*[Zcal;1]<=0;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % PLACE YOUR CODE HERE (END)

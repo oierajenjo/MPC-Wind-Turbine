@@ -80,7 +80,7 @@ g1 = 1/Ac.tau;
 g2 = @(x,u) 2*u(4)*x(1)/Ac.tau;
 
 % vt
-h1 = @(x) W.w_p(x);
+h1 = W.w_p;
 
 % My & Mx
 p1 = B.kx*2*B.l/3;
@@ -99,7 +99,7 @@ Sx = eye(Lk);
 Sx(end-3,end-3) = S_means(1); %Tg
 
 Sz = eye(Zk);
-Sx(end,end) = S_means(2); %Pe
+Sz(end,end) = S_means(2); %Pe
 
 % Actuator Range Constraints
 fc = [-1; 1];
@@ -130,13 +130,17 @@ end
 E = [E_L dU_L];
 
 % Constraints in Actuator Variables
-g = [0; 0];
+% g = [-1;1];
+% g_rep = repmat({g}, 1, Zk);
+% g_L = blkdiag(g_rep{:});
+g = zeros(2,1);
 g_rep = repmat({g}, 1, Zk-7);
 g_rep{1} = [-1;1];
 for k=1:7
     g_rep{end+1} = [-1;1];
 end
 g_L = blkdiag(g_rep{:});
+
 
 g_L = repmat({g_L}, 1, Hu);
 G_L = blkdiag(g_L{:});

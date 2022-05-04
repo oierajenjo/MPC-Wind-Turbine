@@ -10,8 +10,6 @@ Yk = size(y,1); % Size of measured vector
 % Step 1: Generate the sigma-points
 try
     sP = chol(P,'lower');% Calculate square root of error covariance
-    %       norm(sP*sP' - P)
-    %         disp('Matrix is symmetric positive definite.');
 catch ME
     disp('Matrix is not symmetric positive definite');
 %     k
@@ -33,7 +31,7 @@ end
 
 x_m = chi_m*wm; % Calculate mean of predicted state
 % Calculate covariance of predicted state
-P_m = Q(x); % A priori covariance estimate
+P_m = Q; % A priori covariance estimate
 for j = 1:n_sigma_p
     P_m = P_m + wc(j)*(chi_m(:,j) - x_m)*(chi_m(:,j) - x_m)';
 end
