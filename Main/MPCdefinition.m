@@ -66,14 +66,14 @@ Cmpc = [1, zeros(1,Lk-1);
     zeros(3,8), eye(3), zeros(3,Lk-11);
     zeros(3,14), eye(3), zeros(3,Lk-17);
     lambda_rows;
-    zeros(3,Lk-4-3), eye(3), zeros(3,4);
+    zeros(6,Lk-4-6), eye(6), zeros(6,4);
     q2(xeq), zeros(1,Lk-5), q1(xeq), zeros(1,3)];
 Cmpc = Sz\Cmpc*Sx;
 
 if xeq(26)<= W.rate_point
-    Q_c = [0 1 1 ones(1,3) ones(1,3) 20*ones(1,3) ones(1,3) 5]; % Error Weight (lambda)    
+    Q_c = [0 1 1 ones(1,3) ones(1,3) 20*ones(1,3) ones(1,6) 5]; % Error Weight (lambda)    
 else
-    Q_c = [20 1 1 ones(1,3) ones(1,3) zeros(1,3) zeros(1,3) 5]; % Error Weight (omega_r)
+    Q_c = [20 1 1 ones(1,3) ones(1,3) zeros(1,3) zeros(1,6) 5]; % Error Weight (omega_r)
 end
 Qmpc = diag(Q_c);
 
@@ -144,7 +144,7 @@ end
 deltaU_full = [Uprev; deltaU];
 U = V*deltaU_full; % U: u*: The optimal control window
 Xcal = Acal*X0 + Bcal_u*Uprev + Bcal_du*deltaU; % P: P*: Optimal states in prediction window
-Zcal = Psi*X0 + Upsilon*Uprev + Theta*deltaU;
+Zcal = Psi*X0 + Upsilon*Uprev + Theta*deltaU; % CHECK Scalling
 
 Epsilon = Tau - Psi*X0 - Upsilon*Uprev;
 Gcal = 2*Theta'*Qcal*Epsilon;
@@ -160,8 +160,8 @@ Cost = Epsilon'*Qcal*Epsilon - deltaU'*Gcal + deltaU'*Hcal*deltaU;
 %%% Constraints %%%
 %%%%%%%%%%%%%%%%%%%
 
-% Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0; G*[Zcal;1]<=0];
-Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0];
+Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0; G*[Zcal;1]<=0];
+% Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0];
 % Constraints = G*[Zcal;1]<=0;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

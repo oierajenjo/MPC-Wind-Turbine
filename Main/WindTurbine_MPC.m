@@ -63,14 +63,14 @@ x_mpc = x_tv;
 u_mpc = zeros(Uk, N);
 
 %% Reference trajectories
-ref_me = [Ac.omega_opt*ones(N+Hp,1), zeros(N+Hp,8), W.TSR*ones(N+Hp,3) , zeros(N+Hp,3), Ac.Pe_opt*ones(N+Hp,1)]';
+ref_me = [Ac.omega_opt*ones(N+Hp,1), zeros(N+Hp,8), W.TSR*ones(N+Hp,3) , zeros(N+Hp,6), Ac.Pe_opt*ones(N+Hp,1)]';
 ref_me = Sz\ref_me;
 
 disp('Running Loop')
 for k=1:N-1
     %% MPC
     MPCdefinition
-    res = MPCobj({Sx\xeq,uprev_mpc,ref_me(:,k+1:k+Hp)});
+    res = MPCobj({Sx\x_kf(:,k),uprev_mpc,ref_me(:,k+1:k+Hp)});
 
     u_L = res{1};
     u_temp = reshape(u_L, [Uk, length(u_L)/Uk]);
@@ -94,7 +94,7 @@ for k=1:N-1
     [x_kf(:,k+1),P,e(:,k+1)] = UKF(f,h,Q,R,x_kf(:,k),yt(:,k+1),uprev_mpc,kal,P,Ts,v(:,k+1),n);
 %     end
     
-    xeq = x_kf(:,k+1);
+    xeq = x_tv(:,k+1);
     if mod(k,30) == 0
          disp("Iteration: " + k);
     end

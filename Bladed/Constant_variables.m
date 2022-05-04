@@ -93,7 +93,8 @@ Ac.omega_max = convangvel(10,'rpm', 'rad/s');
 % Ac.Pe_min = D.eta*Ac.Tg_min*Ac.omega_min;
 Ac.Pe_min = 0;
 Ac.Pe_opt = 15*10^6;
-Ac.Pe_max = D.eta*Ac.Tg_max*Ac.omega_max;
+% Ac.Pe_max = Ac.Tg_max*Ac.omega_max;
+Ac.Pe_max = 0;
 
 var.Ac = Ac;
 
@@ -117,6 +118,8 @@ W.rate_point = 10.5;
 W.TSR = 9.0621; % Optimal Tip Speed Ratio
 W.lambda_min = Ac.omega_min*Ae.Rr/W.w_max;
 W.lambda_max = Ac.omega_max*Ae.Rr/W.w_min;
+% W.lambda_min = 0;
+% W.lambda_max = 0;
 
 var.W = W;
 
@@ -162,6 +165,7 @@ Hw = 1; % Window parameter
 % Constraints limit values
 Z_c.omega_min = Ac.omega_min;
 Z_c.omega_max = -Ac.omega_max;
+
 Z_c.xtd_min = To.xd_min;
 Z_c.xtd_max = -To.xd_max;
 Z_c.ytd_min = To.yd_min;
@@ -195,6 +199,13 @@ Z_c.lambda_max2 = -W.lambda_max;
 Z_c.lambda_min3 = W.lambda_min;
 Z_c.lambda_max3 = -W.lambda_max;
 
+Z_c.pitchi_min1 = Ac.pitch_min;
+Z_c.pitchi_max1 = -Ac.pitch_max;
+Z_c.pitchi_min2 = Ac.pitch_min;
+Z_c.pitchi_max2 = -Ac.pitch_max;
+Z_c.pitchi_min3 = Ac.pitch_min;
+Z_c.pitchi_max3 = -Ac.pitch_max;
+
 Z_c.pitchid_min1 = Ac.pitch_dot_min;
 Z_c.pitchid_max1 = -Ac.pitch_dot_max;
 Z_c.pitchid_min2 = Ac.pitch_dot_min;
@@ -202,27 +213,8 @@ Z_c.pitchid_max2 = -Ac.pitch_dot_max;
 Z_c.pitchid_min3 = Ac.pitch_dot_min;
 Z_c.pitchid_max3 = -Ac.pitch_dot_max;
 
-Z_c.Pe_min = Ac.Pe_min/S_means(2);
-Z_c.Pe_max = -Ac.Pe_opt/S_means(2);
-
-% Z_c.omega_r_min = convangvel(5,'rpm', 'rad/s');
-% Z_c.omega_r_max = - convangvel(10,'rpm', 'rad/s');
-% Z_c.xtdd_min = 0;
-% Z_c.xtdd_max = -0;
-% Z_c.ytdd_min = 0;
-% Z_c.ytdd_max = -0;
-% Z_c.My_min1 = B.m*B.l*B.xdd_min; Z_c.My_max1 = -B.m*B.l*B.xdd_max;
-% Z_c.My_min2 = B.m*B.l*B.xdd_min; Z_c.My_max2 = -B.m*B.l*B.xdd_max;
-% Z_c.My_min3 = B.m*B.l*B.xdd_min; Z_c.My_max3 = -B.m*B.l*B.xdd_max;
-% Z_c.Mx_min1 = B.m*B.l*B.ydd_min; Z_c.Mx_max1 = -B.m*B.l*B.ydd_max;
-% Z_c.Mx_min2 = B.m*B.l*B.ydd_min; Z_c.Mx_max2 = -B.m*B.l*B.ydd_max;
-% Z_c.Mx_min3 = B.m*B.l*B.ydd_min; Z_c.Mx_max3 = -B.m*B.l*B.ydd_max;
-% Z_c.Pe_min = D.eta*U_c.Tg_min*Z_c.omega_r_min;
-% Z_c.Pe_max = -D.eta*U_c.Tg_max*Z_c.omega_r_max;
-% Z_c.vr_min = 4;
-% Z_c.vr_max = -25;
-% Z_c.azim_min = 0;
-% Z_c.azim_max = -0;
+Z_c.Pe_min = Ac.Pe_min;
+Z_c.Pe_max = -Ac.Pe_max;
 
 Zk = size(struct2table(Z_c),2)/2;
 
