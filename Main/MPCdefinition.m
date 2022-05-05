@@ -110,10 +110,6 @@ Ccal = repmat({Cmpc}, 1, Hp);
 Ccal = blkdiag(Ccal{:});
 Ccal = Ccal(Zk*(Hw-1)+1:end,:); % CHANGE
 
-Psi = Ccal*Acal;
-Upsilon = Ccal*Bcal_u;
-Theta = Ccal*Bcal_du;
-
 Tau = reshape(refht,[Zk*Hp 1]); % Convert to column vector
 Tau = Tau(Zk*(Hw-1)+1:end,:);
 
@@ -143,8 +139,13 @@ end
 %%%%%%%%%%%%
 deltaU_full = [Uprev; deltaU];
 U = V*deltaU_full; % U: u*: The optimal control window
+
+Psi = Ccal*Acal;
+Upsilon = Ccal*Bcal_u;
+Theta = Ccal*Bcal_du;
+
 Xcal = Acal*X0 + Bcal_u*Uprev + Bcal_du*deltaU; % P: P*: Optimal states in prediction window
-Zcal = Psi*X0 + Upsilon*Uprev + Theta*deltaU; % CHECK Scalling
+Zcal = Psi*X0 + Upsilon*Uprev + Theta*deltaU;
 
 Epsilon = Tau - Psi*X0 - Upsilon*Uprev;
 Gcal = 2*Theta'*Qcal*Epsilon;
@@ -173,7 +174,7 @@ Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0; G*[Zcal;1]<=0];
 % ops.mosek.MSK_IPAR_SIM_SCALING = 'MSK_SCALING_AGGRESSIVE';
 % load('mosekdebug');mosekopt('min write(dump.task.gz)', prob, param)
 
-MPCobj = optimizer(Constraints,Cost,ops,{X0,Uprev,refht},{U,Xcal});
+MPCobj = optimizer(Constraints,Cost,ops,{X0,Uprev,refht},{U,Xcal,Zcal});
 % U: u*: The optimal control window
 % P: P*: Optimal states in prediction window
 

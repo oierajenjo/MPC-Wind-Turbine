@@ -96,10 +96,10 @@ q2 = @(x) D.eta*x(24);
 %%%%%%%%%%%%%%%
 
 Sx = eye(Lk);
-Sx(end-3,end-3) = S_means(1); %Tg
+% Sx(end-3,end-3) = S_means(1); %Tg
 
 Sz = eye(Zk);
-Sz(end,end) = S_means(2); %Pe
+% Sz(end,end) = S_means(2); %Pe
 
 % Actuator Range Constraints
 fc = [-1; 1];

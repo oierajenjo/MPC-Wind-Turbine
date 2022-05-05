@@ -61,6 +61,8 @@ uprev_mpc = u_b(:,1);
 xeq = x_i;
 x_mpc = x_tv;
 u_mpc = zeros(Uk, N);
+z_mpc = zeros(Zk, N);
+z_mpc(:,1) = z_i;
 
 %% Reference trajectories
 ref_me = [Ac.omega_opt*ones(N+Hp,1), zeros(N+Hp,8), W.TSR*ones(N+Hp,3) , zeros(N+Hp,6), Ac.Pe_opt*ones(N+Hp,1)]';
@@ -80,6 +82,10 @@ for k=1:N-1
     x_L = res{2};
     x_temp = Sx*reshape(x_L, [Lk, length(x_L)/Lk]);
     x_mpc(:,k+1) = x_temp(:,1);
+    
+    z_L = res{3};
+    z_temp = reshape(z_L, [Zk, length(z_L)/Zk]);
+    z_mpc(:,k+1) = z_temp(:,1);
     
     %% Runge-Kutta 4th order method
 %     disp('Running True Values')
