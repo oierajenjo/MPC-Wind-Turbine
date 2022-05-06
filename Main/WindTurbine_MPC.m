@@ -50,7 +50,7 @@ ref_me = [Ac.omega_opt*ones(N+Hp,1), zeros(N+Hp,8), W.TSR*ones(N+Hp,3) , zeros(N
 ref_me = Sz\ref_me;
 
 disp('Running Loop')
-for k=1:30-1
+for k=1:N-1
     %% MPC
     MPCdefinition
     res = MPCobj({Sx\x_kf(:,k),uprev_mpc,ref_me(:,k+1:k+Hp)});
