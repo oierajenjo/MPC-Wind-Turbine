@@ -10,25 +10,6 @@ Constant_variables
 MPCconstants
 addpath('functions');
 
-% UNCOMMENT
-% kAns = questdlg('Execute Kalman Filter with Bladed measurements', ...
-% 	'Kalman Filter');
-% kAns = 'No';
-% kAns = convertCharsToStrings(kAns);
-% if kAns=="Cancel"
-%     return
-% elseif kAns == "Yes"
-%     disp("Measured values")
-% elseif kAns == "No"
-%     disp("True values")
-% end
-
-% u_b = ones(4,N);
-% theta_f = 0;
-% [lamb_opt, cp_opt] = cp_max(theta_f,cp_l,lambdaVec,pitchVec);
-% K = 0.5*Ae.rho*Ae.Rr^5*pi*cp_opt/lamb_opt^3;
-% u_b = [theta_f; theta_f; theta_f; K].*u_b;
-
 [f,h,Q,R] = system_IPC(var,ct_l,cp_l,lambdaVec,pitchVec,Lk);
 
 % Step 3: Initialize state and covariance
@@ -69,7 +50,7 @@ ref_me = [Ac.omega_opt*ones(N+Hp,1), zeros(N+Hp,8), W.TSR*ones(N+Hp,3) , zeros(N
 ref_me = Sz\ref_me;
 
 disp('Running Loop')
-for k=1:N-1
+for k=1:30-1
     %% MPC
     MPCdefinition
     res = MPCobj({Sx\x_kf(:,k),uprev_mpc,ref_me(:,k+1:k+Hp)});
@@ -88,17 +69,10 @@ for k=1:N-1
     z_mpc(:,k+1) = z_temp(:,1);
     
     %% Runge-Kutta 4th order method
-%     disp('Running True Values')
     [x_tv(:,k+1),yt(:,k+1)] = RK4(f,x_tv(:,k),uprev_mpc,h,n(x_tv(:,k)),v(:,k+1),Ts);
 
     %% Unscented Kalman Filter
-%     if kAns == "Yes"
-%         disp('Running Kalman Filter')
-%         [x_kf(:,k+1),P,e(:,k+1)] = UKF(f,h,Q,R,x_kf(:,k),y_me(:,k+1),uprev_mpc,kal,P,Ts,v(:,k+1),n);
-%     elseif kAns == "No"
-%         disp('Running Kalman Filter')
     [x_kf(:,k+1),P,e(:,k+1)] = UKF(f,h,Q,R,x_kf(:,k),yt(:,k+1),uprev_mpc,kal,P,Ts,v(:,k+1),n);
-%     end
     
     xeq = x_tv(:,k+1);
     if mod(k,30) == 0
@@ -109,6 +83,7 @@ x_kf(end,:) = wrapToPi(x_kf(end,:))+pi;
 x_tv(end,:) = wrapToPi(x_tv(end,:))+pi;
 
 %% Display results
-true_plots(yt,y_me,x_tv,data,t)
-result_display(t,Lk,x_kf,x_tv,x_ul,x_vl)
+true_plots(Lk,yt,x_kf,x_ul,x_vl,t)
+% result_display(t,Lk,x_kf,x_mpc,x_ul,x_vl)
+save('working_MPC.mat')
 rmpath('functions')

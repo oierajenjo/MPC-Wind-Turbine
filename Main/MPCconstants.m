@@ -132,18 +132,23 @@ E = [E_L dU_L];
 % Constraints in Actuator Variables
 g = [-1;1];
 g_rep = repmat({g}, 1, Zk);
-g_rep{end} = zeros(2,1);
+% for i=0:1
+%     g_rep{2+i} = zeros(2,1);
+% end
+% for i=0:2
+%     g_rep{10+i} = zeros(2,1);
+% end
+% g_rep{end} = zeros(2,1);
 g_L = blkdiag(g_rep{:});
 
-g = zeros(2,1);
-g_rep = repmat({g}, 1, Zk-7);
-g_rep{1} = [-1;1];
-for k=1:7
-    g_rep{end+1} = [-1;1];
-end
-g_rep{end} = zeros(2,1);
-g_L = blkdiag(g_rep{:});
-
+% g = zeros(2,1);
+% g_rep = repmat({g}, 1, Zk-7);
+% g_rep{1} = [-1;1];
+% for k=1:7
+%     g_rep{end+1} = [-1;1];
+% end
+% % g_rep{end} = zeros(2,1);
+% g_L = blkdiag(g_rep{:});
 
 g_L = repmat({g_L}, 1, Hu);
 G_L = blkdiag(g_L{:});

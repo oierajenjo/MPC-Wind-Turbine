@@ -71,9 +71,9 @@ Cmpc = [1, zeros(1,Lk-1);
 Cmpc = Sz\Cmpc*Sx;
 
 if xeq(26)<= W.rate_point
-    Q_c = [0 1 1 ones(1,3) ones(1,3) 20*ones(1,3) ones(1,6) 5]; % Error Weight (lambda)    
+    Q_c = [0 5 5 5*ones(1,3) 5*ones(1,3) 20*ones(1,3) ones(1,6) 5]; % Error Weight (lambda)    
 else
-    Q_c = [20 1 1 ones(1,3) ones(1,3) zeros(1,3) zeros(1,6) 5]; % Error Weight (omega_r)
+    Q_c = [20 5 5 5*ones(1,3) 5*ones(1,3) zeros(1,3) zeros(1,6) 5]; % Error Weight (omega_r)
 end
 Qmpc = diag(Q_c);
 
@@ -161,8 +161,8 @@ Cost = Epsilon'*Qcal*Epsilon - deltaU'*Gcal + deltaU'*Hcal*deltaU;
 %%% Constraints %%%
 %%%%%%%%%%%%%%%%%%%
 
-Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0; G*[Zcal;1]<=0];
-% Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0];
+% Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0; G*[Zcal;1]<=0];
+Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0];
 % Constraints = G*[Zcal;1]<=0;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

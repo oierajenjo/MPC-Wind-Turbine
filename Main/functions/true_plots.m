@@ -1,86 +1,21 @@
-function [] = true_plots(yt,y_me,xt,data,t)
+function [] = true_plots(Lk,yt,xt,x_ul,x_vl,t)
+    pe = {'$P_e$'};
     figure
-    plot(t,yt(1,:)',t,y_me(1,:));
-    legend('yt','Bladed')
-    % ylim([-2.6 2.6]);
-    title('wr');
-    xlabel('s')
+    plot(t,yt(10,:)');
+    xlabel('Time (s)', 'Interpreter', 'latex', 'FontSize', 14);
+    ylabel('$Watt [W]$', 'Interpreter', 'latex', 'FontSize', 14);
+%     grid on;
+    legend('True');
+    title(['$Estimation $' pe(1)], 'Interpreter', 'latex', 'FontSize', 15);
 
+for i = 1:Lk
     figure
-    plot(t,yt(2,:)',t,y_me(2,:));
-    legend('yt','Bladed')
-    % ylim([-2.6 2.6]);
-    title('xtddot');
-    xlabel('s')
-
-    figure
-    plot(t,yt(3,:)',t,y_me(3,:));
-    legend('yt','Bladed')
-    % ylim([-2.6 2.6]);
-    title('ytddot');
-    xlabel('s')
-
-    figure
-    plot(t,yt(4,:)',t,y_me(4,:));
-    legend('yt','Bladed')
-    % ylim([-2.6 2.6]);
-    title('My1');
-    xlabel('s')
-
-    figure
-    plot(t,yt(7,:)',t,y_me(7,:));
-    legend('yt','Bladed')
-    % ylim([-2.6 2.6]);
-    title('Mx1');
-    xlabel('s')
-
-    figure
-    plot(t,yt(10,:)',t,y_me(10,:));
-    legend('yt','Bladed')
-    % ylim([-2.6 2.6]);
-    title('Pe');
-    xlabel('s')
-
-    figure
-    plot(t,yt(11,:)',t,y_me(11,:));
-    legend('yt','Bladed')
-    % ylim([-2.6 2.6]);
-    title('vr');
-    xlabel('s')
-
-    figure
-    plot(t,xt(2,:)',t,data.Data(:,224));
-    legend('xt','Bladed')
-    % ylim([-2.6 2.6]);
-    title('xt');
-    xlabel('s')
-
-    figure
-    plot(t,xt(4,:)',t,data.Data(:,225));
-    legend('xt','Bladed')
-    % ylim([-2.6 2.6]);
-    title('yt');
-    xlabel('s')
-
-    figure
-    plot(t,xt(6,:)',t,data.Data(:,85));
-    legend('xt','Bladed')
-    % ylim([-2.6 2.6]);
-    title('xb1');
-    xlabel('s')
-
-    figure
-    plot(t,xt(12,:)',t,data.Data(:,86));
-    legend('xt','Bladed')
-    % ylim([-2.6 2.6]);
-    title('yb1');
-    xlabel('s')
-
-    figure
-    plot(t,xt(24,:)',t,data.Data(:,20));
-    legend('xt','Bladed')
-    % ylim([-2.6 2.6]);
-    title('Tg');
-    xlabel('s')
+    plot(t,xt(i,:));
+    xlabel('Time (s)', 'Interpreter', 'latex', 'FontSize', 14);
+    ylabel(x_ul(i), 'Interpreter', 'latex', 'FontSize', 14);
+%     grid on;
+    legend('UKF');
+    title(['$Estimation $' x_vl(i)], 'Interpreter', 'latex', 'FontSize', 15);
+end
 end
 
