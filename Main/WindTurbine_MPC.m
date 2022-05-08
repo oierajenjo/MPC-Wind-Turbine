@@ -85,5 +85,5 @@ x_tv(end,:) = wrapToPi(x_tv(end,:))+pi;
 %% Display results
 true_plots(Lk,yt,x_kf,x_ul,x_vl,t)
 % result_display(t,Lk,x_kf,x_mpc,x_ul,x_vl)
-save('working_MPC_kf.mat')
+save('working_MPC.mat')
 rmpath('functions')
