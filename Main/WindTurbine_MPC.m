@@ -1,7 +1,7 @@
 clc
 clear all
 close all
-rng(1);
+rng('shuffle');
 
 %% Obtain all variables
 variables_IPC
@@ -74,7 +74,7 @@ for k=1:N-1
     %% Unscented Kalman Filter
     [x_kf(:,k+1),P,e(:,k+1)] = UKF(f,h,Q,R,x_kf(:,k),yt(:,k+1),uprev_mpc,kal,P,Ts,v(:,k+1),n);
     
-    xeq = x_tv(:,k+1);
+    xeq = x_kf(:,k+1);
     if mod(k,30) == 0
          disp("Iteration: " + k);
     end
@@ -85,5 +85,5 @@ x_tv(end,:) = wrapToPi(x_tv(end,:))+pi;
 %% Display results
 true_plots(Lk,yt,x_kf,x_ul,x_vl,t)
 % result_display(t,Lk,x_kf,x_mpc,x_ul,x_vl)
-save('working_MPC.mat')
+save('working_MPC_kf.mat')
 rmpath('functions')
