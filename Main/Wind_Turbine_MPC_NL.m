@@ -48,7 +48,7 @@ u_mpc = zeros(Uk, N);
 %% Reference trajectories
 % ref_me = [Ac.omega_opt*ones(N+Hp,1), zeros(N+Hp,8), W.TSR*ones(N+Hp,3) , zeros(N+Hp,6), Ac.Pe_opt*ones(N+Hp,1)]';
 % ref_me = Sz\ref_me;
-ref_me = [Ac.omega_opt, zeros(1,8), W.TSR*ones(1,3) , zeros(1,6), Ac.Pe_opt]';
+ref_me = [Ac.omega_opt, zeros(1,8), W.TSR*ones(1,3) , zeros(1,6), Ac.Pe_opt];
 
 %% MPC definition
 MPCdefinition_NL
@@ -56,7 +56,7 @@ MPCdefinition_NL
 disp('Running Loop')
 for k=1:N-1
     % Compute optimal control moves
-    [u,nloptions] = nlmpcmove(nlobj,x_kf(:,k),uprev_mpc,ref_me',[],nloptions);
+    [u,nloptions] = nlmpcmove(nlobj,x_kf(:,k),uprev_mpc,ref_me,[],nloptions);
 %     res = MPCobj({Sx\x_kf(:,k),uprev_mpc,ref_me(:,k+1:k+Hp)});
 
 %     u_L = res{1};

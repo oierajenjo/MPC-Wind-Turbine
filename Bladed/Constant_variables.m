@@ -102,7 +102,7 @@ var.Ac = Ac;
 Ts = 0.05; % Sampling time
 W.ti = 0.15; % Turbulence intensity
 W.q = 2^2/600; % Incremental variance mean wind speed
-W.mu_m = 6; % Fixed mean wind speed: 10 m/s
+% W.mu_m = 6; % Fixed mean wind speed: 10 m/s
 W.L = 340.2;
 W.alpha = 0.15; % Wind shear exponent for smooth terrain
 
@@ -185,13 +185,6 @@ Z_c.ybid_max2 = -B.yd_max;
 Z_c.ybid_min3 = B.yd_min;
 Z_c.ybid_max3 = -B.yd_max;
 
-% Z_c.pitchi_min1 = Ac.pitch_min;
-% Z_c.pitchi_max1 = -Ac.pitch_max;
-% Z_c.pitchi_min2 = Ac.pitch_min;
-% Z_c.pitchi_max2 = -Ac.pitch_max;
-% Z_c.pitchi_min3 = Ac.pitch_min;
-% Z_c.pitchi_max3 = -Ac.pitch_max;
-
 Z_c.lambda_min1 = W.lambda_min;
 Z_c.lambda_max1 = -W.lambda_max;
 Z_c.lambda_min2 = W.lambda_min;
@@ -217,4 +210,3 @@ Z_c.Pe_min = Ac.Pe_min;
 Z_c.Pe_max = -Ac.Pe_max;
 
 Zk = size(struct2table(Z_c),2)/2;
-
