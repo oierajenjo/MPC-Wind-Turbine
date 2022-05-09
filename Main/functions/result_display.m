@@ -7,7 +7,7 @@ for i = 1:Lk
     xlabel('Time (s)', 'Interpreter', 'latex', 'FontSize', 14);
     ylabel(x_ul(i), 'Interpreter', 'latex', 'FontSize', 14);
     grid on;
-    legend('UKF','True');
+    legend('UKF','MPC');
     title(['$Estimations $' x_vl(i)], 'Interpreter', 'latex', 'FontSize', 15);
     
     subplot(1,2,2);
