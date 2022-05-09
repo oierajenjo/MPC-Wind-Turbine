@@ -132,9 +132,9 @@ E = [E_L dU_L];
 % Constraints in Actuator Variables
 g = [-1;1];
 g_rep = repmat({g}, 1, Zk);
-% for i=0:1
-%     g_rep{2+i} = zeros(2,1);
-% end
+for i=0:5
+    g_rep{4+i} = zeros(2,1);
+end
 % for i=0:2
 %     g_rep{10+i} = zeros(2,1);
 % end
@@ -162,4 +162,42 @@ G = [G_L Z_L];
 ops = sdpsettings('solver','mosek','showprogress',0,'verbose',1,...
     'cachesolvers',1,'savedebug',0,'debug',1,'savesolverinput',0,'savesolveroutput',0);
 
+%Define the MPC object with Yalmip:
+refht=sdpvar(Zk,Hp);      % Z_{ref}: The window containing the pos-reference
+X0=sdpvar(Lk,1);          % X(k):    The current state
+Uprev=sdpvar(Uk,1);       % U(k-1):  The previous input command.
+deltaU = sdpvar(Uk*Hu,1); % DeltaU
 
+%%%%%%%%%%%%%%%
+%%% Lifting %%%
+%%%%%%%%%%%%%%%
+% Unchanging matrixes
+
+R_c = 0.1; % Input Weight
+Rmpc = R_c*eye(Uk);
+
+R_d = 10; % Change Input Weight
+R_del = R_d*eye(Uk);
+
+Rcal = repmat({Rmpc}, 1, Hu);
+Rcal = blkdiag(Rcal{:});
+
+Rcal_del = repmat({R_del}, 1, Hu);
+Rcal_del = blkdiag(Rcal_del{:});
+
+Tau = reshape(refht,[Zk*Hp 1]); % Convert to column vector
+Tau = Tau(Zk*(Hw-1)+1:end,:);
+
+ident = eye(Uk);
+for i=1:Hu-1
+    ident = [ident; eye(Uk)];
+end
+
+V = [ident ident];
+for i=1:Hu-1
+    temp = [zeros(i*Uk,Uk); ident(1:end-Uk*i,:)];
+    V = [V temp];
+end
+
+deltaU_full = [Uprev; deltaU];
+U = V*deltaU_full; % U: u*: The optimal control window

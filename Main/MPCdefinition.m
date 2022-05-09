@@ -1,12 +1,3 @@
-%Define the MPC object with Yalmip:
-refht=sdpvar(Zk,Hp);      % Z_{ref}: The window containing the pos-reference
-X0=sdpvar(Lk,1);          % X(k):    The current state
-Uprev=sdpvar(Uk,1);       % U(k-1):  The previous input command.
-deltaU = sdpvar(Uk*Hu,1); % DeltaU
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% PLACE YOUR CODE HERE (START)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%
 %%% System Variables %%%
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -70,18 +61,14 @@ Cmpc = [1, zeros(1,Lk-1);
     q2(xeq), zeros(1,Lk-5), q1(xeq), zeros(1,3)];
 Cmpc = Sz\Cmpc*Sx;
 
+
 if xeq(26)<= W.rate_point
-    Q_c = [0 5 5 5*ones(1,3) 5*ones(1,3) 20*ones(1,3) ones(1,6) 5]; % Error Weight (lambda)    
+    Q_c = [0 5 5 5*ones(1,3) 5*ones(1,3) 20*ones(1,3) ones(1,6) 5]; % Error Weight (lambda)
 else
     Q_c = [20 5 5 5*ones(1,3) 5*ones(1,3) zeros(1,3) zeros(1,6) 5]; % Error Weight (omega_r)
 end
 Qmpc = diag(Q_c);
 
-R_c = 0.1; % Input Weight
-Rmpc = R_c*eye(Uk);
-
-R_d = 10; % Change Input Weight
-R_del = R_d*eye(Uk);
 
 %%%%%%%%%%%%%%%
 %%% Lifting %%%
@@ -108,37 +95,15 @@ end
 
 Ccal = repmat({Cmpc}, 1, Hp);
 Ccal = blkdiag(Ccal{:});
-Ccal = Ccal(Zk*(Hw-1)+1:end,:); % CHANGE
-
-Tau = reshape(refht,[Zk*Hp 1]); % Convert to column vector
-Tau = Tau(Zk*(Hw-1)+1:end,:);
+Ccal = Ccal(Zk*(Hw-1)+1:end,:);
 
 Qcal = repmat({Qmpc}, 1, Hp);
 Qcal = blkdiag(Qcal{:});
 Qcal = Qcal(Zk*(Hw-1)+1:end,:);
 
-Rcal = repmat({Rmpc}, 1, Hu);
-Rcal = blkdiag(Rcal{:});
-
-Rcal_del = repmat({R_del}, 1, Hu);
-Rcal_del = blkdiag(Rcal_del{:});
-
-ident = eye(Uk);
-for i=1:Hu-1
-    ident = [ident; eye(Uk)];
-end
-
-V = [ident ident];
-for i=1:Hu-1
-    temp = [zeros(i*Uk,Uk); ident(1:end-Uk*i,:)];
-    V = [V temp];
-end
-
 %%%%%%%%%%%%
 %%% Cost %%%
 %%%%%%%%%%%%
-deltaU_full = [Uprev; deltaU];
-U = V*deltaU_full; % U: u*: The optimal control window
 
 Psi = Ccal*Acal;
 Upsilon = Ccal*Bcal_u;
@@ -157,29 +122,15 @@ Cost = Epsilon'*Qcal*Epsilon - deltaU'*Gcal + deltaU'*Hcal*deltaU;
 % Cost = Ts*((Zcal-refht_col)'*Qcal*(Zcal-refht_col) + deltaU'*Rcal_del*deltaU +...
 %        U'*Rcal*U);
 
+
 %%%%%%%%%%%%%%%%%%%
 %%% Constraints %%%
 %%%%%%%%%%%%%%%%%%%
 
-% Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0; G*[Zcal;1]<=0];
-Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0];
-% Constraints = G*[Zcal;1]<=0;
+Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0; G*[Zcal;1]<=0];
+% Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0];
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% PLACE YOUR CODE HERE (END)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% The Yalmip optimizer-object used for simulation and TurtleBot3 control
-% ops.mosek.MSK_IPAR_INTPNT_SCALING = 'MSK_SCALING_AGGRESSIVE';
-% ops.mosek.MSK_IPAR_SIM_SCALING = 'MSK_SCALING_AGGRESSIVE';
-% load('mosekdebug');mosekopt('min write(dump.task.gz)', prob, param)
-
+% The Yalmip optimizer-object used for simulation and control
 MPCobj = optimizer(Constraints,Cost,ops,{X0,Uprev,refht},{U,Xcal,Zcal});
 % U: u*: The optimal control window
 % P: P*: Optimal states in prediction window
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% YOU CAN PLACE YOUR OWN FUNCTIONS HERE
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-

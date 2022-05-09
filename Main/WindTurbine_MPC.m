@@ -61,8 +61,8 @@ for k=1:N-1
     uprev_mpc = u_temp(:,1);
 
     x_L = res{2};
-    x_temp = Sx*reshape(x_L, [Lk, length(x_L)/Lk]);
-    x_mpc(:,k+1) = x_temp(:,1);
+    x_temp = reshape(x_L, [Lk, length(x_L)/Lk]);
+    x_mpc(:,k+1) = Sx*x_temp(:,1);
     
     z_L = res{3};
     z_temp = reshape(z_L, [Zk, length(z_L)/Zk]);
@@ -83,7 +83,8 @@ x_kf(end,:) = wrapToPi(x_kf(end,:))+pi;
 x_tv(end,:) = wrapToPi(x_tv(end,:))+pi;
 
 %% Display results
-true_plots(Lk,yt,x_kf,x_ul,x_vl,t)
+% true_plots(Lk,yt,x_kf,x_ul,x_vl,t)
+true_plots(Lk,yt,x_kf,x_tv,x_mpc,x_ul,x_vl,t)
 % result_display(t,Lk,x_kf,x_mpc,x_ul,x_vl)
 save('working_MPC.mat')
 rmpath('functions')
