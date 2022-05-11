@@ -72,7 +72,7 @@ for k=1:N-1
     [x_tv(:,k+1),yt(:,k+1)] = RK4(f,x_tv(:,k),uprev_mpc,h,n(x_tv(:,k)),v(:,k+1),Ts);
 
     %% Unscented Kalman Filter
-    [x_kf(:,k+1),P,e(:,k+1)] = UKF(f,h,Q,R,x_kf(:,k),yt(:,k+1),uprev_mpc,kal,P,Ts,v(:,k+1),n);
+    [x_kf(:,k+1),P,e(:,k+1)] = UKF(f,h,Q,R,x_kf(:,k),yt(:,k+1),uprev_mpc,kal,P,Ts,v(:,k+1),n,P0);
     
     xeq = x_kf(:,k+1);
     if mod(k,30) == 0

@@ -1,4 +1,4 @@
-function [xk,P,e] = UKF(f,h,Q,R,x,y,u,kal,P,Ts,v,n)
+function [xk,P,e] = UKF(f,h,Q,R,x,y,u,kal,P,Ts,v,n,P0)
 n_sigma_p = kal.n_sigma_p;
 lambda = kal.lambda;
 wm = kal.wm;
@@ -12,8 +12,9 @@ try
     sP = chol(P,'lower');% Calculate square root of error covariance
 catch ME
     disp('Matrix is not symmetric positive definite');
-%     k
-    return
+    P = P0;
+    sP = chol(P,'lower');% Calculate square root of error covariance
+%     return
 end
 
 % chi_p = "chi previous" = chi(k-1) % Untransformed sigma points
