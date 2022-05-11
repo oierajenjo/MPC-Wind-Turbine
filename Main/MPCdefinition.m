@@ -80,9 +80,9 @@ Cmpc = [1, zeros(1,Lk-1);
 % end
 
 if xeq(26)<= W.rate_point
-    Q_c = [0 1 1 ones(1,3) ones(1,3) 20*ones(1,1) 20*ones(1,3) zeros(1,3) 1]./qs; % Error Weight (lambda)
+    Q_c = [0 5 5 5*ones(1,3) 5*ones(1,3) 20*ones(1,1) 20*ones(1,3) zeros(1,3) 0]./qs; % Error Weight (lambda)
 else
-    Q_c = [20 1 1 ones(1,3) ones(1,3) zeros(1,1) zeros(1,3) zeros(1,3) 20]./qs; % Error Weight (omega_r)
+    Q_c = [20 5 5 5*ones(1,3) 5*ones(1,3) zeros(1,1) zeros(1,3) zeros(1,3) 20]./qs; % Error Weight (omega_r)
 end
 Qmpc = diag(Q_c);
 
