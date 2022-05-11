@@ -86,5 +86,7 @@ x_tv(end,:) = wrapToPi(x_tv(end,:))+pi;
 % true_plots(Lk,yt,x_kf,x_ul,x_vl,t)
 true_plots(Lk,yt,x_kf,x_tv,x_mpc,x_ul,x_vl,t)
 % result_display(t,Lk,x_kf,x_mpc,x_ul,x_vl)
-save('working_MPC_6_2.mat')
+% save('tests/working_MPC.mat')
+save tests/working_MPC_xx.mat e e_rep f_rep g_rep k Lk P P0 t Ts u_b u_mpc Uk x_i ...
+    x_kf x_me x_mpc x_tv x_ul x_vl xeq y_me y_vl Yk yt z_mpc z_temp Zk
 rmpath('functions')
