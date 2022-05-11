@@ -85,11 +85,11 @@ x_me = [omega_r xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta_ref theta_dot...
     tg_ref vt vm psi]';
 
 
-delta_rs = mean([theta_ref tg_ref]);
-qs = mean([omega_r xt_dot yt_dot xb_dot yb_dot ones(N,3) theta_ref theta_dot Pe]);
+% delta_rs = mean([theta_ref tg_ref]);
+% qs = mean([omega_r xt_dot yt_dot xb_dot yb_dot ones(N,3) theta_ref theta_dot Pe]);
 
 
-clearvars -except x_i y_me u_b d_b N data x_me S_means z_i delta_rs qs
+clearvars -except x_i y_me u_b d_b N data x_me S_means z_i % delta_rs qs
 
 %% Plotting variables
 x_vl = {'$\omega_r$', '$x_t$', '$\dot{x}_t$', '$y_t$', '$\dot{y}_t$', ...

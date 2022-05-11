@@ -121,8 +121,8 @@ e_L = blkdiag(e_rep{:});
 
 e_L = repmat({e_L}, 1, Hu);
 E_L = blkdiag(e_L{:});
-du_cons = [Ac.pitch_dot_min; -Ac.pitch_dot_max; Ac.pitch_dot_min; ...
-    -Ac.pitch_dot_max; Ac.pitch_dot_min; -Ac.pitch_dot_max; zeros(2,1)];
+du_cons = [Ac.pitchd_min; -Ac.pitchd_max; Ac.pitchd_min; ...
+    -Ac.pitchd_max; Ac.pitchd_min; -Ac.pitchd_max; zeros(2,1)];
 dU_L = du_cons;
 for i=1:Hu-1
     dU_L = [dU_L; du_cons];
@@ -172,8 +172,12 @@ deltaU = sdpvar(Uk*Hu,1); % DeltaU
 %%% Lifting %%%
 %%%%%%%%%%%%%%%
 % Unchanging matrixes
-% delta_rs = [1.8326*ones(1,3) 21030000];
-% qs = [0.2681 0.4 0.3 19*ones(1,3) 12.5*ones(1,3) 1.81242*ones(1,3) 1.8326*ones(1,3) 0.3142*ones(1,3) 15000000];
+delta_rs = [(Ac.pitch_max-Ac.pitch_min)*ones(1,3) (Ac.Tg_max-Ac.Tg_min)];
+qs = [(Ac.omega_max-Ac.omega_min) (To.xd_max-To.xd_min) (To.yd_max-To.yd_min)...
+    (B.xd_max-B.xd_min)*ones(1,3) (B.yd_max-B.yd_min)*ones(1,3) ...
+    (W.lambda_max-W.lambda_min)*ones(1,3) (Ac.pitch_max-Ac.pitch_min)*ones(1,3)...
+    (Ac.pitchd_max-Ac.pitchd_min)*ones(1,3) (Ac.Pe_max-Ac.Pe_min)];
+
 
 R_c = 0.1; % Input Weight
 Rmpc = R_c*eye(Uk);

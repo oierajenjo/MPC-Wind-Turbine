@@ -54,12 +54,12 @@ for k=1:N-1
     %% MPC
     MPCdefinition
     res = MPCobj({Sx\x_kf(:,k),uprev_mpc,ref_me(:,k+1:k+Hp)});
-
+    
     u_L = res{1};
     u_temp = reshape(u_L, [Uk, length(u_L)/Uk]);
     u_mpc(:,k) = u_temp(:,1);
     uprev_mpc = u_temp(:,1);
-
+    
     x_L = res{2};
     x_temp = reshape(x_L, [Lk, length(x_L)/Lk]);
     x_mpc(:,k+1) = Sx*x_temp(:,1);
@@ -70,13 +70,13 @@ for k=1:N-1
     
     %% Runge-Kutta 4th order method
     [x_tv(:,k+1),yt(:,k+1)] = RK4(f,x_tv(:,k),uprev_mpc,h,n(x_tv(:,k)),v(:,k+1),Ts);
-
+    
     %% Unscented Kalman Filter
     [x_kf(:,k+1),P,e(:,k+1)] = UKF(f,h,Q,R,x_kf(:,k),yt(:,k+1),uprev_mpc,kal,P,Ts,v(:,k+1),n,P0);
     
     xeq = x_kf(:,k+1);
     if mod(k,30) == 0
-         disp("Iteration: " + k);
+        disp("Iteration: " + k);
     end
 end
 x_kf(end,:) = wrapToPi(x_kf(end,:))+pi;
