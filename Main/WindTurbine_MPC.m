@@ -46,8 +46,9 @@ z_mpc = zeros(Zk, N);
 z_mpc(:,1) = z_i;
 
 %% Reference trajectories
-ref_me = [Ac.omega_opt*ones(N+Hp,1), zeros(N+Hp,8), W.TSR*ones(N+Hp,3) , zeros(N+Hp,6), Ac.Pe_opt*ones(N+Hp,1)]';
-ref_me = Sz\ref_me;
+% ref_me = [Ac.omega_opt*ones(N+Hp,1), zeros(N+Hp,8), W.TSR*ones(N+Hp,3) , zeros(N+Hp,6), Ac.Pe_opt*ones(N+Hp,1)]';
+ref_me = [Ac.omega_opt*ones(N+Hp,1), zeros(N+Hp,8), W.TSR*ones(N+Hp,1) , zeros(N+Hp,6), Ac.Pe_opt*ones(N+Hp,1)]';
+% ref_me = Sz\ref_me;
 
 disp('Running Loop')
 for k=1:N-1

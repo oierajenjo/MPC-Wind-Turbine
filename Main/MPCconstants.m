@@ -46,6 +46,11 @@ r5 = @(x,i) -(x(1)*Ae.Rr-x(15+i))/vri_eq(x,i)^2; % dlamb_dvt
 r6 = @(x,i) (x(1)*Ae.Rr-x(15+i))/vri_eq(x,i)^2; % dlamb_dxdott
 r7 = r6; % dlamb_dxdotbi
 
+vr_eq = @(x) x(26) + x(25) - x(3);
+rr1 = @(x) Ae.Rr/vr_eq(x); % dlamb_dwr
+rr2 = @(x) -x(1)*Ae.Rr/vr_eq(x)^2; % dlamb_dvm
+rr3 = @(x) -x(1)*Ae.Rr/vr_eq(x)^2; % dlamb_dvt
+rr4 = @(x) x(1)*Ae.Rr/vr_eq(x)^2; % dlamb_dxdott
 
 d1 = B.kx/B.m; % dx_bi
 d2 = @(x,i) Ae.rho*Ae.Ar*(dCt_dLamb(x,i)*r7(x,i)*vri_eq(x,i)^2 - 2*cti_eq(x,i)*vri_eq(x,i))/(6*B.m) - B.cx/B.m; % dxdot_bi
@@ -132,12 +137,13 @@ E = [E_L dU_L];
 % Constraints in Actuator Variables
 g = [-1;1];
 g_rep = repmat({g}, 1, Zk);
-% for i=0:7
-%     g_rep{2+i} = zeros(2,1);
+for i=0:7
+    g_rep{2+i} = zeros(2,1);
+end
+% for i=0:2
+%     g_rep{10+i} = zeros(2,1);
 % end
-% for i=0:5
-%     g_rep{13+i} = zeros(2,1);
-% end
+g_rep{10} = zeros(2,1);
 % g_rep{end} = zeros(2,1);
 g_L = blkdiag(g_rep{:});
 
@@ -173,11 +179,14 @@ deltaU = sdpvar(Uk*Hu,1); % DeltaU
 %%%%%%%%%%%%%%%
 % Unchanging matrixes
 delta_rs = [(Ac.pitch_max-Ac.pitch_min)*ones(1,3) (Ac.Tg_max-Ac.Tg_min)];
-qs = [(Ac.omega_max-Ac.omega_min) (To.xd_max-To.xd_min) (To.yd_max-To.yd_min)...
+% qs = [(Ac.omega_opt-Ac.omega_min) (To.xd_max-To.xd_min) (To.yd_max-To.yd_min)...
+%     (B.xd_max-B.xd_min)*ones(1,3) (B.yd_max-B.yd_min)*ones(1,3) ...
+%     (W.lambda_max-W.lambda_min)*ones(1,3) (Ac.pitch_max-Ac.pitch_min)*ones(1,3)...
+%     (Ac.pitchd_max-Ac.pitchd_min)*ones(1,3) (Ac.Pe_opt-Ac.Pe_min)];
+qs = [(Ac.omega_opt-Ac.omega_min) (To.xd_max-To.xd_min) (To.yd_max-To.yd_min)...
     (B.xd_max-B.xd_min)*ones(1,3) (B.yd_max-B.yd_min)*ones(1,3) ...
-    (W.lambda_max-W.lambda_min)*ones(1,3) (Ac.pitch_max-Ac.pitch_min)*ones(1,3)...
-    (Ac.pitchd_max-Ac.pitchd_min)*ones(1,3) (Ac.Pe_max-Ac.Pe_min)];
-
+    (W.lambda_max-W.lambda_min) (Ac.pitch_max-Ac.pitch_min)*ones(1,3)...
+    (Ac.pitchd_max-Ac.pitchd_min)*ones(1,3) (Ac.Pe_opt-Ac.Pe_min)];
 
 R_c = 0.1; % Input Weight
 Rmpc = R_c*eye(Uk);
