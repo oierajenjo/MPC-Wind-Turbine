@@ -77,18 +77,19 @@ end
 xb_dot(end+1,:) =  xb_dot(end,:);
 yb_dot(end+1,:) =  yb_dot(end,:);
 theta_dot = data.Data(:,37:39);
-tg = tg_ref;
+% tg = tg_ref;
 vt = zeros(N,1);
 vm = data.Data(:,59);
 
 x_me = [omega_r xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta_ref theta_dot...
-    tg vt vm psi]';
+    tg_ref vt vm psi]';
 
 
-S_means = mean([tg Pe]);
+delta_rs = mean([theta_ref tg_ref]);
+qs = mean([omega_r xt_dot yt_dot xb_dot yb_dot ones(N,3) theta_ref theta_dot Pe]);
 
 
-clearvars -except x_i y_me u_b d_b N data x_me S_means z_i
+clearvars -except x_i y_me u_b d_b N data x_me S_means z_i delta_rs qs
 
 %% Plotting variables
 x_vl = {'$\omega_r$', '$x_t$', '$\dot{x}_t$', '$y_t$', '$\dot{y}_t$', ...

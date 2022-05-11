@@ -172,8 +172,8 @@ deltaU = sdpvar(Uk*Hu,1); % DeltaU
 %%% Lifting %%%
 %%%%%%%%%%%%%%%
 % Unchanging matrixes
-delta_rs = [1.8326*ones(1,3) 21030000];
-qs = [0.2681 0.4 0.3 19*ones(1,3) 12.5*ones(1,3) 1.81242*ones(1,3) 1.8326*ones(1,3) 0.3142*ones(1,3) 15000000];
+% delta_rs = [1.8326*ones(1,3) 21030000];
+% qs = [0.2681 0.4 0.3 19*ones(1,3) 12.5*ones(1,3) 1.81242*ones(1,3) 1.8326*ones(1,3) 0.3142*ones(1,3) 15000000];
 
 R_c = 0.1; % Input Weight
 Rmpc = R_c*eye(Uk);
