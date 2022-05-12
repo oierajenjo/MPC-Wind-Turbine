@@ -23,7 +23,9 @@ elseif kAns == "No"
     disp("True values")
 end
 
-u_b = ones(4,N);
+lmax = 2;
+
+u_b = ones(4,N*lmax);
 theta_f = 0;
 [lamb_opt, cp_opt] = cp_max(theta_f,cp_l,lambdaVec,pitchVec);
 K = 0.5*Ae.rho*Ae.Rr^5*pi*cp_opt/lamb_opt^3;
@@ -36,13 +38,13 @@ u_b = [theta_f; theta_f; theta_f; K].*u_b;
 % Simulation Only: Calculate true state trajectory for comparison
 % Also calculate measurement vector
 % Var(QX) = QVar(X)Q' = sigma^4 -> Var(sqrt(Q)X) = sqrt(Q)Var(X)sqrt(Q)' = sigma^2
-n = @(x) sqrt(Q(x))*randn(Lk, 1); % Generate random process noise (from assumed Q)
-v = sqrt(R)*randn(Yk, N); % Generate random measurement noise (from assumed R)
+n = @(x) sqrt(Q)*randn(Lk, 1); % Generate random process noise (from assumed Q)
+v = sqrt(R)*randn(Yk, N*lmax); % Generate random measurement noise (from assumed R)
 % v = zeros(Yk, N);
 
 %% Initialization
 % Initialize matrices
-x_tv = zeros(Lk, N); % Initialize size of true state for all k
+x_tv = zeros(Lk, N*lmax); % Initialize size of true state for all k
 x_tv(:,1) = x_i; % Set true initial state
 yt = zeros(Yk, N); % Initialize size of output vector for all k
 
@@ -72,6 +74,7 @@ disp('Running Loop')
 ref_me = [Ac.omega_opt*ones(N,1) zeros(N,14) Ac.Pe_opt*ones(N,1)]';
 
 for k=1:N-1
+    for l=1:lmax
     %% Linearized system
     A1 = [zeros(1,11), -a1*ones(1,3);
         zeros(1,2), 1, zeros(1,11);
@@ -107,7 +110,7 @@ for k=1:N-1
         zeros(3,6), eye(3), zeros(3,4);
         zeros(3), -f1*eye(3), -f2*eye(3), zeros(3,4);
         zeros(1,9), -g1, zeros(1,3);
-        zeros(1,10), -W.w_p(xeq), zeros(1,2);
+        zeros(1,10), -W.w_p, zeros(1,2);
         zeros(2,13)];
     
     Ampc = [A1 A2;
@@ -148,6 +151,8 @@ end
 xmpc(end,:) = wrapToPi(xmpc(end,:))+pi;
 
 %% Display results
+t = 1:24000;
+
 figure
 plot(t,xmpc(1,:),t,x_tv(1,:));
 legend('$\omega_r$ (linear)','$\omega_r$ (non-linear)','Interpreter','latex')

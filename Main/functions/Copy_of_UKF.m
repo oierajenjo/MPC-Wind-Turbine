@@ -17,14 +17,14 @@ P = P0; % Set initial error covariance
 e = zeros(Yk,N);
 for k = 1:N-1
     % Step 1: Generate the sigma-points
-    try 
+    try
         sP = chol(P,'lower');% Calculate square root of error covariance
     catch ME
         disp('Matrix is not symmetric positive definite');
         k
         break
     end
-     
+    
     % chi_p = "chi previous" = chi(k-1) % Untransformed sigma points
     chi_p = [xk(:,k), xk(:,k)*ones(1,Lk)+sqrt(Lk+lambda)*sP, ...
         xk(:,k)*ones(1,Lk)-sqrt(Lk+lambda)*sP]; % Untransformed sigma points
@@ -39,7 +39,7 @@ for k = 1:N-1
         k_2 = f(chi_p(:,j)+0.5*Ts*k_1, u_b(:,k)+0.5*Ts);
         k_3 = f(chi_p(:,j)+0.5*Ts*k_2, u_b(:,k)+0.5*Ts);
         k_4 = f(chi_p(:,j)+Ts*k_3, u_b(:,k)+Ts);
-        chi_m(:,j) = chi_p(:,j) + (1/6)*(k_1+2*k_2+2*k_3+k_4)*Ts + Ts*n(chi_p(:,j)); 
+        chi_m(:,j) = chi_p(:,j) + (1/6)*(k_1+2*k_2+2*k_3+k_4)*Ts + Ts*n(chi_p(:,j));
         % chi_m(:,j) = chi_p(:,j) + Ts*f(chi_p(:,j),u_b(:,k)) + Ts*n(:,k);
     end
     

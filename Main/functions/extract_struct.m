@@ -7,4 +7,3 @@ B = getfield(var,'B');
 D = getfield(var,'D');
 To = getfield(var,'To');
 end
-    
