@@ -34,10 +34,10 @@ B.xd_min = -8.7;
 B.xd_max = 10;
 B.yd_min = -5.9;
 B.yd_max = 6.1;
-% B.xd_min = -0;
-% B.xd_max = 0;
-% B.yd_min = -0;
-% B.yd_max = 0;
+B.x_min = -15;
+B.x_max = 15;
+B.y_min = -20;
+B.y_max = 20;
 
 var.B = B;
 
@@ -71,10 +71,11 @@ To.yd_max = 1;
 % To.xd_max = 0.20;
 % To.yd_min = -0.15;
 % To.yd_max = 0.15;
-% To.xd_min = -0;
-% To.xd_max = 0;
-% To.yd_min = -0;
-% To.yd_max = 0;
+To.x_min = -20;
+To.x_max = 20;
+To.y_min = -20;
+To.y_max = 20;
+
 
 var.To = To;
 
@@ -126,7 +127,9 @@ W.w_max = 25;
 W.rate_point = 10.5;
 W.TSR = 9.0621; % Optimal Tip Speed Ratio
 % W.lambda_min = Ac.omega_min*Ae.Rr/W.w_max;
-W.lambda_max = Ac.omega_max*Ae.Rr/W.w_min;
+% W.lambda_max = 0;
+% W.lambda_max = Ac.omega_max*Ae.Rr/W.w_min;
+W.lambda_max = W.TSR;
 W.lambda_min = -W.lambda_max;
 % W.lambda_min = 0;
 
@@ -194,12 +197,31 @@ Z_c.ybid_max2 = -B.yd_max;
 Z_c.ybid_min3 = B.yd_min;
 Z_c.ybid_max3 = -B.yd_max;
 
+% Z_c.xt_min = To.x_min;
+% Z_c.xt_max = -To.x_max;
+% Z_c.yt_min = To.y_min;
+% Z_c.yt_max = -To.y_max;
+% 
+% Z_c.xbi_min1 = B.x_min;
+% Z_c.xbi_max1 = -B.x_max;
+% Z_c.xbi_min2 = B.x_min;
+% Z_c.xbi_max2 = -B.x_max;
+% Z_c.xbi_min3 = B.x_min;
+% Z_c.xbi_max3 = -B.x_max;
+% 
+% Z_c.ybi_min1 = B.y_min;
+% Z_c.ybi_max1 = -B.y_max;
+% Z_c.ybi_min2 = B.y_min;
+% Z_c.ybi_max2 = -B.y_max;
+% Z_c.ybi_min3 = B.y_min;
+% Z_c.ybi_max3 = -B.y_max;
+
 Z_c.lambda_min1 = W.lambda_min;
 Z_c.lambda_max1 = -W.lambda_max;
-% Z_c.lambda_min2 = W.lambda_min;
-% Z_c.lambda_max2 = -W.lambda_max;
-% Z_c.lambda_min3 = W.lambda_min;
-% Z_c.lambda_max3 = -W.lambda_max;
+Z_c.lambda_min2 = W.lambda_min;
+Z_c.lambda_max2 = -W.lambda_max;
+Z_c.lambda_min3 = W.lambda_min;
+Z_c.lambda_max3 = -W.lambda_max;
 
 Z_c.pitchi_min1 = Ac.pitch_min;
 Z_c.pitchi_max1 = -Ac.pitch_max;
