@@ -219,3 +219,7 @@ Z_c.Pe_min = Ac.Pe_min;
 Z_c.Pe_max = -Ac.Pe_max;
 
 Zk = size(struct2table(Z_c),2)/2;
+
+%% Variable names
+var_names = ['vr' 'wr' 'xt' 'xtdot' 'yt' 'ytdot' 'xb1' 'xb2' 'xb3' 'xbdot1' 'xbdot2' 'xbdot3' 'yb1' 'yb2' 'yb3' 'ybdot1' 'ybdot2' ...
+         'ybdot3' 'pitch1' 'pitch2' 'pitch3' 'pitch_rate1' 'pitch_rate2' 'pitch_rate3' 'Tg' 'vt' 'vm' 'azimuth'];
