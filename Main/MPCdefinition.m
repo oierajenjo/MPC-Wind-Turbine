@@ -37,13 +37,14 @@ A4 = [-e2(xeq,0), zeros(1,2), -e11(xeq,0), zeros(1,6), -e6(xeq,0), -e5(xeq,0), -
     zeros(1,10), -W.w_p, zeros(1,2);
     zeros(2,13)];
 
-Ampc = eye(Lk)+ Ts*[A1 A2; A3 A4];
-Ampc = Sx\Ampc*Sx;% State Matrix
+Ampc = [A1 A2; A3 A4];
+Ampc = eye(Lk)+ Ts*Ampc;
+% Ampc = Sx\Ampc*Sx;% State Matrix
 
 
 Bmpc = Ts*[zeros(3,Lk-7), f1*eye(3), zeros(3,4);
     zeros(1,Lk-4), g1, zeros(1,3)]';
-Bmpc = Sx\Bmpc; % Input Matrix
+% Bmpc = Sx\Bmpc; % Input Matrix
 
 
 lambda_rows = [
@@ -151,7 +152,7 @@ Epsilon = Tau - Psi*X0 - Upsilon*Uprev;
 Gcal = 2*Theta'*Qcal*Epsilon;
 Hcal = Theta'*Qcal*Theta + Rcal;
 
-Cost = Epsilon'*Qcal*Epsilon - deltaU'*Gcal + deltaU'*Hcal*deltaU;
+Cost = Ts*(Epsilon'*Qcal*Epsilon - deltaU'*Gcal + deltaU'*Hcal*deltaU);
 
 % refht_col = reshape(refht,[Zk*Hp 1]); % Convert to column vector
 % Cost = Ts*((Zcal-refht_col)'*Qcal*(Zcal-refht_col) + deltaU'*Rcal_del*deltaU +...
@@ -162,7 +163,7 @@ Cost = Epsilon'*Qcal*Epsilon - deltaU'*Gcal + deltaU'*Hcal*deltaU;
 %%% Constraints %%%
 %%%%%%%%%%%%%%%%%%%
 
-Constraints = [G*[Zcal;1]<=0; F*[U;1]<=0; E*[deltaU;1]<=0];
+Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0; G*[Zcal;1]<=0];
 % Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0];
 
 % The Yalmip optimizer-object used for simulation and control

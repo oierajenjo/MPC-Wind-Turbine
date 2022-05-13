@@ -7,6 +7,7 @@ rng(1);
 variables_IPC
 load('BladedFiles\performancemap_data.mat')
 Constant_variables
+MPCconstants_linear
 MPCconstants
 addpath('functions');
 
@@ -85,7 +86,8 @@ x_tv(end,:) = wrapToPi(x_tv(end,:))+pi;
 
 %% Display results
 % true_plots(Lk,yt,x_kf,x_ul,x_vl,t)
-true_plots(Lk,yt,x_kf,x_tv,x_mpc,x_ul,x_vl,var_names,t)
+true_plots(Lk,yt,x_kf,x_mpc,x_ul,x_vl,var_names,t)
+vri_plot(var,x_kf,x_mpc,t)
 % result_display(t,Lk,x_kf,x_mpc,x_ul,x_vl)
 % save('tests/working_MPC.mat')
 save tests/working_MPC_16.mat e e_rep f_rep g_rep k Lk P P0 t Ts u_b u_mpc Uk x_i ...
