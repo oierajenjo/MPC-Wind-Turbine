@@ -56,7 +56,6 @@ MPCdefinition_NL
 disp('Running Loop')
 for k=1:N-1
     % Compute optimal control moves
-    tic
     [u,nloptions] = nlmpcmove(nlobj,x_kf(:,k),uprev_mpc,ref_me,[],nloptions);
 %     res = MPCobj({Sx\x_kf(:,k),uprev_mpc,ref_me(:,k+1:k+Hp)});
 

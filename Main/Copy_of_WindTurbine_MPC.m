@@ -7,6 +7,7 @@ rng(1);
 variables_IPC
 load('BladedFiles\performancemap_data.mat')
 Constant_variables
+MPCconstants_linear
 MPCconstants
 addpath('functions');
 
@@ -23,7 +24,7 @@ elseif kAns == "No"
     disp("True values")
 end
 
-lmax = 2;
+lmax = 1;
 
 u_b = ones(4,N*lmax);
 theta_f = 0;
@@ -73,8 +74,7 @@ disp('Running Loop')
 %% Reference trajectories
 ref_me = [Ac.omega_opt*ones(N,1) zeros(N,14) Ac.Pe_opt*ones(N,1)]';
 
-for k=1:N-1
-    for l=1:lmax
+for k=1:lmax*N-1
     %% Linearized system
     A1 = [zeros(1,11), -a1*ones(1,3);
         zeros(1,2), 1, zeros(1,11);
@@ -151,7 +151,7 @@ end
 xmpc(end,:) = wrapToPi(xmpc(end,:))+pi;
 
 %% Display results
-t = 1:24000;
+t = 1:lmax*N;
 
 figure
 plot(t,xmpc(1,:),t,x_tv(1,:));
@@ -246,7 +246,7 @@ plot(t,xmpc(12,:),t,x_tv(12,:));
 legend('$y_{b_1}$ (linear)','$y_{b_1}$ (non-linear)','Interpreter','latex')
 % ylim([-2.6 2.6]);
 title('Edgewise deflection (blade 1)');
-ylabel('$y_{b_1}$ [m/s]','Interpreter','latex')
+ylabel('$y_{b_1}$ [m]','Interpreter','latex')
 xlabel('time [s]','Interpreter','latex')
 
 figure

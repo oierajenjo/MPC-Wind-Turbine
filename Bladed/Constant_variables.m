@@ -12,8 +12,8 @@ var.D = D;
 B.r = 5.2/2;
 B.l = 117.1836; % Blade length
 B.Mb = 65566; % Blade mass
-B.m = B.Mb/10+3*B.Mb*B.r^2/(20*B.l); % Blade equivalent mass 
-B.d = 0.03; % Blade damping ratio
+B.m = B.Mb/10 + 3*B.Mb*B.r^2/(20*B.l); % Blade equivalent mass 
+B.d = 0.03*1; % Blade damping ratio
 % B.fx = 0.541*sqrt(1-B.d^2); % Blade freq. flapwise
 % B.fy = 0.636*sqrt(1-B.d^2); % Blade freq. edgewise
 B.fx = 0.541; % Blade freq. flapwise
@@ -25,15 +25,19 @@ B.kx = B.wx^2*B.m; % Blade stiffness x direction
 B.cy = B.d*2*B.m*B.wy; % Blade damping y direction
 B.ky = B.wy^2*B.m; % Blade stiffness y direction
 B.B = 3; % Blade amount
-B.cc = 1/5; % Correction coefficient Fx
-B.xd_min = -20;
-B.xd_max = 20;
-B.yd_min = -10;
-B.yd_max = 10;
-% B.xd_min = -0;
-% B.xd_max = 0;
-% B.yd_min = -0;
-% B.yd_max = 0;
+% B.cc = 1/5; % Correction coefficient Fx
+% B.xd_min = -20;
+% B.xd_max = 20;
+% B.yd_min = -10;
+% B.yd_max = 10;
+B.xd_min = -8.7;
+B.xd_max = 10;
+B.yd_min = -5.9;
+B.yd_max = 6.1;
+B.x_min = -15;
+B.x_max = 15;
+B.y_min = -20;
+B.y_max = 20;
 
 var.B = B;
 
@@ -63,10 +67,15 @@ To.xd_min = -1;
 To.xd_max = 1;
 To.yd_min = -1;
 To.yd_max = 1;
-% To.xd_min = -0;
-% To.xd_max = 0;
-% To.yd_min = -0;
-% To.yd_max = 0;
+% To.xd_min = -0.20;
+% To.xd_max = 0.20;
+% To.yd_min = -0.15;
+% To.yd_max = 0.15;
+To.x_min = -20;
+To.x_max = 20;
+To.y_min = -20;
+To.y_max = 20;
+
 
 var.To = To;
 
@@ -84,9 +93,10 @@ Ac.tau = 0.1; % Generator time constant
 Ac.pitch_min = -deg2rad(15);
 Ac.pitch_max = pi/2;
 Ac.Tg_min = 0;
-Ac.Tg_max = 2.159e7;
-Ac.pitch_dot_min = -deg2rad(9); % Pitch angle min angular speed
-Ac.pitch_dot_max = deg2rad(9); % Pitch angle max angular speed
+% Ac.Tg_max = 2.159e7;
+Ac.Tg_max = 21030000;
+Ac.pitchd_min = -deg2rad(9); % Pitch angle min angular speed
+Ac.pitchd_max = deg2rad(9); % Pitch angle max angular speed
 Ac.omega_min = convangvel(0,'rpm', 'rad/s');
 Ac.omega_opt = convangvel(7.56,'rpm', 'rad/s');
 Ac.omega_max = convangvel(10,'rpm', 'rad/s');
@@ -102,7 +112,7 @@ var.Ac = Ac;
 Ts = 0.05; % Sampling time
 W.ti = 0.15; % Turbulence intensity
 W.q = 2^2/600; % Incremental variance mean wind speed
-W.mu_m = 6; % Fixed mean wind speed: 10 m/s
+% W.mu_m = 6; % Fixed mean wind speed: 10 m/s
 W.L = 340.2;
 W.alpha = 0.15; % Wind shear exponent for smooth terrain
 
@@ -117,9 +127,11 @@ W.w_max = 25;
 W.rate_point = 10.5;
 W.TSR = 9.0621; % Optimal Tip Speed Ratio
 % W.lambda_min = Ac.omega_min*Ae.Rr/W.w_max;
-W.lambda_max = Ac.omega_max*Ae.Rr/W.w_min;
-W.lambda_min = -W.lambda_max;
 % W.lambda_max = 0;
+% W.lambda_max = Ac.omega_max*Ae.Rr/W.w_min;
+W.lambda_max = W.TSR;
+W.lambda_min = -W.lambda_max;
+% W.lambda_min = 0;
 
 var.W = W;
 
@@ -185,12 +197,24 @@ Z_c.ybid_max2 = -B.yd_max;
 Z_c.ybid_min3 = B.yd_min;
 Z_c.ybid_max3 = -B.yd_max;
 
-% Z_c.pitchi_min1 = Ac.pitch_min;
-% Z_c.pitchi_max1 = -Ac.pitch_max;
-% Z_c.pitchi_min2 = Ac.pitch_min;
-% Z_c.pitchi_max2 = -Ac.pitch_max;
-% Z_c.pitchi_min3 = Ac.pitch_min;
-% Z_c.pitchi_max3 = -Ac.pitch_max;
+% Z_c.xt_min = To.x_min;
+% Z_c.xt_max = -To.x_max;
+% Z_c.yt_min = To.y_min;
+% Z_c.yt_max = -To.y_max;
+% 
+% Z_c.xbi_min1 = B.x_min;
+% Z_c.xbi_max1 = -B.x_max;
+% Z_c.xbi_min2 = B.x_min;
+% Z_c.xbi_max2 = -B.x_max;
+% Z_c.xbi_min3 = B.x_min;
+% Z_c.xbi_max3 = -B.x_max;
+% 
+% Z_c.ybi_min1 = B.y_min;
+% Z_c.ybi_max1 = -B.y_max;
+% Z_c.ybi_min2 = B.y_min;
+% Z_c.ybi_max2 = -B.y_max;
+% Z_c.ybi_min3 = B.y_min;
+% Z_c.ybi_max3 = -B.y_max;
 
 Z_c.lambda_min1 = W.lambda_min;
 Z_c.lambda_max1 = -W.lambda_max;
@@ -206,15 +230,18 @@ Z_c.pitchi_max2 = -Ac.pitch_max;
 Z_c.pitchi_min3 = Ac.pitch_min;
 Z_c.pitchi_max3 = -Ac.pitch_max;
 
-Z_c.pitchid_min1 = Ac.pitch_dot_min;
-Z_c.pitchid_max1 = -Ac.pitch_dot_max;
-Z_c.pitchid_min2 = Ac.pitch_dot_min;
-Z_c.pitchid_max2 = -Ac.pitch_dot_max;
-Z_c.pitchid_min3 = Ac.pitch_dot_min;
-Z_c.pitchid_max3 = -Ac.pitch_dot_max;
+Z_c.pitchid_min1 = Ac.pitchd_min;
+Z_c.pitchid_max1 = -Ac.pitchd_max;
+Z_c.pitchid_min2 = Ac.pitchd_min;
+Z_c.pitchid_max2 = -Ac.pitchd_max;
+Z_c.pitchid_min3 = Ac.pitchd_min;
+Z_c.pitchid_max3 = -Ac.pitchd_max;
 
 Z_c.Pe_min = Ac.Pe_min;
 Z_c.Pe_max = -Ac.Pe_max;
 
 Zk = size(struct2table(Z_c),2)/2;
 
+%% Variable names
+var_names = ['vr' 'wr' 'xt' 'xtdot' 'yt' 'ytdot' 'xb1' 'xb2' 'xb3' 'xbdot1' 'xbdot2' 'xbdot3' 'yb1' 'yb2' 'yb3' 'ybdot1' 'ybdot2' ...
+         'ybdot3' 'pitch1' 'pitch2' 'pitch3' 'pitch_rate1' 'pitch_rate2' 'pitch_rate3' 'Tg' 'vt' 'vm' 'azimuth'];

@@ -11,7 +11,7 @@ l_b = 117.18; % Blade length
 alpha = 0.15; % Wind shear exponent
 
 i=1;
-
+r_r = 80;
 for r_r=10:20:120
 for theta=0:0.1:360
     % w_i = alpha*(r_r/H)*cosd(theta)+alpha*(alpha-1)/2*(r_r/H)^2*cosd(theta)^2+alpha*(alpha-1)*(alpha-2)/6*(r_r/H)^3*cosd(theta)^3;

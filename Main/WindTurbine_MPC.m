@@ -1,12 +1,13 @@
 clc
 clear all
 close all
-rng('shuffle');
+rng(1);
 
 %% Obtain all variables
 variables_IPC
 load('BladedFiles\performancemap_data.mat')
 Constant_variables
+MPCconstants_linear
 MPCconstants
 addpath('functions');
 
@@ -47,19 +48,20 @@ z_mpc(:,1) = z_i;
 
 %% Reference trajectories
 ref_me = [Ac.omega_opt*ones(N+Hp,1), zeros(N+Hp,8), W.TSR*ones(N+Hp,3) , zeros(N+Hp,6), Ac.Pe_opt*ones(N+Hp,1)]';
-ref_me = Sz\ref_me;
+% ref_me = [Ac.omega_opt*ones(N+Hp,1), zeros(N+Hp,8), W.TSR*ones(N+Hp,1) , zeros(N+Hp,6), Ac.Pe_opt*ones(N+Hp,1)]';
+% ref_me = Sz\ref_me;
 
 disp('Running Loop')
 for k=1:N-1
     %% MPC
     MPCdefinition
     res = MPCobj({Sx\x_kf(:,k),uprev_mpc,ref_me(:,k+1:k+Hp)});
-
+    
     u_L = res{1};
     u_temp = reshape(u_L, [Uk, length(u_L)/Uk]);
     u_mpc(:,k) = u_temp(:,1);
     uprev_mpc = u_temp(:,1);
-
+    
     x_L = res{2};
     x_temp = reshape(x_L, [Lk, length(x_L)/Lk]);
     x_mpc(:,k+1) = Sx*x_temp(:,1);
@@ -70,13 +72,13 @@ for k=1:N-1
     
     %% Runge-Kutta 4th order method
     [x_tv(:,k+1),yt(:,k+1)] = RK4(f,x_tv(:,k),uprev_mpc,h,n(x_tv(:,k)),v(:,k+1),Ts);
-
+    
     %% Unscented Kalman Filter
-    [x_kf(:,k+1),P,e(:,k+1)] = UKF(f,h,Q,R,x_kf(:,k),yt(:,k+1),uprev_mpc,kal,P,Ts,v(:,k+1),n);
+    [x_kf(:,k+1),P,e(:,k+1)] = UKF(f,h,Q,R,x_kf(:,k),yt(:,k+1),uprev_mpc,kal,P,Ts,v(:,k+1),n,P0);
     
     xeq = x_kf(:,k+1);
     if mod(k,30) == 0
-         disp("Iteration: " + k);
+        disp("Iteration: " + k);
     end
 end
 x_kf(end,:) = wrapToPi(x_kf(end,:))+pi;
@@ -84,7 +86,10 @@ x_tv(end,:) = wrapToPi(x_tv(end,:))+pi;
 
 %% Display results
 % true_plots(Lk,yt,x_kf,x_ul,x_vl,t)
-true_plots(Lk,yt,x_kf,x_tv,x_mpc,x_ul,x_vl,t)
+true_plots(Lk,yt,x_kf,x_mpc,x_ul,x_vl,var_names,t)
+vri_plot(var,x_kf,x_mpc,t)
 % result_display(t,Lk,x_kf,x_mpc,x_ul,x_vl)
-save('working_MPC.mat')
+% save('tests/working_MPC.mat')
+save tests/working_MPC_16.mat e e_rep f_rep g_rep k Lk P P0 t Ts u_b u_mpc Uk x_i ...
+    x_kf x_me x_mpc x_tv x_ul x_vl xeq y_me y_vl Yk yt z_mpc z_temp Zk
 rmpath('functions')
