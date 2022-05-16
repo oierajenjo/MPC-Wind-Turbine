@@ -75,6 +75,14 @@ f = @(x,u,Ts) [f1(x); f2(x); f3(x); f4(x); f5(x); f6(x); f7(x);...
     f16(x); f17(x); f18(x); f19(x); f20(x); f21(x,u); f22(x,u);...
     f23(x,u); f24(x,u); f25(x); f26; f27(x)]; % Nonlinear prediction
 
+% Discretize f
+% f = @(x,u,Ts) x + Ts*f(x,u,Ts); % Euler
+k_1 = @(x,u,Ts) f(x,u,Ts);
+k_2 = @(x,u,Ts) f(x+0.5*Ts*k_1(x,u,Ts),u+0.5*Ts,Ts);
+k_3 = @(x,u,Ts) f(x+0.5*Ts*k_2(x,u,Ts),u+0.5*Ts,Ts);
+k_4 = @(x,u,Ts) f(x+Ts*k_3(x,u,Ts),u+Ts,Ts);
+f = @(x,u,Ts) x + (1/6)*(k_1(x,u,Ts)+2*k_2(x,u,Ts)+2*k_3(x,u,Ts)+k_4(x,u,Ts))*Ts; % Runge-Kutta
+
 h = @(x) [x(1); f3(x); f5(x); x(6)*B.kx*2*B.l/3; x(7)*B.kx*2*B.l/3;
     x(8)*B.kx*2*B.l/3; x(12)*B.ky*2*B.l/3; x(13)*B.ky*2*B.l/3; ...
     x(14)*B.ky*2*B.l/3; x(18); x(19); x(20);D.eta*x(24)*x(1); vr(x); x(27)];

@@ -116,6 +116,12 @@ xt = zeros(Lk, N); % Initialize size of true state for all k
 xt(:,1) = x_i; % Set true initial state
 yt = zeros(Yk, N); % Initialize size of output vector for all k
 [xt,yt] = RK4(f,xt,h,yt,u_b,N,n,v,Ts);
+% Euler
+% for k = 1:N-1
+%     xt(:,k+1) = xt(:,k) + Ts*f(xt(:,k),u_b(:,k)) + Ts*n(xt(:,k)); 
+%     yt(:,k) = h(xt(:,k)) + v(:,k);
+% end
+% yt(:,N) = h(xt(:,N)) + v(:,N);
 
 figure
 plot(t,yt(1,:)',t,y_me(1,:));
@@ -158,7 +164,7 @@ ylabel('$M_{x_1}$ [Nm]','Interpreter','latex')
 xlabel('time [s]','Interpreter','latex')
 
 figure
-plot(t,yt(10,:)',t,y_me(10,:));
+plot(t,yt(13,:)',t,y_me(13,:));
 legend('$P_e$ (sim.)','$P_e$ (Bladed)','Interpreter','latex')
 % ylim([-2.6 2.6]);
 title('Electrical power');
@@ -166,7 +172,7 @@ ylabel('$P_e$ [W]','Interpreter','latex')
 xlabel('time [s]','Interpreter','latex')
 
 figure
-plot(t,yt(11,:)',t,y_me(11,:));
+plot(t,yt(14,:)',t,y_me(14,:));
 legend('$v_r$ (sim.)','$v_r$ (Bladed)','Interpreter','latex')
 % ylim([-2.6 2.6]);
 title('Relative wind speed at the rotor');
@@ -206,10 +212,10 @@ ylabel('$\dot{x}_{b_1}$ [m/s]','Interpreter','latex')
 xlabel('time [s]','Interpreter','latex')
 
 figure
-plot(t,xt(12,:)',t,data.Data(:,86));
+plot(Ts*(1:400),xt(12,1:400)',Ts*(1:400),data.Data(1:400,86));
 legend('$y_{b_1}$ (sim.)','$y_{b_1}$ (Bladed)','Interpreter','latex')
 % ylim([-2.6 2.6]);
-title('Edgewise deflection (blade 1)');
+title('Edgewise deflection (blade 1) - RK4');
 ylabel('$y_{b_1}$ [m/s]','Interpreter','latex')
 xlabel('time [s]','Interpreter','latex')
 
@@ -248,6 +254,20 @@ xlabel('time [s]','Interpreter','latex')
 for k=1:N
     tr(k) = Tr(xt(:,k));
 end
+for k=1:N
+    p1(k) = vri(xt(:,k),1);
+    p2(k) = vri(xt(:,k),2);
+    p3(k) = vri(xt(:,k),3);
+end
+figure
+plot(Ts*(1:600),p1(1:600),Ts*(1:600),p2(1:600),Ts*(1:600),p3(1:600))
+legend('$v_{r_1}$ (sim.)','$v_{r_2}$ (sim.)','$v_{r_3}$ (sim.)','Interpreter','latex')
+title("Individual blade wind speed")
+ylabel('$v_{r_i}$ [m/s]','Interpreter','latex')
+xlabel('time [s]','Interpreter','latex')
+
+
+
 figure
 plot(t,tr/(D.Jr+D.Jg), t,xt(24,:)/(D.Jr+D.Jg))
 legend('Tr','Tg')
@@ -266,7 +286,7 @@ P0 = [M.sigma_enc; M.sigma_tdef; M.sigma_tvel; M.sigma_tdef; M.sigma_tvel;...
 P0 = diag(P0);
 % P0 = 0.01*eye(Lk,Lk); 
 
-[xk,P,e] = UKF(f,h,Q,R,xk,yt,u_b,Lk,Yk,N,P0,Ts,v,n);
+[xk,P,e] = UKF(f,h,Q,R,xk,y_me,u_b,Lk,Yk,N,P0,Ts,v,n);
 
 
 % % Construct the filter

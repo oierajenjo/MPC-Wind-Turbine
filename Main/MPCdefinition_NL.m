@@ -1,3 +1,6 @@
+Hp = 5;
+Hu = 5;
+
 % Define object
 nlobj = nlmpc(Lk,Zk,Uk);
 nlobj.Ts = Ts;
@@ -6,7 +9,8 @@ nlobj.ControlHorizon = Hu;
 
 % Define model
 nlobj.Model.StateFcn = f;
-nlobj.Model.IsContinuousTime = true;
+nlobj.Model.IsContinuousTime = false;
+nlmsobj.Model.StateJacFcn = @mystatejac;
 nlobj.Model.NumberOfParameters = 1;
 nlobj.Model.OutputFcn = hz;
 
@@ -80,4 +84,47 @@ validateFcns(nlobj, x0, u0, [], {Ts});
 nloptions = nlmpcmoveopt;
 nloptions.Parameters = {Ts};
 
+function [Ampc,Bmpc] = mystatejac(x,~)
+A1 = [zeros(1,11), -a1*ones(1,3);
+    zeros(1,2), 1, zeros(1,11);
+    0, -b3, -b4, zeros(1,2), b1*ones(1,3), b2*ones(1,3), zeros(1,3);
+    zeros(1,4), 1, zeros(1,9);
+    zeros(1,3), -c4, -c5, zeros(1,6), c2*ones(1,3);
+    zeros(3,8), eye(3), zeros(3,3);
+    d10(x,0), d3, d4(x,0), zeros(1,2), -d1, zeros(1,2), d2(x,0), zeros(1,5);
+    d10(x,1), d3, d4(x,1), zeros(1,3), -d1, zeros(1,2), d2(x,1), zeros(1,4);
+    d10(x,2), d3, d4(x,2), zeros(1,4), -d1, zeros(1,2), d2(x,2), zeros(1,3);
+    zeros(3,14)];
 
+A2 = [zeros(1,9), -a2, zeros(1,3);
+    zeros(3,13);
+    c3*ones(1,3), zeros(1,6), -c1, zeros(1,3);
+    zeros(3,13);
+    d8(x,0), zeros(1,2), d7(x,0), zeros(1,6), d6(x,0), d5(x,0), d9(x,0);
+    0, d8(x,1), zeros(1,2), d7(x,1), zeros(1,5), d6(x,1), d5(x,1), d9(x,1);
+    0, 0, d8(x,2), zeros(1,2), d7(x,2), zeros(1,4), d6(x,2), d5(x,2), d9(x,2);
+    eye(3), zeros(3,10)];
+
+A3 = [-e9(x,0), 0, -e7(x,0), e3, e4, zeros(1,3), -e8(x,0), 0, 0, -e1, 0, 0;
+    -e9(x,1), 0, -e7(x,1), e3, e4, zeros(1,4), -e8(x,1), 0, 0, -e1, 0;
+    -e9(x,2), 0, -e7(x,2), e3, e4, zeros(1,5), -e8(x,2), 0, 0, -e1;
+    zeros(9,14);
+    1, zeros(1,13)];
+
+A4 = [-e2(x,0), zeros(1,2), -e11(x,0), zeros(1,6), -e6(x,0), -e5(x,0), -e10(x,0);
+    0, -e2(x,1), zeros(1,2), -e11(x,1), zeros(1,5), -e6(x,1), -e5(x,1), -e10(x,1);
+    0, 0, -e2(x,2), zeros(1,2), -e11(x,2), zeros(1,4), -e6(x,2), -e5(x,2), -e10(x,2);
+    zeros(3,6), eye(3), zeros(3,4);
+    zeros(3), -f1*eye(3), -f2*eye(3), zeros(3,4);
+    zeros(1,9), -g1, zeros(1,3);
+    zeros(1,10), -W.w_p, zeros(1,2);
+    zeros(2,13)];
+
+Ampc = eye(Lk)+ Ts*[A1 A2; A3 A4];
+%Ampc = Sx\Ampc*Sx;% State Matrix
+
+
+Bmpc = Ts*[zeros(3,Lk-7), f1*eye(3), zeros(3,4);
+    zeros(1,Lk-4), g1, zeros(1,3)]';
+%Bmpc = Sx\Bmpc; % Input Matrix
+end

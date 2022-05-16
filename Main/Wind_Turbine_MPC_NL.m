@@ -1,7 +1,7 @@
 clc
 clear all
 close all
-rng('shuffle');
+rng(1);
 
 %% Obtain all variables
 variables_IPC
@@ -48,15 +48,16 @@ u_mpc = zeros(Uk, N);
 %% Reference trajectories
 % ref_me = [Ac.omega_opt*ones(N+Hp,1), zeros(N+Hp,8), W.TSR*ones(N+Hp,3) , zeros(N+Hp,6), Ac.Pe_opt*ones(N+Hp,1)]';
 % ref_me = Sz\ref_me;
-ref_me = [Ac.omega_opt, zeros(1,8), W.TSR*ones(1,3) , zeros(1,6), Ac.Pe_opt]';
+ref_me = [Ac.omega_opt, zeros(1,8), W.TSR*ones(1,3) , zeros(1,6), Ac.Pe_opt];
 
 %% MPC definition
 MPCdefinition_NL
-    
+
 disp('Running Loop')
 for k=1:N-1
     % Compute optimal control moves
-    [u,nloptions] = nlmpcmove(nlobj,x_kf(:,k),uprev_mpc,ref_me',[],nloptions);
+    tic
+    [u,nloptions] = nlmpcmove(nlobj,x_kf(:,k),uprev_mpc,ref_me,[],nloptions);
 %     res = MPCobj({Sx\x_kf(:,k),uprev_mpc,ref_me(:,k+1:k+Hp)});
 
 %     u_L = res{1};
@@ -75,15 +76,16 @@ for k=1:N-1
 %     z_mpc(:,k+1) = z_temp(:,1);
     
     %% Runge-Kutta 4th order method
-    [x_tv(:,k+1),yt(:,k+1)] = RK4(f,x_tv(:,k),uprev_mpc,h,n(x_tv(:,k)),v(:,k+1),Ts);
+    [x_tv(:,k+1),yt(:,k+1)] = RK4_NL(f,x_tv(:,k),uprev_mpc,h,n(x_tv(:,k)),v(:,k+1),Ts);
 
     %% Unscented Kalman Filter
-    [x_kf(:,k+1),P,e(:,k+1)] = UKF(f,h,Q,R,x_kf(:,k),yt(:,k+1),uprev_mpc,kal,P,Ts,v(:,k+1),n);
+    [x_kf(:,k+1),P,e(:,k+1)] = UKF_NL(f,h,Q,R,x_kf(:,k),yt(:,k+1),uprev_mpc,kal,P,Ts,v(:,k+1),n);
     
 %     xeq = x_kf(:,k+1);
     if mod(k,30) == 0
          disp("Iteration: " + k);
     end
+    toc
 end
 x_kf(end,:) = wrapToPi(x_kf(end,:))+pi;
 x_tv(end,:) = wrapToPi(x_tv(end,:))+pi;
