@@ -1,10 +1,10 @@
 % vr
 vr_eq = @(x) x(26) + x(25) - x(3);
 
+% vri
 ws_ts = @(x,i) (To.r^2*(Ae.Rr^2*(sin(x(27)+2*pi*i/3))^2-To.xh^2)/(To.xh^2+Ae.Rr^2*(sin(x(27)+2*pi*i/3))^2)^2 +...
     ((Ae.Rr*cos(x(27)+2*pi*i/3)+To.H)/To.H)^W.alpha); % Wind Share and Tower Shadow
 
-% vri
 vri_eq = @(x,i) x(26)*ws_ts(x,i) + x(25) - x(3)- x(9+i);
 
 %lambda_i
@@ -74,14 +74,14 @@ d10 = @(x,i) Ae.rho*Ae.Ar*vri_eq(x,i)^2*dCt_dLamb(x,i)*r1(x,i)/(2*B.m); % dw_r
 
 % ybi_dot
 e1 = B.ky/B.m; % dy_bi
-e2 = @(x,i) Ae.rho*Ae.Ar*vri_eq(x,i)^3*(dCp_dLamb(x,i)*r2(x,i))/(4*B.m*x(1)*B.l) + B.cy/B.m; % dydot_bi
+e2 = @(x,i) 3*Ae.rho*Ae.Ar*vri_eq(x,i)^3*dCp_dLamb(x,i)*r2(x,i)/(4*B.m*x(1)*B.l) + B.cy/B.m; % dydot_bi
 e3 = e1; % dy_t
 e4 = B.cy/B.m; % dydot_t
 e5 = @(x,i) 3*Ae.rho*Ae.Ar*(dCp_dLamb(x,i)*r3(x,i)*vri_eq(x,i)^3 + 3*cpi_eq(x,i)*ws_ts(x,i)*vri_eq(x,i)^2)/(4*B.m*x(1)*B.l); % dv_m
 e6 = @(x,i) 3*Ae.rho*Ae.Ar*(dCp_dLamb(x,i)*r5(x,i)*vri_eq(x,i)^3 + 3*cpi_eq(x,i)*vri_eq(x,i)^2)/(4*B.m*x(1)*B.l); % dv_t
 e7 = @(x,i) 3*Ae.rho*Ae.Ar*(dCp_dLamb(x,i)*r6(x,i)*vri_eq(x,i)^3 - 3*cpi_eq(x,i)*vri_eq(x,i)^2)/(4*B.m*x(1)*B.l); % dxdot_t
 e8 = @(x,i) 3*Ae.rho*Ae.Ar*(dCp_dLamb(x,i)*r7(x,i)*vri_eq(x,i)^3 - 3*cpi_eq(x,i)*vri_eq(x,i)^2)/(4*B.m*x(1)*B.l); % dxdot_bi
-e9 = @(x,i) 3*Ae.rho*Ae.Ar*vri_eq(x,i)^3*(dCp_dLamb(x,i)*r1(x,i)-cpi_eq(x,i)/x(1))/(4*B.m*x(1)*B.l); % dw_r
+e9 = @(x,i) 3*Ae.rho*Ae.Ar*vri_eq(x,i)^3*(dCp_dLamb(x,i)*r1(x,i) - cpi_eq(x,i)/x(1))/(4*B.m*x(1)*B.l); % dw_r
 e10 = @(x,i) 3*Ae.rho*Ae.Ar*(3*cpi_eq(x,i)*dvri_dazim(x,i)*vri_eq(x,i)^2 + dCp_dLamb(x,i)*r4(x,i)*vri_eq(x,i)^3)/(4*B.m*x(1)*B.l); % dazim
 e11 = @(x,i) 3*Ae.rho*Ae.Ar*vri_eq(x,i)^3*dCp_dTheta(x,i)/(4*B.m*x(1)*B.l); % dpitch
 
@@ -91,7 +91,7 @@ f2 = 2*Ac.omega*Ac.xi;
 
 % Tg
 g1 = 1/Ac.tau;
-g2 = @(x,u) 2*u(4)*x(1)/Ac.tau;
+% g2 = @(x,u) 2*u(4)*x(1)/Ac.tau;
 
 % vt
 h1 = W.w_p;

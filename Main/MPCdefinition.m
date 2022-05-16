@@ -48,7 +48,7 @@ Bmpc = Ts*[zeros(3,Lk-7), f1*eye(3), zeros(3,4);
 
 
 lambda_rows = [
-    r1(xeq,0), 0, r6(xeq,0), zeros(1,5), r7(xeq,0), zeros(1,5), r2(xeq,0), zeros(1,9), r5(xeq,0), r3(xeq,0), r4(xeq,1);
+    r1(xeq,0), 0, r6(xeq,0), zeros(1,5), r7(xeq,0), zeros(1,5), r2(xeq,0), zeros(1,9), r5(xeq,0), r3(xeq,0), r4(xeq,0);
     r1(xeq,1), 0, r6(xeq,1), zeros(1,6), r7(xeq,1), zeros(1,5), r2(xeq,1), zeros(1,8), r5(xeq,1), r3(xeq,1), r4(xeq,1);
     r1(xeq,2), 0, r6(xeq,2), zeros(1,7), r7(xeq,2), zeros(1,5), r2(xeq,2), zeros(1,7), r5(xeq,2), r3(xeq,2), r4(xeq,2);];
 
