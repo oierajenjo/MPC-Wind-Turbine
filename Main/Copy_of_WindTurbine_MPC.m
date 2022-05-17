@@ -7,7 +7,7 @@ rng(1);
 variables_IPC
 load('BladedFiles\performancemap_data.mat')
 Constant_variables
-MPCconstants_linear
+MPCconstants_linear_no_ws_ts
 MPCconstants
 addpath('functions');
 
@@ -138,6 +138,8 @@ Ampc = [A1 A2; A3 A4];
     k_4 = Ampc*(xmpc(:,k)+Ts*k_3) + Bmpc*(u_b(:,k)+Ts);
     xmpc(:,k+1) = xmpc(:,k) + (1/6)*(k_1+2*k_2+2*k_3+k_4)*Ts; 
     ympc(:,k+1) = Cmpc*xmpc(:,k+1);
+    
+    azimuth_partial_deriv(k) = Ae.rho*Ae.Ar*(2*cti_eq(xeq,0)*dvri_dazim(xeq,0)*vri_eq(xeq,0)+ dCt_dLamb(xeq,0)*r4(xeq,0)*vri_eq(xeq,0)^2)/(2*B.m);
     
     %% Runge-Kutta 4th order method
     % disp('Running True Values')
