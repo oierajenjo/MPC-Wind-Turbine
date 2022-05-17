@@ -75,7 +75,7 @@ for k=1:N-1
     
     %% Unscented Kalman Filter
     [x_kf(:,k+1),P,e(:,k+1)] = UKF(f,h,Q,R,x_kf(:,k),yt(:,k+1),uprev_mpc,kal,P,Ts,v(:,k+1),n,P0);
-    
+%     [x_kf(:,k+1),P,e(:,k+1)] = UKF(f,h,Q,R,x_kf(:,k),yt(:,k+1),uprev_mpc,kal,P,Ts,zeros(Yk,1),n,P0);
     xeq = x_kf(:,k+1);
     if mod(k,30) == 0
         disp("Iteration: " + k);

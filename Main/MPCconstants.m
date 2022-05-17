@@ -1,7 +1,6 @@
 %%%%%%%%%%%%%%%
 % CONSTRAINTS %
 %%%%%%%%%%%%%%%
-
 Sx = eye(Lk);
 % Sx(end-3,end-3) = S_means(1); %Tg
 

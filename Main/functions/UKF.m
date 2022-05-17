@@ -28,10 +28,12 @@ chi_m = zeros(Lk,n_sigma_p); % Transformed sigma points
 for j=1:n_sigma_p
     % Runge-Kutta 4th order method
 %     [chi_m(:,j),~] = RK4(f,chi_p(:,j),u,h,n(chi_p(:,j)),v,Ts);
-    [chi_m(:,j),~] = RK4(f,chi_p(:,j),u,h,zeros(Lk,1),zeros(Yk,1),Ts);
+    [chi_m(:,j),~] = RK4(f,chi_p(:,j),u,h,zeros(Lk,1),v,Ts);
+%     chi_m(:,j) = f(chi_p(:,j),u);
 end
 
 x_m = chi_m*wm; % Calculate mean of predicted state
+
 % Calculate covariance of predicted state
 P_m = Q; % A priori covariance estimate
 % P_m = 0; % A priori covariance estimate
@@ -45,7 +47,8 @@ end
 % obtaining the acceleration
 psi_m = zeros(Yk,n_sigma_p);
 for j=1:kal.n_sigma_p
-    psi_m(:,j) = h(chi_m(:,j)) + v;
+    psi_m(:,j) = h(chi_m(:,j));
+%     psi_m(:,j) = h(chi_m(:,j)) + v;
 end
 y_m = psi_m*wm; % Calculate mean of predicted output
 
@@ -53,8 +56,8 @@ y_m = psi_m*wm; % Calculate mean of predicted output
 % and cross-covariance between state and output
 Pyy = R;
 % Pyy = 0;
-%Pxy = zeros(L,2);
-Pxy = 0;
+Pxy = zeros(Lk,Yk);
+% Pxy = 0;
 for j = 1:n_sigma_p
     Pyy = Pyy + wc(j)*(psi_m(:,j) - y_m)*(psi_m(:,j) - y_m)';
     Pxy = Pxy + wc(j)*(chi_m(:,j) - x_m)*(psi_m(:,j) - y_m)';

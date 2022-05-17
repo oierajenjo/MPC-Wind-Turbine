@@ -27,11 +27,11 @@ r5 = @(x,i) -(x(1)*Ae.Rr-x(15+i))/vri_eq(x,i)^2; % dlamb_dvt
 r6 = @(x,i) (x(1)*Ae.Rr-x(15+i))/vri_eq(x,i)^2; % dlamb_dxdott
 r7 = r6; % dlamb_dxdotbi
 
-% lambda
-rr1 = @(x) Ae.Rr/vr_eq(x); % dlamb_dwr
-rr2 = @(x) -x(1)*Ae.Rr/vr_eq(x)^2; % dlamb_dvm
-rr3 = @(x) -x(1)*Ae.Rr/vr_eq(x)^2; % dlamb_dvt
-rr4 = @(x) x(1)*Ae.Rr/vr_eq(x)^2; % dlamb_dxdott
+% % lambda
+% rr1 = @(x) Ae.Rr/vr_eq(x); % dlamb_dwr
+% rr2 = @(x) -x(1)*Ae.Rr/vr_eq(x)^2; % dlamb_dvm
+% rr3 = @(x) -x(1)*Ae.Rr/vr_eq(x)^2; % dlamb_dvt
+% rr4 = @(x) x(1)*Ae.Rr/vr_eq(x)^2; % dlamb_dxdott
 
 % Gradients (dCt_dLambda, dCt_dPitch, dCp_dLambda, dCp_dPitch)
 [dCp_dTheta_vec, dCp_dLambda_vec] = gradient(cp_l);
@@ -58,8 +58,6 @@ c3 = B.cy/To.m;
 c4 = (B.B*c2 + To.k/To.m);
 c5 = (B.B*c3 + To.c/To.m);
 
-
-%% CONTINUE HERE
 % xbi_dot
 d1 = B.kx/B.m; % dx_bi
 d2 = @(x,i) Ae.rho*Ae.Ar*(dCt_dLamb(x,i)*r7(x,i)*vri_eq(x,i)^2 - 2*cti_eq(x,i)*vri_eq(x,i))/(2*B.m) - B.cx/B.m; % dxdot_bi
@@ -91,7 +89,7 @@ f2 = 2*Ac.omega*Ac.xi;
 
 % Tg
 g1 = 1/Ac.tau;
-% g2 = @(x,u) 2*u(4)*x(1)/Ac.tau;
+g2 = @(x,u) 2*u(4)*x(1)/Ac.tau;
 
 % vt
 h1 = W.w_p;
