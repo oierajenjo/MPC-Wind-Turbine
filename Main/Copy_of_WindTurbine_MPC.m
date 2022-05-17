@@ -76,45 +76,42 @@ ref_me = [Ac.omega_opt*ones(N,1) zeros(N,14) Ac.Pe_opt*ones(N,1)]';
 
 for k=1:lmax*N-1
     %% Linearized system
-    A1 = [zeros(1,11), -a1*ones(1,3);
-        zeros(1,2), 1, zeros(1,11);
-        0, -b3, -b4, zeros(1,2), b1*ones(1,3), b2*ones(1,3), zeros(1,3);
-        zeros(1,4), 1, zeros(1,9);
-        zeros(1,3), -c4, -c5, zeros(1,6), c2*ones(1,3);
-        zeros(3,8), eye(3), zeros(3,3);
-        d10(xeq,0), d3, d4(xeq,0), zeros(1,2), -d1, zeros(1,2), d2(xeq,0), zeros(1,5);
-        d10(xeq,1), d3, d4(xeq,1), zeros(1,3), -d1, zeros(1,2), d2(xeq,1), zeros(1,4);
-        d10(xeq,2), d3, d4(xeq,2), zeros(1,4), -d1, zeros(1,2), d2(xeq,2), zeros(1,3);
-        zeros(3,14)];
-    
-    A2 = [zeros(1,9), -a2, zeros(1,3);
-        zeros(3,13);
-        c3*ones(1,3), zeros(1,6), -c1, zeros(1,3);
-        zeros(3,13);
-        d8(xeq,0), zeros(1,2), d7(xeq,0), zeros(1,6), d6(xeq,0), d5(xeq,0), d9(xeq,0);
-        0, d8(xeq,1), zeros(1,2), d7(xeq,1), zeros(1,5), d6(xeq,1), d5(xeq,1), d9(xeq,1);
-        0, 0, d8(xeq,2), zeros(1,2), d7(xeq,2), zeros(1,4), d6(xeq,2), d5(xeq,2), d9(xeq,2);
-        eye(3), zeros(3,10)];
-    
-    A3 = [-e9(xeq,0), 0, -e7(xeq,0), e3, e4, zeros(1,3), -e8(xeq,0), 0, 0, -e1, 0, 0;
-        -e9(xeq,1), 0, -e7(xeq,1), e3, e4, zeros(1,4), -e8(xeq,1), 0, 0, -e1, 0;
-        -e9(xeq,2), 0, -e7(xeq,2), e3, e4, zeros(1,5), -e8(xeq,2), 0, 0, -e1;
-        zeros(6,14);
-        g2(xeq,u_b(:,k)), zeros(1,13);
-        zeros(2,14);
-        1, zeros(1,13)];
-    
-    A4 = [-e2(xeq,0), zeros(1,2), -e11(xeq,0), zeros(1,6), -e6(xeq,0), -e5(xeq,0), -e10(xeq,0);
-        0, -e2(xeq,1), zeros(1,2), -e11(xeq,1), zeros(1,5), -e6(xeq,1), -e5(xeq,1), -e10(xeq,1);
-        0, 0, -e2(xeq,2), zeros(1,2), -e11(xeq,2), zeros(1,4), -e6(xeq,2), -e5(xeq,2), -e10(xeq,2);
-        zeros(3,6), eye(3), zeros(3,4);
-        zeros(3), -f1*eye(3), -f2*eye(3), zeros(3,4);
-        zeros(1,9), -g1, zeros(1,3);
-        zeros(1,10), -W.w_p, zeros(1,2);
-        zeros(2,13)];
-    
-    Ampc = [A1 A2;
-        A3 A4];
+A1 = [zeros(1,11), -a1*ones(1,3);
+    zeros(1,2), 1, zeros(1,11);
+    0, -b3, -b4, zeros(1,2), b1*ones(1,3), b2*ones(1,3), zeros(1,3);
+    zeros(1,4), 1, zeros(1,9);
+    zeros(1,3), -c4, -c5, zeros(1,6), c2*ones(1,3);
+    zeros(3,8), eye(3), zeros(3,3);
+    d10(xeq,0), d3, d4(xeq,0), zeros(1,2), -d1, zeros(1,2), d2(xeq,0), zeros(1,5);
+    d10(xeq,1), d3, d4(xeq,1), zeros(1,3), -d1, zeros(1,2), d2(xeq,1), zeros(1,4);
+    d10(xeq,2), d3, d4(xeq,2), zeros(1,4), -d1, zeros(1,2), d2(xeq,2), zeros(1,3);
+    zeros(3,14)];
+
+A2 = [zeros(1,9), -a2, zeros(1,3);
+    zeros(3,13);
+    c3*ones(1,3), zeros(1,6), -c1, zeros(1,3);
+    zeros(3,13);
+    d8(xeq,0), zeros(1,2), d7(xeq,0), zeros(1,6), d6(xeq,0), d5(xeq,0), d9(xeq,0);
+    0, d8(xeq,1), zeros(1,2), d7(xeq,1), zeros(1,5), d6(xeq,1), d5(xeq,1), d9(xeq,1);
+    0, 0, d8(xeq,2), zeros(1,2), d7(xeq,2), zeros(1,4), d6(xeq,2), d5(xeq,2), d9(xeq,2);
+    eye(3), zeros(3,10)];
+
+A3 = [-e9(xeq,0), 0, -e7(xeq,0), e3, e4, zeros(1,3), -e8(xeq,0), 0, 0, -e1, 0, 0;
+    -e9(xeq,1), 0, -e7(xeq,1), e3, e4, zeros(1,4), -e8(xeq,1), 0, 0, -e1, 0;
+    -e9(xeq,2), 0, -e7(xeq,2), e3, e4, zeros(1,5), -e8(xeq,2), 0, 0, -e1;
+    zeros(9,14);
+    1, zeros(1,13)];
+
+A4 = [-e2(xeq,0), zeros(1,2), -e11(xeq,0), zeros(1,6), -e6(xeq,0), -e5(xeq,0), -e10(xeq,0);
+    0, -e2(xeq,1), zeros(1,2), -e11(xeq,1), zeros(1,5), -e6(xeq,1), -e5(xeq,1), -e10(xeq,1);
+    0, 0, -e2(xeq,2), zeros(1,2), -e11(xeq,2), zeros(1,4), -e6(xeq,2), -e5(xeq,2), -e10(xeq,2);
+    zeros(3,6), eye(3), zeros(3,4);
+    zeros(3), -f1*eye(3), -f2*eye(3), zeros(3,4);
+    zeros(1,9), -g1, zeros(1,3);
+    zeros(1,10), -W.w_p, zeros(1,2);
+    zeros(2,13)];
+
+Ampc = [A1 A2; A3 A4];
     % Ampc = eye(Lk); % State Matrix
     
     Bmpc = [zeros(3,Lk-7), f1*eye(3), zeros(3,4);
