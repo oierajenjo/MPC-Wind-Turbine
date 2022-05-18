@@ -39,7 +39,7 @@ A4 = [-e2(xeq,0), zeros(1,2), -e11(xeq,0), zeros(1,6), -e6(xeq,0), -e5(xeq,0), -
 
 Ampc = [A1 A2; A3 A4];
 % eig(Ampc)
-Ampc = eye(Lk)+ Ts*Ampc;
+Ampc = eye(Lk) + Ts*Ampc;
 % Ampc = Sx\Ampc*Sx;% State Matrix
 
 
@@ -178,8 +178,8 @@ Cost = Ts*(Epsilon'*Qcal*Epsilon - deltaU'*Gcal + deltaU'*Hcal*deltaU);
 %%%%%%%%%%%%%%%%%%%
 
 % Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0; G*[Zcal;1]<=0];
-% Constraints = [F*[U;1]<=0; G*[Zcal;1]<=0];
 Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0];
+% Constraints = [F*[U;1]<=0; G*[Zcal;1]<=0];
 % Constraints = G*[Zcal;1]<=0;
 
 % The Yalmip optimizer-object used for simulation and control
