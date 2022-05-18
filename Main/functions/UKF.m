@@ -13,8 +13,9 @@ try
 catch ME
     disp('Matrix is not symmetric positive definite');
 %     P = P0;
-%     sP = chol(P,'lower');% Calculate square root of error covariance
-    return
+    P = nearestSPD(P);
+    sP = chol(P,'lower');% Calculate square root of error covariance
+%     return
 end
 
 % chi_p = "chi previous" = chi(k-1) % Untransformed sigma points
