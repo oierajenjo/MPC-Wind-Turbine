@@ -81,13 +81,16 @@ for k=1:N-1
     [x_tv(:,k+1),yt(:,k+1)] = RK4(f,x_tv(:,k),uprev_mpc,h,n(x_tv(:,k)),v(:,k+1),Ts);
     
     %% Unscented Kalman Filter
-    [x_kf(:,k+1),P,e(:,k+1)] = UKF(f,h,Q,R,x_kf(:,k),yt(:,k+1),uprev_mpc,kal,P,Ts,v(:,k+1),n,P0);
+%     [x_kf(:,k+1),P,e(:,k+1)] = UKF(f,h,Q,R,x_kf(:,k),yt(:,k+1),uprev_mpc,kal,P,Ts,v(:,k+1),n,P0);
 %     [x_kf(:,k+1),P,e(:,k+1)] = UKF(f,h,Q,R,x_kf(:,k),yt(:,k+1),uprev_mpc,kal,P,Ts,zeros(Yk,1),n,P0);
-    xeq = x_kf(:,k+1);
+    
+    xeq = x_tv(:,k+1);
+    
     if mod(k,30) == 0
         disp("Iteration: " + k);
     end
 end
+
 x_kf(end,:) = wrapToPi(x_kf(end,:))+pi;
 x_tv(end,:) = wrapToPi(x_tv(end,:))+pi;
 

@@ -33,7 +33,7 @@ K = 0.5*Ae.rho*Ae.Rr^5*pi*cp_opt/lamb_opt^3;
 u_b = [theta_f; theta_f; theta_f; K].*u_b;
 
 
-[f,h,Q,R] = system_IPC(var,ct_l,cp_l,lambdaVec,pitchVec,Lk);
+[f,h,Q,R] = Copy_of_system_IPC(var,ct_l,cp_l,lambdaVec,pitchVec,Lk);
 
 % Step 3: Initialize state and covariance
 % Simulation Only: Calculate true state trajectory for comparison
