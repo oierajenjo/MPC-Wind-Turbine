@@ -38,6 +38,7 @@ A4 = [-e2(xeq,0), zeros(1,2), -e11(xeq,0), zeros(1,6), -e6(xeq,0), -e5(xeq,0), -
     zeros(2,13)];
 
 Ampc = [A1 A2; A3 A4];
+% eig(Ampc)
 Ampc = eye(Lk)+ Ts*Ampc;
 % Ampc = Sx\Ampc*Sx;% State Matrix
 
@@ -91,6 +92,19 @@ Cmpc = [1, zeros(1,Lk-1);
 %     lambda_row;
 %     zeros(6,Lk-4-6), eye(6), zeros(6,4);
 %     q2(xeq), zeros(1,Lk-5), q1(xeq), zeros(1,3)]; % 1 lambda + xd&yd
+
+
+Cy = [1, zeros(1,Lk-1);
+    0, -b3, -b4, zeros(1,2), b1*ones(1,3), b2*ones(1,3), zeros(1,Lk-11);
+    zeros(1,3), -c4, -c5, zeros(1,6), c2*ones(1,3), c3*ones(1,3), zeros(1,6), -c1, zeros(1,3);
+    zeros(3,5), p1*eye(3), zeros(3,Lk-8);
+    zeros(3,11), p2*eye(3), zeros(3,Lk-14);
+    zeros(3,17), eye(3), zeros(3,Lk-20);
+    q2(xeq), zeros(1,Lk-5), q1(xeq), zeros(1,3);
+    zeros(1,2), -1, zeros(1,Lk-6), 1, 1, 0;
+    zeros(1,Lk-1), 1];
+    
+
 
 
 if xeq(26)<= W.rate_point % 3 lambda
@@ -164,7 +178,9 @@ Cost = Ts*(Epsilon'*Qcal*Epsilon - deltaU'*Gcal + deltaU'*Hcal*deltaU);
 %%%%%%%%%%%%%%%%%%%
 
 % Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0; G*[Zcal;1]<=0];
+% Constraints = [F*[U;1]<=0; G*[Zcal;1]<=0];
 Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0];
+% Constraints = G*[Zcal;1]<=0;
 
 % The Yalmip optimizer-object used for simulation and control
 MPCobj = optimizer(Constraints,Cost,ops,{X0,Uprev,refht},{U,Xcal,Zcal});

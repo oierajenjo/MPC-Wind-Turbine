@@ -57,7 +57,12 @@ disp('Running Loop')
 for k=1:N-1
     %% MPC
     MPCdefinition
-    res = MPCobj({Sx\x_kf(:,k),uprev_mpc,ref_me(:,k+1:k+Hp)});
+    res = MPCobj({Sx\x_tv(:,k),uprev_mpc,ref_me(:,k+1:k+Hp)});
+    
+    for j=1:Lk
+        O(j+Yk*(j-1):j+Yk*(j)-1,:) = Cy*Ampc^(j-1);
+    end
+    O_ranks(k) = rank(O);
     
     u_L = res{1};
     u_temp = reshape(u_L, [Uk, length(u_L)/Uk]);
