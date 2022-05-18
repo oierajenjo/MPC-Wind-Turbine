@@ -7,7 +7,8 @@ rng(1);
 variables_IPC
 load('BladedFiles\performancemap_data.mat')
 Constant_variables
-MPCconstants_linear
+MPCconstants_linear_no_ws_ts
+% MPCconstants_linear
 MPCconstants
 addpath('functions');
 
@@ -34,6 +35,7 @@ P0 = [M.sigma_enc; M.sigma_tdef; M.sigma_tvel; M.sigma_tdef; M.sigma_tvel;...
     M.sigma_bvel; M.sigma_bdef; M.sigma_bdef; M.sigma_bdef; M.sigma_bvel;...
     M.sigma_bvel; M.sigma_bvel; M.sigma_pit; M.sigma_pit; M.sigma_pit;...
     M.sigma_pitvel; M.sigma_pitvel; M.sigma_pitvel; M.sigma_pow;...
+%     0.5; 0.5; M.sigma_azim].^2;
     M.sigma_vane; 0.01; M.sigma_azim].^2;
 P0 = diag(P0);
 P = P0;
