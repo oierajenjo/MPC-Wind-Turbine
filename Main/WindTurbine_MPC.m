@@ -7,8 +7,8 @@ rng(1);
 variables_IPC
 load('BladedFiles\performancemap_data.mat')
 Constant_variables
-% MPCconstants_linear_no_ws_ts
-MPCconstants_linear
+MPCconstants_linear_no_ws_ts
+% MPCconstants_linear
 MPCconstants
 addpath('functions');
 
@@ -86,8 +86,8 @@ for k=1:N-1
     
     xeq = x_tv(:,k+1);
     
-    if mod(k,30) == 0
-        disp("Iteration: " + k);
+    if mod(k+1,50) == 0
+        disp("Iteration: " + num2str(k+1));
     end
 end
 

@@ -149,10 +149,10 @@ Qcal = repmat({Qmpc}, 1, Hp);
 Qcal = blkdiag(Qcal{:});
 Qcal = Qcal(Zk*(Hw-1)+1:end,:);
 
+
 %%%%%%%%%%%%
 %%% Cost %%%
 %%%%%%%%%%%%
-
 Psi = Ccal*Acal;
 Upsilon = Ccal*Bcal_u;
 Theta = Ccal*Bcal_du;
