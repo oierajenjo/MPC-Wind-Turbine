@@ -12,9 +12,10 @@ try
     sP = chol(P,'lower');% Calculate square root of error covariance
 catch ME
     disp('Matrix is not symmetric positive definite');
-%     P = P0;
-%     sP = chol(P,'lower');% Calculate square root of error covariance
-    return
+    % P = P0;
+    P = nearestSPD(P);
+    sP = chol(P,'lower');% Calculate square root of error covariance
+    % return
 end
 
 % chi_p = "chi previous" = chi(k-1) % Untransformed sigma points
@@ -27,9 +28,9 @@ chi_p = [x, x*ones(1,Lk)+sqrt(Lk+lambda)*sP, ...
 chi_m = zeros(Lk,n_sigma_p); % Transformed sigma points
 for j=1:n_sigma_p
     % Runge-Kutta 4th order method
-%     [chi_m(:,j),~] = RK4(f,chi_p(:,j),u,h,n(chi_p(:,j)),v,Ts);
+    % [chi_m(:,j),~] = RK4(f,chi_p(:,j),u,h,n(chi_p(:,j)),v,Ts);
     [chi_m(:,j),~] = RK4(f,chi_p(:,j),u,h,zeros(Lk,1),v,Ts);
-%     chi_m(:,j) = f(chi_p(:,j),u);
+    % chi_m(:,j) = f(chi_p(:,j),u);
 end
 
 x_m = chi_m*wm; % Calculate mean of predicted state

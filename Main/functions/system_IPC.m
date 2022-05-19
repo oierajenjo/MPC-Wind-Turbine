@@ -6,6 +6,7 @@ vr = @(x) ve(x) - x(3);
 
 ws_ts = @(x,i) (To.r^2*(Ae.Rr^2*(sin(x(27)+2*pi*i/3))^2-To.xh^2)/(To.xh^2+Ae.Rr^2*(sin(x(27)+2*pi*i/3))^2)^2 +...
     ((Ae.Rr*cos(x(27)+2*pi*i/3)+To.H)/To.H)^W.alpha); % Wind Share and Tower Shadow
+% ws_ts = @(x,i) 1; % Wind Share and Tower Shadow
 vei = @(x,i) x(26)*ws_ts(x,i) + x(25);
 vri = @(x,i) vei(x,i) - x(3);
 
@@ -57,8 +58,8 @@ f21 = @(x,u) Ac.omega^2*u(1) - 2*Ac.omega*Ac.xi*x(21) - Ac.omega^2*x(18); % Pitc
 f22 = @(x,u) Ac.omega^2*u(2) - 2*Ac.omega*Ac.xi*x(22) - Ac.omega^2*x(19); % Pitch 2 acceleration
 f23 = @(x,u) Ac.omega^2*u(3) - 2*Ac.omega*Ac.xi*x(23) - Ac.omega^2*x(20); % Pitch 3 acceleration
 
-% f24 = @(x,u) (u(4)-x(24))/Ac.tau; % Torque change in time
-f24 = @(x,u) (u(4)*x(1)^2-x(24))/Ac.tau; % Torque change in time
+f24 = @(x,u) (u(4)-x(24))/Ac.tau; % Torque change in time
+% f24 = @(x,u) (u(4)*x(1)^2-x(24))/Ac.tau; % Torque change in time (SIMPLE Cont.)
 
 %% Wind
 f25 = @(x) -W.w_p*x(25); % Wind turbulence acceleration

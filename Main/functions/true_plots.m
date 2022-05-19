@@ -19,10 +19,10 @@ ylabel('$Velocity [\frac{m}{s}]$', 'Interpreter', 'latex', 'FontSize', 14);
 legend('UKF', 'MPC');
 title(['$Estimation $' tl(2)], 'Interpreter', 'latex', 'FontSize', 15);
 
-filename = sprintf('MPC_%s', var_names(1));
+filename = sprintf('plots/MPC_%s', var_names(1));
 set(gcf, 'PaperPosition', [0 0 6 3.7]); %Position plot at left hand corner with width 25 and height 20.
 set(gcf, 'PaperSize', [5.7 3.7]); %Set the paper to have width 25 and height 20.
-saveas(gcf, filename, 'pdf') %Save figure
+% saveas(gcf, filename, 'pdf') %Save figure
 
 for i = 1:Lk
     figure
@@ -37,7 +37,7 @@ for i = 1:Lk
     filename = sprintf('plots/MPC_%s', var_names(1+i));
     set(gcf, 'PaperPosition', [0 0 6 3.7]); %Position plot at left hand corner with width 25 and height 20.
     set(gcf, 'PaperSize', [5.7 3.7]); %Set the paper to have width 25 and height 20.
-    saveas(gcf, filename, 'pdf') %Save figure
+%     saveas(gcf, filename, 'pdf') %Save figure
 end
 end
 

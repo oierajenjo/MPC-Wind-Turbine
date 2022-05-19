@@ -63,10 +63,10 @@ rn = sqrt(3.945^2+To.H^2);
 alpha_r = sin(acos(To.H/sqrt(To.xh^2+To.H^2)));
 alpha_n = sin(acos(To.H/sqrt(3.945^2+To.H^2)));
 To.xtoff = (rr*To.Mr*9.807*alpha_r+rn*To.Mn*9.807*alpha_n)/(To.k*(rr*0.37+rn*0.63)*sin(alpha_n*0.37+alpha_r*0.63));
-To.xd_min = -1;
-To.xd_max = 1;
-To.yd_min = -1;
-To.yd_max = 1;
+To.xd_min = -1.5;
+To.xd_max = 1.5;
+To.yd_min = -1.5;
+To.yd_max = 1.5;
 % To.xd_min = -0.20;
 % To.xd_max = 0.20;
 % To.yd_min = -0.15;
@@ -87,7 +87,7 @@ Ae.Ar = pi*Ae.Rr^2; % Rotor area
 var.Ae = Ae;
 
 %% Actuator constants
-Ac.omega = 2.4*pi; % Natural frequency of pitch actuator model
+Ac.omega = 1.2*2*pi; % Natural frequency of pitch actuator model
 Ac.xi = 0.8; % Damping factor of pitch actuator model
 Ac.tau = 0.1; % Generator time constant
 Ac.pitch_min = -deg2rad(15);
@@ -216,12 +216,19 @@ Z_c.ybid_max3 = -B.yd_max;
 % Z_c.ybi_min3 = B.y_min;
 % Z_c.ybi_max3 = -B.y_max;
 
-Z_c.lambda_min1 = W.lambda_min;
-Z_c.lambda_max1 = -W.lambda_max;
-Z_c.lambda_min2 = W.lambda_min;
-Z_c.lambda_max2 = -W.lambda_max;
-Z_c.lambda_min3 = W.lambda_min;
-Z_c.lambda_max3 = -W.lambda_max;
+% Z_c.lambda_min1 = W.lambda_min;
+% Z_c.lambda_max1 = -W.lambda_max;
+% Z_c.lambda_min2 = W.lambda_min;
+% Z_c.lambda_max2 = -W.lambda_max;
+% Z_c.lambda_min3 = W.lambda_min;
+% Z_c.lambda_max3 = -W.lambda_max;
+
+Z_c.lambda_min1 = 0;
+Z_c.lambda_max1 = 0;
+Z_c.lambda_min2 = 0;
+Z_c.lambda_max2 = 0;
+Z_c.lambda_min3 = 0;
+Z_c.lambda_max3 = 0;
 
 Z_c.pitchi_min1 = Ac.pitch_min;
 Z_c.pitchi_max1 = -Ac.pitch_max;
@@ -243,5 +250,5 @@ Z_c.Pe_max = -Ac.Pe_max;
 Zk = size(struct2table(Z_c),2)/2;
 
 %% Variable names
-var_names = ['vr' 'wr' 'xt' 'xtdot' 'yt' 'ytdot' 'xb1' 'xb2' 'xb3' 'xbdot1' 'xbdot2' 'xbdot3' 'yb1' 'yb2' 'yb3' 'ybdot1' 'ybdot2' ...
-         'ybdot3' 'pitch1' 'pitch2' 'pitch3' 'pitch_rate1' 'pitch_rate2' 'pitch_rate3' 'Tg' 'vt' 'vm' 'azimuth'];
+var_names = ["vr" "wr" "xt" "xtdot" "yt" "ytdot" "xb1" "xb2" "xb3" "xbdot1" "xbdot2" "xbdot3" "yb1" "yb2" "yb3" "ybdot1" "ybdot2" ...
+         "ybdot3" "pitch1" "pitch2" "pitch3" "pitch_rate1" "pitch_rate2" "pitch_rate3" "Tg" "vt" "vm" "azimuth"];

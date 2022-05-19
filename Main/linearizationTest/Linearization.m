@@ -11,6 +11,8 @@ syms x [1 Lk]
 syms f [1 Lk]
 syms cp ct
 
+%% Drive train
+f1(x) = (1-D.mu)*(-(x(12)+x(13)+x(14))*B.ky*2*B.l/3)/(D.Jr+D.Jg) - x(24)/(D.Jr+D.Jg);
 df1 = diff(f1,x12)*x12 + diff(f1,x13)*x13 + diff(f1,x14)*x14 + diff(f1,x24)*x24;
 % int(f1(x12,x13,x14,x24))
 
@@ -20,6 +22,7 @@ lambda(x) = x(26)*(To.r^2*(Ae.Rr^2*(sin(x(27)))^2-To.xh^2)/(To.xh^2+Ae.Rr^2*(sin
 dlambda = diff(lambda,x26)*x26 + diff(lambda,x27)*x27 + diff(lambda,x25)*x25 ...
     + diff(lambda,x3)*x3 + diff(lambda,x9)*x9;
 
+dlambda2 = diff(lambda,x(26))*x(26);
 
 f9(x)= 0.5*Ae.rho*Ae.Ar*cp*(x(26)*(To.r^2*(Ae.Rr^2*(sin(x(27)))^2-To.xh^2) ...
     /(To.xh^2+Ae.Rr^2*(sin(x(27)))^2)^2 + ((Ae.Rr*cos(x(27))+To.H)/To.H)^W.alpha) ...

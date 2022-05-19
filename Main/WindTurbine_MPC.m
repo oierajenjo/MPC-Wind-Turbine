@@ -7,6 +7,7 @@ rng(1);
 variables_IPC
 load('BladedFiles\performancemap_data.mat')
 Constant_variables
+% MPCconstants_linear_no_ws_ts
 MPCconstants_linear
 MPCconstants
 addpath('functions');
@@ -34,6 +35,7 @@ P0 = [M.sigma_enc; M.sigma_tdef; M.sigma_tvel; M.sigma_tdef; M.sigma_tvel;...
     M.sigma_bvel; M.sigma_bdef; M.sigma_bdef; M.sigma_bdef; M.sigma_bvel;...
     M.sigma_bvel; M.sigma_bvel; M.sigma_pit; M.sigma_pit; M.sigma_pit;...
     M.sigma_pitvel; M.sigma_pitvel; M.sigma_pitvel; M.sigma_pow;...
+%     0.5; 0.5; M.sigma_azim].^2;
     M.sigma_vane; 0.01; M.sigma_azim].^2;
 P0 = diag(P0);
 P = P0;
@@ -55,7 +57,12 @@ disp('Running Loop')
 for k=1:N-1
     %% MPC
     MPCdefinition
-    res = MPCobj({Sx\x_kf(:,k),uprev_mpc,ref_me(:,k+1:k+Hp)});
+    res = MPCobj({Sx\x_tv(:,k),uprev_mpc,ref_me(:,k+1:k+Hp)});
+    
+%     for j=1:Lk
+%         O(j+Yk*(j-1):j+Yk*(j)-1,:) = Cy*Ampc^(j-1);
+%     end
+%     O_ranks(k) = rank(O);
     
     u_L = res{1};
     u_temp = reshape(u_L, [Uk, length(u_L)/Uk]);
@@ -74,22 +81,26 @@ for k=1:N-1
     [x_tv(:,k+1),yt(:,k+1)] = RK4(f,x_tv(:,k),uprev_mpc,h,n(x_tv(:,k)),v(:,k+1),Ts);
     
     %% Unscented Kalman Filter
-    [x_kf(:,k+1),P,e(:,k+1)] = UKF(f,h,Q,R,x_kf(:,k),yt(:,k+1),uprev_mpc,kal,P,Ts,v(:,k+1),n,P0);
+%     [x_kf(:,k+1),P,e(:,k+1)] = UKF(f,h,Q,R,x_kf(:,k),yt(:,k+1),uprev_mpc,kal,P,Ts,v(:,k+1),n,P0);
 %     [x_kf(:,k+1),P,e(:,k+1)] = UKF(f,h,Q,R,x_kf(:,k),yt(:,k+1),uprev_mpc,kal,P,Ts,zeros(Yk,1),n,P0);
-    xeq = x_kf(:,k+1);
+    
+    xeq = x_tv(:,k+1);
+    
     if mod(k,30) == 0
         disp("Iteration: " + k);
     end
 end
+
+x_mpc(end,:) = wrapToPi(x_mpc(end,:))+pi;
 x_kf(end,:) = wrapToPi(x_kf(end,:))+pi;
 x_tv(end,:) = wrapToPi(x_tv(end,:))+pi;
 
 %% Display results
-% true_plots(Lk,yt,x_kf,x_ul,x_vl,t)
-true_plots(Lk,yt,x_kf,x_mpc,x_ul,x_vl,var_names,t)
+true_plots(Lk,yt,x_tv,x_mpc,x_ul,x_vl,var_names,t)
+% true_plots(Lk,yt,x_kf,x_mpc,x_ul,x_vl,var_names,t)
 vri_plot(var,x_kf,x_mpc,t)
 % result_display(t,Lk,x_kf,x_mpc,x_ul,x_vl)
 % save('tests/working_MPC.mat')
-save tests/working_MPC_16.mat e e_rep f_rep g_rep k Lk P P0 t Ts u_b u_mpc Uk x_i ...
+save tests/working_MPC_xx.mat e e_rep f_rep g_rep k Lk P P0 t Ts u_b u_mpc Uk x_i ...
     x_kf x_me x_mpc x_tv x_ul x_vl xeq y_me y_vl Yk yt z_mpc z_temp Zk
 rmpath('functions')
