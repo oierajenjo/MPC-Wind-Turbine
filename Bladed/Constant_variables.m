@@ -87,7 +87,7 @@ Ae.Ar = pi*Ae.Rr^2; % Rotor area
 var.Ae = Ae;
 
 %% Actuator constants
-Ac.omega = 1.2*2*pi; % Natural frequency of pitch actuator model
+Ac.omega = 1.2; % Natural frequency of pitch actuator model
 Ac.xi = 0.8; % Damping factor of pitch actuator model
 Ac.tau = 0.1; % Generator time constant
 Ac.pitch_min = -deg2rad(15);
