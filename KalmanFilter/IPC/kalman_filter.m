@@ -312,7 +312,6 @@ P0 = diag(P0);
 
 [xk,P,e] = UKF(f,h,Q,R,xk,y_me,u_b,Lk,Yk,N,P0,Ts,v,n);
 
-
 % % Construct the filter
 % ukf = unscentedKalmanFilter(f,... % State transition function
 %     h,... % Measurement function

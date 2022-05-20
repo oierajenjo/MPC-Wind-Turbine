@@ -23,6 +23,8 @@ for k = 1:N-1
     catch ME
         disp('Matrix is not symmetric positive definite');
         k
+        P = nearestSPD(P);
+        sP = chol(P,'lower');% Calculate square root of error covariance
 %         % 1) Compute the LDL decomposition: A lower-triangular matrix L, 
 %         %    a block-diagonal matrix D (1-by-1 and 2-by-2 blocks),
 %         %    and a permutation matrix P, such that A is P*L*D*L'*P'
@@ -36,7 +38,6 @@ for k = 1:N-1
 %         % In this case, check that d(d<0) are all nearly zero.
 %         % 3) Ugly but quick: Just add a small number to A's diagonal before calling Cholesky
 %         sP = chol(P + 1e-7*eye(size(P)),'lower');
-        break
     end
      
     % chi_p = "chi previous" = chi(k-1) % Untransformed sigma points
