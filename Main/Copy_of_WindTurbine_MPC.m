@@ -70,10 +70,6 @@ xmpc(:,1) = x_i; % Set true initial state
 
 
 disp('Running Loop')
-
-%% Reference trajectories
-ref_me = [Ac.omega_opt*ones(N,1) zeros(N,14) Ac.Pe_opt*ones(N,1)]';
-
 for k=1:lmax*N-1
     %% Linearized system
     A1 = [zeros(1,11), -a1*ones(1,3);
@@ -99,7 +95,10 @@ for k=1:lmax*N-1
     A3 = [-e9(xeq,0), 0, -e7(xeq,0), e3, e4, zeros(1,3), -e8(xeq,0), 0, 0, -e1, 0, 0;
         -e9(xeq,1), 0, -e7(xeq,1), e3, e4, zeros(1,4), -e8(xeq,1), 0, 0, -e1, 0;
         -e9(xeq,2), 0, -e7(xeq,2), e3, e4, zeros(1,5), -e8(xeq,2), 0, 0, -e1;
-        zeros(9,14);
+        zeros(6,14);
+        g2(xeq,uprev_mpc), zeros(1,13);
+%         zeros(1,14);
+        zeros(2,14);
         1, zeros(1,13)];
     
     A4 = [-e2(xeq,0), zeros(1,2), -e11(xeq,0), zeros(1,6), -e6(xeq,0), -e5(xeq,0), -e10(xeq,0);
@@ -115,7 +114,8 @@ for k=1:lmax*N-1
     % Ampc = eye(Lk); % State Matrix
     
     Bmpc = [zeros(3,Lk-7), f1*eye(3), zeros(3,4);
-        zeros(1,Lk-4), g2(xeq), zeros(1,3)]';
+        zeros(1,Lk)]';
+%         zeros(1,Lk-4), g3(xeq), zeros(1,3)]';
     %     Bmpc = [zeros(3,Lk-7), f1*eye(3), zeros(3,4);
     %         zeros(1,Lk-4), g1, zeros(1,3)]';
     % Bmpc = Ts*eye(Lk,Uk); % Input Matrix
@@ -137,6 +137,7 @@ for k=1:lmax*N-1
     k_3 = Ampc*(xmpc(:,k)+0.5*Ts*k_2) + Bmpc*(u_b(:,k)+0.5*Ts);
     k_4 = Ampc*(xmpc(:,k)+Ts*k_3) + Bmpc*(u_b(:,k)+Ts);
     xmpc(:,k+1) = xmpc(:,k) + (1/6)*(k_1+2*k_2+2*k_3+k_4)*Ts;
+%     xmpc(:,k+1) = (eye(Lk) + Ts*Ampc)*xmpc(:,k) + Ts*Bmpc*u_b(:,k);
     ympc(:,k+1) = Cmpc*xmpc(:,k+1);
     
     azimuth_partial_deriv(k) = Ae.rho*Ae.Ar*(2*cti_eq(xeq,0)*dvri_dazim(xeq,0)*vri_eq(xeq,0)+ dCt_dLamb(xeq,0)*r4(xeq,0)*vri_eq(xeq,0)^2)/(2*B.m);
@@ -146,6 +147,7 @@ for k=1:lmax*N-1
     [x_tv(:,k+1),yt(:,k+1)] = RK4(f,x_tv(:,k),u_b(:,k),h,n(x_tv(:,k)),v(:,k+1),Ts);
     
     xeq = x_tv(:,k+1);
+    uprev_mpc = u_b(:,k);
 end
 xmpc(end,:) = wrapToPi(xmpc(end,:))+pi;
 
