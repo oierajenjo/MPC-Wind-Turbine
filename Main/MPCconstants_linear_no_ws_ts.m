@@ -84,7 +84,7 @@ f2 = 2*Ac.omega*Ac.xi;
 
 % Tg
 g1 = 1/Ac.tau;
-g2 = @(x,u) 2*u(4)*x(1)/Ac.tau;
+g2 = @(x) x(1)^2/Ac.tau;
 
 % vt
 h1 = W.w_p;

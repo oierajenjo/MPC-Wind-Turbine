@@ -25,7 +25,7 @@ r3 = @(x,i) -(x(1)*Ae.Rr-x(15+i))*ws_ts(x,i)/vri_eq(x,i)^2; % dlamb_dvm
 r4 = @(x,i) -(x(1)*Ae.Rr-x(15+i))*dvri_dazim(x,i)/vri_eq(x,i)^2; % dlamb_dazim
 r5 = @(x,i) -(x(1)*Ae.Rr-x(15+i))/vri_eq(x,i)^2; % dlamb_dvt
 r6 = @(x,i) (x(1)*Ae.Rr-x(15+i))/vri_eq(x,i)^2; % dlamb_dxdott
-r7 = r6; % dlamb_dxdotbi
+r7 = @(x,i) (x(1)*Ae.Rr-x(15+i))/vri_eq(x,i)^2; % dlamb_dxdotbi
 
 % % lambda
 % rr1 = @(x) Ae.Rr/vr_eq(x); % dlamb_dwr
@@ -89,7 +89,7 @@ f2 = 2*Ac.omega*Ac.xi;
 
 % Tg
 g1 = 1/Ac.tau;
-g2 = @(x,u) 2*u(4)*x(1)/Ac.tau;
+g2 = @(x) x(1)^2/Ac.tau;
 
 % vt
 h1 = W.w_p;

@@ -103,8 +103,6 @@ Cy = [1, zeros(1,Lk-1);
     q2(xeq), zeros(1,Lk-5), q1(xeq), zeros(1,3);
     zeros(1,2), -1, zeros(1,Lk-6), 1, 1, 0;
     zeros(1,Lk-1), 1];
-    
-
 
 
 if xeq(26)<= W.rate_point % 3 lambda
@@ -151,10 +149,10 @@ Qcal = repmat({Qmpc}, 1, Hp);
 Qcal = blkdiag(Qcal{:});
 Qcal = Qcal(Zk*(Hw-1)+1:end,:);
 
+
 %%%%%%%%%%%%
 %%% Cost %%%
 %%%%%%%%%%%%
-
 Psi = Ccal*Acal;
 Upsilon = Ccal*Bcal_u;
 Theta = Ccal*Bcal_du;
