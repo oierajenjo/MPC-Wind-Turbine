@@ -130,8 +130,8 @@ W.TSR = 9.0621; % Optimal Tip Speed Ratio
 % W.lambda_max = 0;
 % W.lambda_max = Ac.omega_max*Ae.Rr/W.w_min;
 W.lambda_max = W.TSR;
-W.lambda_min = -W.lambda_max;
-% W.lambda_min = 0;
+% W.lambda_min = -W.lambda_max;
+W.lambda_min = 0;
 
 var.W = W;
 
@@ -225,10 +225,10 @@ Z_c.ybid_max3 = -B.yd_max;
 
 Z_c.lambda_min1 = 0;
 Z_c.lambda_max1 = 0;
-Z_c.lambda_min2 = 0;
-Z_c.lambda_max2 = 0;
-Z_c.lambda_min3 = 0;
-Z_c.lambda_max3 = 0;
+% Z_c.lambda_min2 = 0;
+% Z_c.lambda_max2 = 0;
+% Z_c.lambda_min3 = 0;
+% Z_c.lambda_max3 = 0;
 
 Z_c.pitchi_min1 = Ac.pitch_min;
 Z_c.pitchi_max1 = -Ac.pitch_max;
@@ -237,12 +237,19 @@ Z_c.pitchi_max2 = -Ac.pitch_max;
 Z_c.pitchi_min3 = Ac.pitch_min;
 Z_c.pitchi_max3 = -Ac.pitch_max;
 
-Z_c.pitchid_min1 = Ac.pitchd_min;
-Z_c.pitchid_max1 = -Ac.pitchd_max;
-Z_c.pitchid_min2 = Ac.pitchd_min;
-Z_c.pitchid_max2 = -Ac.pitchd_max;
-Z_c.pitchid_min3 = Ac.pitchd_min;
-Z_c.pitchid_max3 = -Ac.pitchd_max;
+% Z_c.pitchid_min1 = Ac.pitchd_min;
+% Z_c.pitchid_max1 = -Ac.pitchd_max;
+% Z_c.pitchid_min2 = Ac.pitchd_min;
+% Z_c.pitchid_max2 = -Ac.pitchd_max;
+% Z_c.pitchid_min3 = Ac.pitchd_min;
+% Z_c.pitchid_max3 = -Ac.pitchd_max;
+
+Z_c.pitchid_min1 = 0;
+Z_c.pitchid_max1 = 0;
+Z_c.pitchid_min2 = 0;
+Z_c.pitchid_max2 = 0;
+Z_c.pitchid_min3 = 0;
+Z_c.pitchid_max3 = 0;
 
 Z_c.Pe_min = Ac.Pe_min;
 Z_c.Pe_max = -Ac.Pe_max;

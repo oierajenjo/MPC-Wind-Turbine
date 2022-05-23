@@ -44,21 +44,15 @@ g_rep = repmat({g}, 1, Zk);
 % for i=0:2
 %     g_rep{16+i} = zeros(2,1);
 % end
+% for i=0:2
+%     g_rep{10+i} = zeros(2,1);
+% end
 for i=0:2
-    g_rep{10+i} = zeros(2,1);
+    g_rep{14+i} = zeros(2,1);
 end
-% g_rep{10} = zeros(2,1);
+g_rep{10} = zeros(2,1);
 % g_rep{end} = zeros(2,1);
 g_L = blkdiag(g_rep{:});
-
-% g = zeros(2,1);
-% g_rep = repmat({g}, 1, Zk-7);
-% g_rep{1} = [-1;1];
-% for k=1:7
-%     g_rep{end+1} = [-1;1];
-% end
-% % g_rep{end} = zeros(2,1);
-% g_L = blkdiag(g_rep{:});
 
 g_L = repmat({g_L}, 1, Hu);
 G_L = blkdiag(g_L{:});
@@ -84,15 +78,25 @@ deltaU = sdpvar(Uk*Hu,1); % DeltaU
 % Unchanging matrixes
 delta_rs = [(Ac.pitch_max-Ac.pitch_min)*ones(1,3) (Ac.Tg_max-Ac.Tg_min)];
 
-qs = [(Ac.omega_opt-Ac.omega_min) (To.xd_max-To.xd_min) (To.yd_max-To.yd_min)...
-    (B.xd_max-B.xd_min)*ones(1,3) (B.yd_max-B.yd_min)*ones(1,3) ...
-    (W.lambda_max-W.lambda_min)*ones(1,3) (Ac.pitch_max-Ac.pitch_min)*ones(1,3)...
-    (Ac.pitchd_max-Ac.pitchd_min)*ones(1,3) (Ac.Pe_opt-Ac.Pe_min)]; % 3 lambda + xd&yd
-
+% 3 lambdas
 % qs = [(Ac.omega_opt-Ac.omega_min) (To.xd_max-To.xd_min) (To.yd_max-To.yd_min)...
 %     (B.xd_max-B.xd_min)*ones(1,3) (B.yd_max-B.yd_min)*ones(1,3) ...
+%     (W.lambda_max-W.lambda_min)*ones(1,3) (Ac.pitch_max-Ac.pitch_min)*ones(1,3)...
+%     (Ac.pitchd_max-Ac.pitchd_min)*ones(1,3) (Ac.Pe_opt-Ac.Pe_min)]; % 3 lambda + xd&yd
+% qs = [(Ac.omega_opt-Ac.omega_min) (To.x_max-To.xd_min) (To.y_max-To.yd_min)...
+%     (B.x_max-B.x_min)*ones(1,3) (B.y_max-B.y_min)*ones(1,3) ...
+%     (W.lambda_max-W.lambda_min)*ones(1,3) (Ac.pitch_max-Ac.pitch_min)*ones(1,3)...
+%     (Ac.pitchd_max-Ac.pitchd_min)*ones(1,3) (Ac.Pe_opt-Ac.Pe_min)]; % 3 lambda + x&y
+
+% 1 lambdas
+qs = [(Ac.omega_opt-Ac.omega_min) (To.xd_max-To.xd_min) (To.yd_max-To.yd_min)...
+    (B.xd_max-B.xd_min)*ones(1,3) (B.yd_max-B.yd_min)*ones(1,3) ...
+    (W.lambda_max-W.lambda_min) (Ac.pitch_max-Ac.pitch_min)*ones(1,3)...
+    (Ac.pitchd_max-Ac.pitchd_min)*ones(1,3) (Ac.Pe_opt-Ac.Pe_min)]; % 1 lambda + xd&yd
+% qs = [(Ac.omega_opt-Ac.omega_min) (To.x_max-To.x_min) (To.y_max-To.y_min)...
+%     (B.x_max-B.x_min)*ones(1,3) (B.y_max-B.y_min)*ones(1,3) ...
 %     (W.lambda_max-W.lambda_min) (Ac.pitch_max-Ac.pitch_min)*ones(1,3)...
-%     (Ac.pitchd_max-Ac.pitchd_min)*ones(1,3) (Ac.Pe_opt-Ac.Pe_min)]; % 1 lambda + xd&yd
+%     (Ac.pitchd_max-Ac.pitchd_min)*ones(1,3) (Ac.Pe_opt-Ac.Pe_min)]; % 1 lambda + x&y
 
 R_c = 0.1; % Input Weight
 Rmpc = R_c*eye(Uk);
