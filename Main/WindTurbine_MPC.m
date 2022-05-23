@@ -7,8 +7,8 @@ rng(1);
 variables_IPC
 load('BladedFiles\performancemap_data.mat')
 Constant_variables
-% MPCconstants_linear_no_ws_ts
-MPCconstants_linear
+MPCconstants_linear_no_ws_ts
+% MPCconstants_linear
 MPCconstants
 addpath('functions');
 

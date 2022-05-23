@@ -176,8 +176,8 @@ Cost = Ts*(Epsilon'*Qcal*Epsilon - deltaU'*Gcal + deltaU'*Hcal*deltaU);
 %%% Constraints %%%
 %%%%%%%%%%%%%%%%%%%
 
-% Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0; G*[Zcal;1]<=0];
-Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0];
+Constraints = [F*[U;1]<=0; G*[Zcal;1]<=0; E*[deltaU;1]<=0];
+% Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0];
 % Constraints = [F*[U;1]<=0; G*[Zcal;1]<=0];
 % Constraints = G*[Zcal;1]<=0;
 

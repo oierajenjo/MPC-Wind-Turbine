@@ -237,19 +237,19 @@ Z_c.pitchi_max2 = -Ac.pitch_max;
 Z_c.pitchi_min3 = Ac.pitch_min;
 Z_c.pitchi_max3 = -Ac.pitch_max;
 
-% Z_c.pitchid_min1 = Ac.pitchd_min;
-% Z_c.pitchid_max1 = -Ac.pitchd_max;
-% Z_c.pitchid_min2 = Ac.pitchd_min;
-% Z_c.pitchid_max2 = -Ac.pitchd_max;
-% Z_c.pitchid_min3 = Ac.pitchd_min;
-% Z_c.pitchid_max3 = -Ac.pitchd_max;
+Z_c.pitchid_min1 = Ac.pitchd_min;
+Z_c.pitchid_max1 = -Ac.pitchd_max;
+Z_c.pitchid_min2 = Ac.pitchd_min;
+Z_c.pitchid_max2 = -Ac.pitchd_max;
+Z_c.pitchid_min3 = Ac.pitchd_min;
+Z_c.pitchid_max3 = -Ac.pitchd_max;
 
-Z_c.pitchid_min1 = 0;
-Z_c.pitchid_max1 = 0;
-Z_c.pitchid_min2 = 0;
-Z_c.pitchid_max2 = 0;
-Z_c.pitchid_min3 = 0;
-Z_c.pitchid_max3 = 0;
+% Z_c.pitchid_min1 = 0;
+% Z_c.pitchid_max1 = 0;
+% Z_c.pitchid_min2 = 0;
+% Z_c.pitchid_max2 = 0;
+% Z_c.pitchid_min3 = 0;
+% Z_c.pitchid_max3 = 0;
 
 Z_c.Pe_min = Ac.Pe_min;
 Z_c.Pe_max = -Ac.Pe_max;
