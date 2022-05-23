@@ -25,7 +25,7 @@ for i=1:3
     xlabel('Time (s)', 'Interpreter', 'latex', 'FontSize', 14);
     ylabel('$Velocity [\frac{m}{s}]$', 'Interpreter', 'latex', 'FontSize', 14);
     % grid on;
-    legend('UKF', 'MPC');
+    legend('Non-linear', 'Linear');
     title(['$Estimation $' tl(i)], 'Interpreter', 'latex', 'FontSize', 15);
 end
 end

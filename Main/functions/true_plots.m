@@ -6,7 +6,7 @@ plot(t,y(13,:)');
 xlabel('Time (s)', 'Interpreter', 'latex', 'FontSize', 14);
 ylabel('$Watt [W]$', 'Interpreter', 'latex', 'FontSize', 14);
 % grid on;
-legend('True');
+legend('Non-linear');
 title(['$Estimation $' tl(1)], 'Interpreter', 'latex', 'FontSize', 15);
 
 
@@ -16,7 +16,7 @@ plot(t,(xk(26,:)+xk(25,:)), t,(xm(26,:)+xm(25,:)));
 xlabel('Time (s)', 'Interpreter', 'latex', 'FontSize', 14);
 ylabel('$Velocity [\frac{m}{s}]$', 'Interpreter', 'latex', 'FontSize', 14);
 % grid on;
-legend('UKF', 'MPC');
+legend('Non-linear', 'Linear');
 title(['$Estimation $' tl(2)], 'Interpreter', 'latex', 'FontSize', 15);
 
 filename = sprintf('plots/MPC_%s', var_names(1));
@@ -31,7 +31,7 @@ for i = 1:Lk
     xlabel('Time (s)', 'Interpreter', 'latex', 'FontSize', 14);
     ylabel(x_ul(i), 'Interpreter', 'latex', 'FontSize', 14);
     % grid on;
-    legend('UKF', 'MPC');
+    legend('Non-linear', 'Linear');
     title(['$Estimation $' x_vl(i)], 'Interpreter', 'latex', 'FontSize', 15);
     
     filename = sprintf('plots/MPC_%s', var_names(1+i));
