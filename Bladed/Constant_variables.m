@@ -1,3 +1,5 @@
+Ts = 0.05; % Sampling time
+
 %% Drive train model constants
 D.Jr = 321699000; % Rotor moment of inertia
 D.Jg = 3.223e6; % Generator moment of inertia
@@ -88,7 +90,7 @@ var.Ae = Ae;
 %% Actuator constants
 Ac.omega = 1.2; % Natural frequency of pitch actuator model
 Ac.xi = 0.8; % Damping factor of pitch actuator model
-Ac.tau = 0.05; % Generator time constant
+Ac.tau = Ts; % Generator time constant
 Ac.pitch_min = -deg2rad(15);
 Ac.pitch_max = pi/2;
 Ac.Tg_min = 0;
@@ -108,7 +110,6 @@ Ac.Pe_max = Ac.Tg_max*Ac.omega_max;
 var.Ac = Ac;
 
 %% Wind model constants
-Ts = 0.05; % Sampling time
 W.ti = 0.15; % Turbulence intensity
 W.q = 2^2/600; % Incremental variance mean wind speed
 % W.mu_m = 6; % Fixed mean wind speed: 10 m/s
