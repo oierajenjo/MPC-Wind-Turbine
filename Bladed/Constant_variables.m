@@ -42,22 +42,22 @@ B.y_max = 20;
 var.B = B;
 
 %% Tower model constants
+To.Ht = 144.582; % Tower height
+To.H = To.Ht + 4.34799; % Hub height
+To.r_top = 3.25; % Tower top radius
+To.r_base = 5; % Tower base radius
+To.r = (To.r_top-To.r_base)*(To.H-B.l)/To.H + To.r_base; % Tower radius
 To.Mn = 630888; % Nacelle mass
 To.Mt = 1086002; % Tower mass
 To.Mr = 387198; % Rotor mass
-To.m = To.Mn + To.Mt/3; % Tower equivalent mass
+To.m = To.Mn + To.Mt/3 + To.Mt*To.r^2/(4*To.H^2); % Tower equivalent mass
 % To.m = 2475680-B.m*B.B; % Tower mass
 To.d = 0.005; % Tower damping ratio
 To.f = 0.18; % Tower freq. flapwise
 To.c = To.d*2*To.m*2*pi*To.f; % Tower damping
 To.k = (2*pi*To.f)^2*To.m; % Tower stiffness
-To.Ht = 144.582; % Tower height
-To.r_top = 3.25; % Tower top radius
-To.r_base = 5; % Tower base radius
-To.H = To.Ht + 4.34799; % Hub height
-To.r = (To.r_top-To.r_base)*(To.H-B.l)/To.H + To.r_base; % Tower radius
 To.xh = 10.93; % Hub overhang
-To.Jt = To.Mn*To.H^2 + To.Mt*To.H^2/3;
+To.Jt = To.Mn*To.H^2 + To.Mt*To.H^2/3 + To.Mt*To.r^2/4;
 rr = sqrt(To.xh^2+To.H^2);
 rn = sqrt(3.945^2+To.H^2);
 alpha_r = sin(acos(To.H/sqrt(To.xh^2+To.H^2)));
@@ -76,7 +76,6 @@ To.x_max = 20;
 To.y_min = -20;
 To.y_max = 20;
 
-
 var.To = To;
 
 %% Aerodynamic model constants
@@ -89,7 +88,7 @@ var.Ae = Ae;
 %% Actuator constants
 Ac.omega = 1.2; % Natural frequency of pitch actuator model
 Ac.xi = 0.8; % Damping factor of pitch actuator model
-Ac.tau = 0.1; % Generator time constant
+Ac.tau = 0.05; % Generator time constant
 Ac.pitch_min = -deg2rad(15);
 Ac.pitch_max = pi/2;
 Ac.Tg_min = 0;
