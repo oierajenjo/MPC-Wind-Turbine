@@ -46,6 +46,7 @@ xeq = x_i;
 x_mpc = x_tv;
 u_mpc = zeros(Uk, N);
 z_mpc = zeros(Zk, N);
+z_i(10) = lamb_eq(x_i);
 z_mpc(:,1) = z_i;
 
 %% Reference trajectories
