@@ -203,13 +203,13 @@ title('Flapwise deflection (blade 1)');
 ylabel('$x_{b_1}$ [m]','Interpreter','latex')
 xlabel('time [s]','Interpreter','latex')
 
-figure
-plot(t,xt(6,:)',t,xt(7,:)',t,xt(8,:)');
-legend('$x_{b_1}$ (sim.)','$x_{b_2}$ (sim.)','$x_{b_3}$ (sim.)','Interpreter','latex')
-% ylim([-2.6 2.6]);
-title('Flapwise deflection (blade 1, 2 & 3)');
-ylabel('$x_{b}$ [m]','Interpreter','latex')
-xlabel('time [s]','Interpreter','latex')
+% figure
+% plot(t,xt(6,:)',t,xt(7,:)',t,xt(8,:)');
+% legend('$x_{b_1}$ (sim.)','$x_{b_2}$ (sim.)','$x_{b_3}$ (sim.)','Interpreter','latex')
+% % ylim([-2.6 2.6]);
+% title('Flapwise deflection (blade 1, 2 & 3)');
+% ylabel('$x_{b}$ [m]','Interpreter','latex')
+% xlabel('time [s]','Interpreter','latex')
 
 figure
 plot(t,xt(9,:)');
@@ -219,13 +219,13 @@ title('Flapwise velocity (blade 1)');
 ylabel('$\dot{x}_{b_1}$ [m/s]','Interpreter','latex')
 xlabel('time [s]','Interpreter','latex')
 
-figure
-plot(Ts*(1:400),xt(12,1:400)',Ts*(1:400),data.Data(1:400,86));
-legend('$y_{b_1}$ (sim.)','$y_{b_1}$ (Bladed)','Interpreter','latex')
-% ylim([-2.6 2.6]);
-title('Edgewise deflection (blade 1) - Euler');
-ylabel('$y_{b_1}$ [m]','Interpreter','latex')
-xlabel('time [s]','Interpreter','latex')
+% figure
+% plot(Ts*(1:400),xt(12,1:400)',Ts*(1:400),data.Data(1:400,86));
+% legend('$y_{b_1}$ (sim.)','$y_{b_1}$ (Bladed)','Interpreter','latex')
+% % ylim([-2.6 2.6]);
+% title('Edgewise deflection (blade 1) - Euler');
+% ylabel('$y_{b_1}$ [m]','Interpreter','latex')
+% xlabel('time [s]','Interpreter','latex')
 
 figure
 plot(t,xt(12,:)',t,data.Data(:,86));
