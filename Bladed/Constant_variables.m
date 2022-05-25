@@ -1,3 +1,5 @@
+Ts = 0.05; % Sampling time
+
 %% Drive train model constants
 D.Jr = 321699000; % Rotor moment of inertia
 D.Jg = 3.223e6; % Generator moment of inertia
@@ -42,22 +44,22 @@ B.y_max = 20;
 var.B = B;
 
 %% Tower model constants
+To.Ht = 144.582; % Tower height
+To.H = To.Ht + 4.34799; % Hub height
+To.r_top = 3.25; % Tower top radius
+To.r_base = 5; % Tower base radius
+To.r = (To.r_top-To.r_base)*(To.H-B.l)/To.H + To.r_base; % Tower radius
 To.Mn = 630888; % Nacelle mass
 To.Mt = 1086002; % Tower mass
 To.Mr = 387198; % Rotor mass
-To.m = To.Mn + To.Mt/3; % Tower equivalent mass
+To.m = To.Mn + To.Mt/3 + To.Mt*To.r^2/(4*To.H^2); % Tower equivalent mass
 % To.m = 2475680-B.m*B.B; % Tower mass
 To.d = 0.005; % Tower damping ratio
 To.f = 0.18; % Tower freq. flapwise
 To.c = To.d*2*To.m*2*pi*To.f; % Tower damping
 To.k = (2*pi*To.f)^2*To.m; % Tower stiffness
-To.Ht = 144.582; % Tower height
-To.r_top = 3.25; % Tower top radius
-To.r_base = 5; % Tower base radius
-To.H = To.Ht + 4.34799; % Hub height
-To.r = (To.r_top-To.r_base)*(To.H-B.l)/To.H + To.r_base; % Tower radius
 To.xh = 10.93; % Hub overhang
-To.Jt = To.Mn*To.H^2 + To.Mt*To.H^2/3;
+To.Jt = To.Mn*To.H^2 + To.Mt*To.H^2/3 + To.Mt*To.r^2/4;
 rr = sqrt(To.xh^2+To.H^2);
 rn = sqrt(3.945^2+To.H^2);
 alpha_r = sin(acos(To.H/sqrt(To.xh^2+To.H^2)));
@@ -76,7 +78,6 @@ To.x_max = 20;
 To.y_min = -20;
 To.y_max = 20;
 
-
 var.To = To;
 
 %% Aerodynamic model constants
@@ -89,7 +90,7 @@ var.Ae = Ae;
 %% Actuator constants
 Ac.omega = 1.2; % Natural frequency of pitch actuator model
 Ac.xi = 0.8; % Damping factor of pitch actuator model
-Ac.tau = 0.1; % Generator time constant
+Ac.tau = Ts; % Generator time constant
 Ac.pitch_min = -deg2rad(15);
 Ac.pitch_max = pi/2;
 Ac.Tg_min = 0;
@@ -109,7 +110,6 @@ Ac.Pe_max = Ac.Tg_max*Ac.omega_max;
 var.Ac = Ac;
 
 %% Wind model constants
-Ts = 0.05; % Sampling time
 W.ti = 0.15; % Turbulence intensity
 W.q = 2^2/600; % Incremental variance mean wind speed
 % W.mu_m = 6; % Fixed mean wind speed: 10 m/s
@@ -237,19 +237,19 @@ Z_c.pitchi_max2 = -Ac.pitch_max;
 Z_c.pitchi_min3 = Ac.pitch_min;
 Z_c.pitchi_max3 = -Ac.pitch_max;
 
-% Z_c.pitchid_min1 = Ac.pitchd_min;
-% Z_c.pitchid_max1 = -Ac.pitchd_max;
-% Z_c.pitchid_min2 = Ac.pitchd_min;
-% Z_c.pitchid_max2 = -Ac.pitchd_max;
-% Z_c.pitchid_min3 = Ac.pitchd_min;
-% Z_c.pitchid_max3 = -Ac.pitchd_max;
+Z_c.pitchid_min1 = Ac.pitchd_min;
+Z_c.pitchid_max1 = -Ac.pitchd_max;
+Z_c.pitchid_min2 = Ac.pitchd_min;
+Z_c.pitchid_max2 = -Ac.pitchd_max;
+Z_c.pitchid_min3 = Ac.pitchd_min;
+Z_c.pitchid_max3 = -Ac.pitchd_max;
 
-Z_c.pitchid_min1 = 0;
-Z_c.pitchid_max1 = 0;
-Z_c.pitchid_min2 = 0;
-Z_c.pitchid_max2 = 0;
-Z_c.pitchid_min3 = 0;
-Z_c.pitchid_max3 = 0;
+% Z_c.pitchid_min1 = 0;
+% Z_c.pitchid_max1 = 0;
+% Z_c.pitchid_min2 = 0;
+% Z_c.pitchid_max2 = 0;
+% Z_c.pitchid_min3 = 0;
+% Z_c.pitchid_max3 = 0;
 
 Z_c.Pe_min = Ac.Pe_min;
 Z_c.Pe_max = -Ac.Pe_max;

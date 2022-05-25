@@ -42,14 +42,8 @@ g_rep = repmat({g}, 1, Zk);
 %     g_rep{2+i} = zeros(2,1);
 % end
 % for i=0:2
-%     g_rep{16+i} = zeros(2,1);
+%     g_rep{14+i} = zeros(2,1);
 % end
-% for i=0:2
-%     g_rep{10+i} = zeros(2,1);
-% end
-for i=0:2
-    g_rep{14+i} = zeros(2,1);
-end
 g_rep{10} = zeros(2,1);
 % g_rep{end} = zeros(2,1);
 g_L = blkdiag(g_rep{:});
