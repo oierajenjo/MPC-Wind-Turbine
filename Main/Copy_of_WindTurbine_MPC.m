@@ -7,8 +7,8 @@ rng(1);
 variables_IPC
 load('BladedFiles\performancemap_data.mat')
 Constant_variables
-MPCconstants_linear
-% MPCconstants_linear_no_ws_ts
+% MPCconstants_linear
+MPCconstants_linear_no_ws_ts
 MPCconstants
 addpath('functions');
 
@@ -25,9 +25,7 @@ addpath('functions');
 %     disp("True values")
 % end
 
-lmax = 1;
-
-u_b = ones(4,N*lmax);
+u_b = ones(4,N);
 theta_f = 0;
 [lamb_opt, cp_opt] = cp_max(theta_f,cp_l,lambdaVec,pitchVec);
 K = 0.5*Ae.rho*Ae.Rr^5*pi*cp_opt/lamb_opt^3;
@@ -41,12 +39,12 @@ u_b = [theta_f; theta_f; theta_f; K].*u_b;
 % Also calculate measurement vector
 % Var(QX) = QVar(X)Q' = sigma^4 -> Var(sqrt(Q)X) = sqrt(Q)Var(X)sqrt(Q)' = sigma^2
 n = @(x) sqrt(Q)*randn(Lk, 1); % Generate random process noise (from assumed Q)
-v = sqrt(R)*randn(Yk, N*lmax); % Generate random measurement noise (from assumed R)
+v = sqrt(R)*randn(Yk, N); % Generate random measurement noise (from assumed R)
 % v = zeros(Yk, N);
 
 %% Initialization
 % Initialize matrices
-x_tv = zeros(Lk, N*lmax); % Initialize size of true state for all k
+x_tv = zeros(Lk, N); % Initialize size of true state for all k
 x_tv(:,1) = x_i; % Set true initial state
 yt = zeros(Yk, N); % Initialize size of output vector for all k
 
@@ -71,7 +69,7 @@ xmpc(:,1) = x_i; % Set true initial state
 
 
 disp('Running Loop')
-for k=1:lmax*N-1
+for k=1:N-1
     %% Linearized system
     A1 = [zeros(1,11), -a1*ones(1,3);
         zeros(1,2), 1, zeros(1,11);
@@ -97,8 +95,8 @@ for k=1:lmax*N-1
         -e9(xeq,1), 0, -e7(xeq,1), e3, e4, zeros(1,4), -e8(xeq,1), 0, 0, -e1, 0;
         -e9(xeq,2), 0, -e7(xeq,2), e3, e4, zeros(1,5), -e8(xeq,2), 0, 0, -e1;
         zeros(6,14);
-        g2(xeq,uprev_mpc), zeros(1,13);
-%         zeros(1,14);
+%         g2(xeq,uprev_mpc), zeros(1,13);
+        zeros(1,14);
         zeros(2,14);
         1, zeros(1,13)];
     
@@ -115,8 +113,8 @@ for k=1:lmax*N-1
     % Ampc = eye(Lk); % State Matrix
     
     Bmpc = [zeros(3,Lk-7), f1*eye(3), zeros(3,4);
-        zeros(1,Lk)]';
-%         zeros(1,Lk-4), g3(xeq), zeros(1,3)]';
+%         zeros(1,Lk)]';
+        zeros(1,Lk-4), g3(xeq), zeros(1,3)]';
     %     Bmpc = [zeros(3,Lk-7), f1*eye(3), zeros(3,4);
     %         zeros(1,Lk-4), g1, zeros(1,3)]';
     % Bmpc = Ts*eye(Lk,Uk); % Input Matrix
@@ -141,7 +139,7 @@ for k=1:lmax*N-1
 %     xmpc(:,k+1) = (eye(Lk) + Ts*Ampc)*xmpc(:,k) + Ts*Bmpc*u_b(:,k);
     ympc(:,k+1) = Cmpc*xmpc(:,k+1);
     
-    azimuth_partial_deriv(k) = Ae.rho*Ae.Ar*(2*cti_eq(xeq,0)*dvri_dazim(xeq,0)*vri_eq(xeq,0)+ dCt_dLamb(xeq,0)*r4(xeq,0)*vri_eq(xeq,0)^2)/(2*B.m);
+    % azimuth_partial_deriv(k) = Ae.rho*Ae.Ar*(2*cti_eq(xeq,0)*dvri_dazim(xeq,0)*vri_eq(xeq,0)+ dCt_dLamb(xeq,0)*r4(xeq,0)*vri_eq(xeq,0)^2)/(2*B.m);
     
     %% Runge-Kutta 4th order method
     % disp('Running True Values')
@@ -153,7 +151,7 @@ end
 xmpc(end,:) = wrapToPi(xmpc(end,:))+pi;
 
 %% Display results
-t = 1:lmax*N;
+t = 1:N;
 
 figure
 plot(t,xmpc(1,:),t,x_tv(1,:));

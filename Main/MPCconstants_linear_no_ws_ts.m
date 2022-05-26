@@ -29,8 +29,8 @@ rr3 = @(x) -x(1)*Ae.Rr/vr_eq(x)^2; % dlamb_dvt
 rr4 = @(x) x(1)*Ae.Rr/vr_eq(x)^2; % dlamb_dxdott
 
 % Gradients (dCt_dLambda, dCt_dPitch, dCp_dLambda, dCp_dPitch)
-[dCp_dTheta_vec, dCp_dLambda_vec] = gradient(cp_l);
-[dCt_dTheta_vec, dCt_dLambda_vec] = gradient(ct_l);
+[dCp_dTheta_vec, dCp_dLambda_vec] = gradient(cp_l,pitchVec,lambdaVec);
+[dCt_dTheta_vec, dCt_dLambda_vec] = gradient(ct_l,pitchVec,lambdaVec);
 dCp_dTheta = @(x,i) cp_ct(lambi_eq(x,i),x(18+i),dCp_dTheta_vec,lambdaVec,pitchVec)/B.B;
 dCp_dLamb = @(x,i) cp_ct(lambi_eq(x,i),x(18+i),dCp_dLambda_vec,lambdaVec,pitchVec)/B.B;
 dCt_dTheta = @(x,i) cp_ct(lambi_eq(x,i),x(18+i),dCt_dTheta_vec,lambdaVec,pitchVec)/B.B;
