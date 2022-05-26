@@ -64,7 +64,7 @@ ops = sdpsettings('solver','mosek','showprogress',0,'verbose',1,...
 refht = sdpvar(Zk,Hp);      % Z_{ref}: The window containing the pos-reference
 X0 = sdpvar(Lk,1);          % X(k):    The current state
 Uprev = sdpvar(Uk,1);       % U(k-1):  The previous input command.
-deltaU = sdpvar(Uk*Hu,1); % DeltaU
+deltaU = sdpvar(Uk*Hu,1);   % DeltaU
 
 %%%%%%%%%%%%%%%
 %%% Lifting %%%

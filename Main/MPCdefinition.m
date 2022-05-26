@@ -37,14 +37,17 @@ A4 = [-e2(xeq,0), zeros(1,2), -e11(xeq,0), zeros(1,6), -e6(xeq,0), -e5(xeq,0), -
     zeros(1,10), -W.w_p, zeros(1,2);
     zeros(2,13)];
 
-Ampc = [A1 A2; A3 A4];
+Am = [A1 A2; A3 A4];
 % eig(Ampc)
-Ampc = eye(Lk) + Ts*Ampc;
+Ampc = eye(Lk) + Ts*Am;
+% Ampc = eye(Lk) + (1/6)*(6*eye(Lk)+(5*eye(Lk)+(eye(Lk)+(2*eye(Lk)+Ts*Am)*Am)*Ts)*Ts*Am)*Am*Ts;
 % Ampc = Sx\Ampc*Sx;% State Matrix
 
 
-Bmpc = Ts*[zeros(3,Lk-7), f1*eye(3), zeros(3,4);
+Bm = [zeros(3,Lk-7), f1*eye(3), zeros(3,4);
     zeros(1,Lk-4), g1, zeros(1,3)]';
+Bmpc = Ts*Bm;
+% Bmpc = (1/6)*(6*eye(Lk)+(4*eye(Lk)+(3*eye(Lk)+Ts*Am)*Ts*Am)*Ts*Am)*Bm*Ts;
 % Bmpc = Sx\Bmpc; % Input Matrix
 
 
@@ -105,6 +108,7 @@ Cmpc = [1, zeros(1,Lk-1);
 %     zeros(1,2), -1, zeros(1,Lk-6), 1, 1, 0;
 %     zeros(1,Lk-1), 1];
 
+% Dmpc = (1/6)*(3*eye(Lk)+(2*eye(Lk)+Ts*Am)*Ts*Am)*Ts*Bm;
 
 % if xeq(26)<= W.rate_point % 3 lambda
 %     Q_c = [0 10 10 10*ones(1,3) 10*ones(1,3) 20*ones(1,3) 20*ones(1,3) zeros(1,3) 0]./qs; % Error Weight (lambda)
@@ -126,6 +130,8 @@ Acal = [];
 Ai = Ampc;
 Bcal_u = [];
 Bi = zeros(Lk,Uk);
+% Dcal = [];
+
 for i=1:Hp
     if i~=1
         Ai = Ai*Ampc;
@@ -134,6 +140,8 @@ for i=1:Hp
     
     Bi = Ampc*Bi + Bmpc;
     Bcal_u = [Bcal_u; Bi];
+    
+%     Dcal = [Dcal, Dmpc]; 
 end
 
 Bcal_du = Bcal_u;
@@ -165,19 +173,17 @@ Epsilon = Tau - Psi*X0 - Upsilon*Uprev;
 Gcal = 2*Theta'*Qcal*Epsilon;
 Hcal = Theta'*Qcal*Theta + Rcal;
 
-Cost = Ts*(Epsilon'*Qcal*Epsilon - deltaU'*Gcal + deltaU'*Hcal*deltaU);
+Cost = Epsilon'*Qcal*Epsilon - deltaU'*Gcal + deltaU'*Hcal*deltaU;
 
-% refht_col = reshape(refht,[Zk*Hp 1]); % Convert to column vector
-% Cost = Ts*((Zcal-refht_col)'*Qcal*(Zcal-refht_col) + deltaU'*Rcal_del*deltaU +...
+% Cost = Ts*((Zcal-Tau)'*Qcal*(Zcal-Tau) + deltaU'*Rcal_del*deltaU +...
 %        U'*Rcal*U);
-
 
 %%%%%%%%%%%%%%%%%%%
 %%% Constraints %%%
 %%%%%%%%%%%%%%%%%%%
 
-% Constraints = [F*[U;1]<=0; G*[Zcal;1]<=0; E*[deltaU;1]<=0];
-Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0];
+Constraints = [F*[U;1]<=0; G*[Zcal;1]<=0; E*[deltaU;1]<=0];
+% Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0];
 % Constraints = [F*[U;1]<=0; G*[Zcal;1]<=0];
 % Constraints = G*[Zcal;1]<=0;
 
