@@ -8,23 +8,27 @@ load('BladedFiles\performancemap_data.mat')
 Constant_variables
 MPCconstants
 syms x [1 Lk]
+syms dx [1 Lk]
 syms f [1 Lk]
 syms cp ct
 
-%% Drive train
-f1(x) = (1-D.mu)*(-(x(12)+x(13)+x(14))*B.ky*2*B.l/3)/(D.Jr+D.Jg) - x(24)/(D.Jr+D.Jg);
-df1 = diff(f1,x12)*x12 + diff(f1,x13)*x13 + diff(f1,x14)*x14 + diff(f1,x24)*x24;
-% int(f1(x12,x13,x14,x24))
+% %% Drive train
+% f1(x) = (1-D.mu)*(-(x(12)+x(13)+x(14))*B.ky*2*B.l/3)/(D.Jr+D.Jg) - x(24)/(D.Jr+D.Jg);
+% df1 = diff(f1,x12)*x12 + diff(f1,x13)*x13 + diff(f1,x14)*x14 + diff(f1,x24)*x24;
+% % int(f1(x12,x13,x14,x24))
+% 
+% vr_i(x) = x(26)*(To.r^2*(Ae.Rr^2*(sin(x(27)))^2-To.xh^2)/(To.xh^2+Ae.Rr^2*(sin(x(27)))^2)^2 +...
+%     ((Ae.Rr*cos(x(27))+To.H)/To.H)^W.alpha) + x(25) - x(3) -x(9);
+% 
+% dvr_i = diff(vr_i,x26)*x26 + diff(vr_i,x27)*x27 + diff(vr_i,x25)*x25 ...
+%     + diff(vr_i,x3)*x3 + diff(vr_i,x9)*x9;
+% 
+% vr(x) = x(26) + x(25) - x(3);
+% 
+% dvr = diff(vr,x(26))*x(26) + diff(vr,x(25))*x(25) + diff(vr,x(3))*x(3);
 
-lambda_i(x) = x(26)*(To.r^2*(Ae.Rr^2*(sin(x(27)))^2-To.xh^2)/(To.xh^2+Ae.Rr^2*(sin(x(27)))^2)^2 +...
-    ((Ae.Rr*cos(x(27))+To.H)/To.H)^W.alpha) + x(25) - x(3) -x(9);
-
-dlambda_i = diff(lambda_i,x26)*x26 + diff(lambda_i,x27)*x27 + diff(lambda_i,x25)*x25 ...
-    + diff(lambda_i,x3)*x3 + diff(lambda_i,x9)*x9;
-
-lambda(x) = x(26) + x(25) - x(3);
-
-dlambda = diff(lambda,x(26))*x(26) + diff(lambda,x(25))*x(25) + diff(lambda,x(3))*x(3);
+lambda(x) = Ae.Rr*x(1)/(x(26) + x(25) - x(3));
+dlambda = diff(lambda,x(1))*dx(1) + diff(lambda,x(26))*dx(26) + diff(lambda,x(25))*dx(25) + diff(lambda,x(3))*dx(3);
 
 % f9(x)= 0.5*Ae.rho*Ae.Ar*cp*(x(26)*(To.r^2*(Ae.Rr^2*(sin(x(27)))^2-To.xh^2) ...
 %     /(To.xh^2+Ae.Rr^2*(sin(x(27)))^2)^2 + ((Ae.Rr*cos(x(27))+To.H)/To.H)^W.alpha) ...
