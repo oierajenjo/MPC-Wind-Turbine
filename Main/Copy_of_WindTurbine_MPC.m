@@ -138,7 +138,7 @@ end
 xmpc(end,:) = wrapToPi(xmpc(end,:))+pi;
 
 %% Display results
-t = 1:N;
+% t = 1:Ts:N*Ts;
 
 figure
 plot(t,xmpc(1,:),t,x_tv(1,:));
