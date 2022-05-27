@@ -84,7 +84,7 @@ Cmpc = [1, zeros(1,Lk-1);
     zeros(1,4), 1, zeros(1,Lk-5);
     zeros(3,8), eye(3), zeros(3,Lk-11);
     zeros(3,14), eye(3), zeros(3,Lk-17);
-    lambda_row;
+    Ts*lambda_row;
     zeros(6,Lk-4-6), eye(6), zeros(6,4);
     q2(xeq), zeros(1,Lk-5), q1(xeq), zeros(1,3)]; % 1 lambda + xd&yd
 
@@ -128,9 +128,15 @@ Qmpc = diag(Q_c);
 %%%%%%%%%%%%%%%
 Acal = [];
 Ai = Ampc;
+Amcal = [];
+Ami = Am;
 Bcal_u = [];
 Bi = zeros(Lk,Uk);
 % Dcal = [];
+Ztemp = [];
+Zi = zeros(Zk);
+Zi(10,10) = 1;
+% Zi(end,end) = 1;
 
 for i=1:Hp
     if i~=1
@@ -138,8 +144,16 @@ for i=1:Hp
     end
     Acal = [Acal; Ai];
     
+    if i~=1
+        Ami = Ami*Am;
+    end
+    Amcal = [Amcal; Ami];
+    
     Bi = Ampc*Bi + Bmpc;
     Bcal_u = [Bcal_u; Bi];
+    
+    
+    Ztemp = [Ztemp; Zi];
     
 %     Dcal = [Dcal, Dmpc]; 
 end
@@ -168,7 +182,9 @@ Theta = Ccal*Bcal_du;
 
 Xcal = Acal*X0 + Bcal_u*Uprev + Bcal_du*deltaU; % P: P*: Optimal states in prediction window
 Zcal = Psi*X0 + Upsilon*Uprev + Theta*deltaU;
+% Zcal = Ztemp*Z0 + Psi*X0 + Upsilon*Uprev + Theta*deltaU;
 
+% Epsilon = Tau - Ztemp*Z0 - Psi*X0 - Upsilon*Uprev;
 Epsilon = Tau - Psi*X0 - Upsilon*Uprev;
 Gcal = 2*Theta'*Qcal*Epsilon;
 Hcal = Theta'*Qcal*Theta + Rcal;
@@ -182,12 +198,12 @@ Cost = Epsilon'*Qcal*Epsilon - deltaU'*Gcal + deltaU'*Hcal*deltaU;
 %%% Constraints %%%
 %%%%%%%%%%%%%%%%%%%
 
-Constraints = [F*[U;1]<=0; G*[Zcal;1]<=0; E*[deltaU;1]<=0];
-% Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0];
+% Constraints = [F*[U;1]<=0; G*[Zcal;1]<=0; E*[deltaU;1]<=0];
+Constraints = [F*[U;1]<=0; E*[deltaU;1]<=0];
 % Constraints = [F*[U;1]<=0; G*[Zcal;1]<=0];
 % Constraints = G*[Zcal;1]<=0;
 
 % The Yalmip optimizer-object used for simulation and control
-MPCobj = optimizer(Constraints,Cost,ops,{X0,Uprev,refht},{U,Xcal,Zcal});
+MPCobj = optimizer(Constraints,Cost,ops,{X0,Z0,Uprev,refht},{U,Xcal,Zcal});
 % U: u*: The optimal control window
 % P: P*: Optimal states in prediction window
