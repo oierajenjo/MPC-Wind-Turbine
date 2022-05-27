@@ -12,19 +12,6 @@ MPCconstants_linear_no_ws_ts
 MPCconstants
 addpath('functions');
 
-% UNCOMMENT
-% kAns = questdlg('Execute Kalman Filter with Bladed measurements', ...
-% 	'Kalman Filter');
-% kAns = 'No';
-% kAns = convertCharsToStrings(kAns);
-% if kAns=="Cancel"
-%     return
-% elseif kAns == "Yes"
-%     disp("Measured values")
-% elseif kAns == "No"
-%     disp("True values")
-% end
-
 u_b = ones(4,N);
 theta_f = 0;
 [lamb_opt, cp_opt] = cp_max(theta_f,cp_l,lambdaVec,pitchVec);
@@ -95,8 +82,8 @@ for k=1:N-1
         -e9(xeq,1), 0, -e7(xeq,1), e3, e4, zeros(1,4), -e8(xeq,1), 0, 0, -e1, 0;
         -e9(xeq,2), 0, -e7(xeq,2), e3, e4, zeros(1,5), -e8(xeq,2), 0, 0, -e1;
         zeros(6,14);
-%         g2(xeq,uprev_mpc), zeros(1,13);
-        zeros(1,14);
+        g2(xeq,uprev_mpc), zeros(1,13);
+%         zeros(1,14);
         zeros(2,14);
         1, zeros(1,13)];
     
@@ -113,8 +100,8 @@ for k=1:N-1
     % Ampc = eye(Lk); % State Matrix
     
     Bmpc = [zeros(3,Lk-7), f1*eye(3), zeros(3,4);
-%         zeros(1,Lk)]';
-        zeros(1,Lk-4), g3(xeq), zeros(1,3)]';
+        zeros(1,Lk)]';
+%         zeros(1,Lk-4), g3(xeq), zeros(1,3)]';
     %     Bmpc = [zeros(3,Lk-7), f1*eye(3), zeros(3,4);
     %         zeros(1,Lk-4), g1, zeros(1,3)]';
     % Bmpc = Ts*eye(Lk,Uk); % Input Matrix
@@ -132,9 +119,9 @@ for k=1:N-1
     %     ympc(:,k+1) = Cmpc*xmpc(:,k+1);
     
     k_1 = Ampc*xmpc(:,k) + Bmpc*u_b(:,k);
-    k_2 = Ampc*(xmpc(:,k)+0.5*Ts*k_1) + Bmpc*(u_b(:,k)+0.5*Ts);
-    k_3 = Ampc*(xmpc(:,k)+0.5*Ts*k_2) + Bmpc*(u_b(:,k)+0.5*Ts);
-    k_4 = Ampc*(xmpc(:,k)+Ts*k_3) + Bmpc*(u_b(:,k)+Ts);
+    k_2 = Ampc*(xmpc(:,k)+0.5*Ts*k_1) + Bmpc*(u_b(:,k));
+    k_3 = Ampc*(xmpc(:,k)+0.5*Ts*k_2) + Bmpc*(u_b(:,k));
+    k_4 = Ampc*(xmpc(:,k)+Ts*k_3) + Bmpc*(u_b(:,k));
     xmpc(:,k+1) = xmpc(:,k) + (1/6)*(k_1+2*k_2+2*k_3+k_4)*Ts;
 %     xmpc(:,k+1) = (eye(Lk) + Ts*Ampc)*xmpc(:,k) + Ts*Bmpc*u_b(:,k);
     ympc(:,k+1) = Cmpc*xmpc(:,k+1);
