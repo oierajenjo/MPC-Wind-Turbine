@@ -84,7 +84,7 @@ Cmpc = [1, zeros(1,Lk-1);
     zeros(1,4), 1, zeros(1,Lk-5);
     zeros(3,8), eye(3), zeros(3,Lk-11);
     zeros(3,14), eye(3), zeros(3,Lk-17);
-    Ts*lambda_row;
+    lambda_row;
     zeros(6,Lk-4-6), eye(6), zeros(6,4);
     q2(xeq), zeros(1,Lk-5), q1(xeq), zeros(1,3)]; % 1 lambda + xd&yd
 
