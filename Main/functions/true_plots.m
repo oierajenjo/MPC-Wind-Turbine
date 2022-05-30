@@ -20,8 +20,8 @@ legend('Non-linear', 'Linear');
 title(['$Estimation $' tl(2)], 'Interpreter', 'latex', 'FontSize', 15);
 
 filename = sprintf('plots/MPC_%s', var_names(1));
-set(gcf, 'PaperPosition', [0 0 6 3.7]); %Position plot at left hand corner with width 25 and height 20.
-set(gcf, 'PaperSize', [5.7 3.7]); %Set the paper to have width 25 and height 20.
+set(gcf, 'PaperPosition', [0 0 14.5 9.4]); %Position plot at left hand corner with width 25 and height 20.
+set(gcf, 'PaperSize', [14.5 9.4]); %Set the paper to have width 25 and height 20.
 saveas(gcf, filename, 'pdf') %Save figure
 
 for i = 1:Lk
@@ -35,8 +35,8 @@ for i = 1:Lk
     title(['$Estimation $' x_vl(i)], 'Interpreter', 'latex', 'FontSize', 15);
     
     filename = sprintf('plots/MPC_%s', var_names(1+i));
-    set(gcf, 'PaperPosition', [0 0 6 3.7]); %Position plot at left hand corner with width 25 and height 20.
-    set(gcf, 'PaperSize', [5.7 3.7]); %Set the paper to have width 25 and height 20.
+    set(gcf, 'PaperPosition', [0 0 14.5 9.4]); %Position plot at left hand corner with width 25 and height 20.
+    set(gcf, 'PaperSize', [14.5 9.4]); %Set the paper to have width 25 and height 20.
     saveas(gcf, filename, 'pdf') %Save figure
 end
 end
