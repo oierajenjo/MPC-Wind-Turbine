@@ -36,10 +36,10 @@ B.xd_min = -8.7;
 B.xd_max = 10;
 B.yd_min = -5.9;
 B.yd_max = 6.1;
-B.x_min = -15;
-B.x_max = 15;
-B.y_min = -20;
-B.y_max = 20;
+% B.x_min = -15;
+% B.x_max = 15;
+% B.y_min = -20;
+% B.y_max = 20;
 
 var.B = B;
 
@@ -69,14 +69,14 @@ To.xd_min = -1.5;
 To.xd_max = 1.5;
 To.yd_min = -1.5;
 To.yd_max = 1.5;
-% To.xd_min = -0.20;
-% To.xd_max = 0.20;
-% To.yd_min = -0.15;
-% To.yd_max = 0.15;
-To.x_min = -20;
-To.x_max = 20;
-To.y_min = -20;
-To.y_max = 20;
+To.xd_min = -0.20;
+To.xd_max = 0.20;
+To.yd_min = -0.15;
+To.yd_max = 0.15;
+% To.x_min = -20;
+% To.x_max = 20;
+% To.y_min = -20;
+% To.y_max = 20;
 
 var.To = To;
 

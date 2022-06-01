@@ -27,7 +27,7 @@ v = sqrt(R)*randn(Yk, N); % Generate random measurement noise (from assumed R)
 x_tv = zeros(Lk, N); % Initialize size of true state for all k
 x_tv(:,1) = x_i; % Set true initial state
 yt = zeros(Yk, N); % Initialize size of output vector for all k
-
+yt(:,1) = y_me(:,1);
 % Initialize state and covariance
 x_kf = x_tv; % Initialize size of state estimate for all k
 P0 = [M.sigma_enc; M.sigma_tdef; M.sigma_tvel; M.sigma_tdef; M.sigma_tvel;...
