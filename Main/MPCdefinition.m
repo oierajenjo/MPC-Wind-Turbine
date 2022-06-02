@@ -50,32 +50,8 @@ Bmpc = Ts*Bm;
 % Bmpc = (1/6)*(6*eye(Lk)+(4*eye(Lk)+(3*eye(Lk)+Ts*Am)*Ts*Am)*Ts*Am)*Bm*Ts;
 % Bmpc = Sx\Bmpc; % Input Matrix
 
-
-% lambda_rows = [
-%     r1(xeq,0), 0, r6(xeq,0), zeros(1,5), r7(xeq,0), zeros(1,5), r2(xeq,0), zeros(1,9), r5(xeq,0), r3(xeq,0), r4(xeq,0);
-%     r1(xeq,1), 0, r6(xeq,1), zeros(1,6), r7(xeq,1), zeros(1,5), r2(xeq,1), zeros(1,8), r5(xeq,1), r3(xeq,1), r4(xeq,1);
-%     r1(xeq,2), 0, r6(xeq,2), zeros(1,7), r7(xeq,2), zeros(1,5), r2(xeq,2), zeros(1,7), r5(xeq,2), r3(xeq,2), r4(xeq,2)];
-
-% Cmpc = [1, zeros(1,Lk-1);
-%     0, 0, 1, zeros(1,Lk-3);
-%     zeros(1,4), 1, zeros(1,Lk-5);
-%     zeros(3,8), eye(3), zeros(3,Lk-11);
-%     zeros(3,14), eye(3), zeros(3,Lk-17);
-%     lambda_rows;
-%     zeros(6,Lk-4-6), eye(6), zeros(6,4);
-%     q2(xeq), zeros(1,Lk-5), q1(xeq), zeros(1,3)]; % 3 lambdas + xd&yd
-% Cmpc = Sz\Cmpc*Sx;
-
-% Cmpc = [1, zeros(1,Lk-1);
-%     0, 1, 0, zeros(1,Lk-3);
-%     zeros(1,3), 1, zeros(1,Lk-4);
-%     zeros(3,5), eye(3), zeros(3,Lk-8);
-%     zeros(3,11), eye(3), zeros(3,Lk-14);
-%     lambda_rows;
-%     zeros(6,Lk-4-6), eye(6), zeros(6,4);
-%     q2(xeq), zeros(1,Lk-5), q1(xeq), zeros(1,3)]; % 3 lambdas + x&y
-% Cmpc = Sz\Cmpc*Sx;
-
+Kc = xeq_dot - Am*xeq - Bm*uprev_mpc;
+K1 = Ts*Kc;
 
 lambda_row = [rr1(xeq), 0, rr4(xeq), zeros(1,Lk-6), rr3(xeq), rr2(xeq), 0];
 
@@ -87,6 +63,9 @@ Cmpc = [1, zeros(1,Lk-1);
     lambda_row;
     zeros(6,Lk-4-6), eye(6), zeros(6,4);
     q2(xeq), zeros(1,Lk-5), q1(xeq), zeros(1,3)]; % 1 lambda + xd&yd
+
+
+K2 = zeq - Cmpc*xeq;
 
 % Cmpc = [1, zeros(1,Lk-1);
 %     0, 1, 0, zeros(1,Lk-3);
@@ -108,13 +87,6 @@ Cmpc = [1, zeros(1,Lk-1);
 %     zeros(1,2), -1, zeros(1,Lk-6), 1, 1, 0;
 %     zeros(1,Lk-1), 1];
 
-% Dmpc = (1/6)*(3*eye(Lk)+(2*eye(Lk)+Ts*Am)*Ts*Am)*Ts*Bm;
-
-% if xeq(26)<= W.rate_point % 3 lambda
-%     Q_c = [0 10 10 10*ones(1,3) 10*ones(1,3) 20*ones(1,3) 20*ones(1,3) zeros(1,3) 0]./qs; % Error Weight (lambda)
-% else
-%     Q_c = [20 10 10 10*ones(1,3) 10*ones(1,3) zeros(1,3) zeros(1,3) zeros(1,3) 20]./qs; % Error Weight (omega_r)
-% end
 if xeq(Lk-1)<= W.rate_point % 1 lambdas
     Q_c = [0 1 1 1*ones(1,3) 1*ones(1,3) 20 20*ones(1,3) zeros(1,3) 0]./qs; % Error Weight (lambda)
 else
@@ -132,11 +104,6 @@ Amcal = [];
 Ami = Am;
 Bcal_u = [];
 Bi = zeros(Lk,Uk);
-% Dcal = [];
-Ztemp = [];
-Zi = zeros(Zk);
-Zi(10,10) = 1;
-% Zi(end,end) = 1;
 
 for i=1:Hp
     if i~=1
@@ -151,11 +118,16 @@ for i=1:Hp
     
     Bi = Ampc*Bi + Bmpc;
     Bcal_u = [Bcal_u; Bi];
+end
+
+K1cal = eye(Lk);
+Ki = eye(Lk);
+K2cal = K2;
+for i=1:Hp-1
+    Ki = eye(Lk) + Ampc*Ki;
+    K1cal = [K1cal; Ki];
     
-    
-    Ztemp = [Ztemp; Zi];
-    
-%     Dcal = [Dcal, Dmpc]; 
+    K2cal = [K2cal; K2];
 end
 
 Bcal_du = Bcal_u;
@@ -172,7 +144,6 @@ Qcal = repmat({Qmpc}, 1, Hp);
 Qcal = blkdiag(Qcal{:});
 Qcal = Qcal(Zk*(Hw-1)+1:end,:);
 
-
 %%%%%%%%%%%%
 %%% Cost %%%
 %%%%%%%%%%%%
@@ -180,12 +151,12 @@ Psi = Ccal*Acal;
 Upsilon = Ccal*Bcal_u;
 Theta = Ccal*Bcal_du;
 
-Xcal = Acal*X0 + Bcal_u*Uprev + Bcal_du*deltaU; % P: P*: Optimal states in prediction window
-Zcal = Psi*X0 + Upsilon*Uprev + Theta*deltaU;
-% Zcal = Ztemp*Z0 + Psi*X0 + Upsilon*Uprev + Theta*deltaU;
+Xcal = Acal*X0 + Bcal_u*Uprev + Bcal_du*deltaU + K1cal*K1; % P: P*: Optimal states in prediction window
+% Zcal = Psi*X0 + Upsilon*Uprev + Theta*deltaU;
+Zcal = Psi*X0 + Upsilon*Uprev + Theta*deltaU + Ccal*K1cal*K1 + K2cal;
 
-% Epsilon = Tau - Ztemp*Z0 - Psi*X0 - Upsilon*Uprev;
-Epsilon = Tau - Psi*X0 - Upsilon*Uprev;
+% Epsilon = Tau - Psi*X0 - Upsilon*Uprev;
+Epsilon = Tau - Psi*X0 - Upsilon*Uprev - Ccal*K1cal*K1 - K2cal;
 Gcal = 2*Theta'*Qcal*Epsilon;
 Hcal = Theta'*Qcal*Theta + Rcal;
 
@@ -204,6 +175,6 @@ Constraints = [F*[U;1]<=0; G*[Zcal;1]<=0; E*[deltaU;1]<=0];
 % Constraints = G*[Zcal;1]<=0;
 
 % The Yalmip optimizer-object used for simulation and control
-MPCobj = optimizer(Constraints,Cost,ops,{X0,Z0,Uprev,refht},{U,Xcal,Zcal});
+MPCobj = optimizer(Constraints,Cost,ops,{X0,Uprev,refht},{U,Xcal,Zcal});
 % U: u*: The optimal control window
 % P: P*: Optimal states in prediction window

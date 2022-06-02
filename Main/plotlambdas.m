@@ -14,7 +14,7 @@ plot(t,z_mpc(end,:),t,pe);
 xlabel('Time (s)', 'Interpreter', 'latex', 'FontSize', 14);
 ylabel('$Watt [W]$', 'Interpreter', 'latex', 'FontSize', 14);
 % grid on;
-legend('Non-linear','Expected');
+legend('Actual','Expected');
 title(['$Estimation $' tl(1)], 'Interpreter', 'latex', 'FontSize', 15);
 filename = 'plots/MPC_Pe';
 set(gcf, 'PaperPosition', [0 0 14.5 9.4]); %Position plot at left hand corner with width 25 and height 20.
@@ -26,7 +26,7 @@ plot(t,z_mpc(10,:)',t,lam);
 xlabel('Time (s)', 'Interpreter', 'latex', 'FontSize', 14);
 ylabel('$\cdot$', 'Interpreter', 'latex', 'FontSize', 14);
 % grid on;
-legend('Non-linear','Expected');
+legend('Actual','Expected');
 title(['$Estimation $' tl(2)], 'Interpreter', 'latex', 'FontSize', 15);
 filename = 'plots/MPC_lambda';
 set(gcf, 'PaperPosition', [0 0 14.5 9.4]); %Position plot at left hand corner with width 25 and height 20.

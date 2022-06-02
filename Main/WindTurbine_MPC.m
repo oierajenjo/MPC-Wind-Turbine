@@ -43,12 +43,13 @@ e = zeros(Yk, N);
 
 uprev_mpc = u_b(:,1);
 xeq = x_i;
+xeq_dot = zeros(Lk,1);
 x_mpc = x_tv;
 u_mpc = zeros(Uk, N);
 z_mpc = zeros(Zk, N);
 z_i(10) = lamb_eq(x_i);
 z_mpc(:,1) = z_i;
-zprev = z_i;
+zeq = z_i;
 
 %% Reference trajectories
 % ref_me = [Ac.omega_opt*ones(N+Hp,1), zeros(N+Hp,8), W.TSR*ones(N+Hp,3) , zeros(N+Hp,6), Ac.Pe_opt*ones(N+Hp,1)]';
@@ -57,9 +58,10 @@ ref_me = [Ac.omega_opt*ones(N+Hp,1), zeros(N+Hp,8), W.TSR*ones(N+Hp,1) , zeros(N
 
 disp('Running Loop')
 for k=1:N-1
+%     tic
     %% MPC
     MPCdefinition
-    res = MPCobj({Sx\x_tv(:,k),zprev,uprev_mpc,ref_me(:,k+1:k+Hp)});
+    res = MPCobj({Sx\x_tv(:,k),uprev_mpc,ref_me(:,k+1:k+Hp)});
     
 %     for j=1:Lk
 %         O(j+Yk*(j-1):j+Yk*(j)-1,:) = Cy*Ampc^(j-1);
@@ -77,8 +79,7 @@ for k=1:N-1
     
     z_L = res{3};
     z_temp = reshape(z_L, [Zk, length(z_L)/Zk]);
-    z_mpc(:,k) = z_temp(:,1);
-    zprev = z_mpc(:,k);
+    z_mpc(:,k+1) = z_temp(:,1);
     
     %% Runge-Kutta 4th order method
     [x_tv(:,k+1),yt(:,k+1)] = RK4(f,x_tv(:,k),uprev_mpc,h,n(x_tv(:,k)),v(:,k+1),Ts);
@@ -87,11 +88,15 @@ for k=1:N-1
 %     [x_kf(:,k+1),P,e(:,k+1)] = UKF(f,h,Q,R,x_kf(:,k),yt(:,k+1),uprev_mpc,kal,P,Ts,v(:,k+1),n,P0);
 %     [x_kf(:,k+1),P,e(:,k+1)] = UKF(f,h,Q,R,x_kf(:,k),yt(:,k+1),uprev_mpc,kal,P,Ts,zeros(Yk,1),n,P0);
     
+    %% Operating Points
+    xeq_dot = (x_tv(:,k+1)-xeq)/Ts;
     xeq = x_tv(:,k+1);
+    zeq = z_mpc(:,k+1);
     
     if mod(k+1,50) == 0
         disp("Iteration: " + num2str(k+1));
     end
+%     toc
 end
 
 x_mpc(end,:) = wrapToPi(x_mpc(end,:))+pi;
