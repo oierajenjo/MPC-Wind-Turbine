@@ -61,12 +61,6 @@ x_i = [omega_r(1) xt xt_dot yt yt_dot xb xb_dot yb yb_dot zeros(1,3) theta_dot..
 
 % 1 lambda
 z_i = [omega_r(1) xt_dot yt_dot xb_dot yb_dot 0 zeros(1,3) zeros(1,3) Pe(1,:)]';
-% z_i = [omega_r(1) xt yt xb yb 0 zeros(1,3) zeros(1,3) Pe(1,:)]';
-
-% 3 lambda
-% z_i = [omega_r(1) xt_dot yt_dot xb_dot yb_dot zeros(1,3) zeros(1,3) zeros(1,3)...
-%     Pe(1,:)]'; 
-% z_i = [omega_r(1) xt yt xb yb zeros(1,3) zeros(1,3) zeros(1,3) Pe(1,:)]';
 
 %% Initial state vector
 xt = data.Data(:,224);

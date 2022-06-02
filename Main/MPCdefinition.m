@@ -87,13 +87,14 @@ K2 = zeq - Cmpc*xeq;
 %     zeros(1,2), -1, zeros(1,Lk-6), 1, 1, 0;
 %     zeros(1,Lk-1), 1];
 
-if xeq(Lk-1)<= W.rate_point % 1 lambdas
-    Q_c = [0 1 1 1*ones(1,3) 1*ones(1,3) 20 20*ones(1,3) zeros(1,3) 0]./qs; % Error Weight (lambda)
+if xeq(Lk-1)<= W.rate_point*0.8 % 1 lambdas
+    Q_c = [10 1 1 1*ones(1,3) 1*ones(1,3) 10 20*ones(1,3) zeros(1,3) 0]./qs; % Error Weight (lambda)
+elseif W.rate_point*0.8 <= xeq(Lk-1) && xeq(Lk-1)<= W.rate_point*1.2
+    Q_c = [5 1 1 1*ones(1,3) 1*ones(1,3) 20 20*ones(1,3) zeros(1,3) 0]./qs; % Error Weight (lambda)
 else
     Q_c = [20 1 1 1*ones(1,3) 1*ones(1,3) 0 zeros(1,3) zeros(1,3) 20]./qs; % Error Weight (omega_r)
 end
 Qmpc = diag(Q_c);
-
 
 %%%%%%%%%%%%%%%
 %%% Lifting %%%
