@@ -23,7 +23,7 @@ r6 = @(x,i) (x(1)*Ae.Rr-x(15+i))/vri_eq(x,i)^2; % dlamb_dxdott
 r7 = r6; % dlamb_dxdotbi
 
 % lambda
-lamb_eq = @(x,i) (x(1)*Ae.Rr)/(vr_eq(x));
+lamb_eq = @(x) (x(1)*Ae.Rr)/(vr_eq(x));
 rr1 = @(x) Ae.Rr/vr_eq(x); % dlamb_dwr
 rr2 = @(x) -x(1)*Ae.Rr/vr_eq(x)^2; % dlamb_dvm
 rr3 = @(x) -x(1)*Ae.Rr/vr_eq(x)^2; % dlamb_dvt

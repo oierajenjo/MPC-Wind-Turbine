@@ -36,10 +36,10 @@ B.xd_min = -8.7;
 B.xd_max = 10;
 B.yd_min = -5.9;
 B.yd_max = 6.1;
-B.x_min = -15;
-B.x_max = 15;
-B.y_min = -20;
-B.y_max = 20;
+% B.xd_min = 0;
+% B.xd_max = 0;
+% B.yd_min = 0;
+% B.yd_max = 0;
 
 var.B = B;
 
@@ -73,10 +73,10 @@ To.yd_max = 1.5;
 % To.xd_max = 0.20;
 % To.yd_min = -0.15;
 % To.yd_max = 0.15;
-To.x_min = -20;
-To.x_max = 20;
-To.y_min = -20;
-To.y_max = 20;
+% To.xd_min = 0;
+% To.xd_max = 0;
+% To.yd_min = 0;
+% To.yd_max = 0;
 
 var.To = To;
 
@@ -94,8 +94,8 @@ Ac.tau = Ts; % Generator time constant
 Ac.pitch_min = -deg2rad(15);
 Ac.pitch_max = pi/2;
 Ac.Tg_min = 0;
-% Ac.Tg_max = 2.159e7;
-Ac.Tg_max = 21030000;
+Ac.Tg_max = 2.159e7;
+Ac.Tg_opt = 21030000;
 Ac.pitchd_min = -deg2rad(9); % Pitch angle min angular speed
 Ac.pitchd_max = deg2rad(9); % Pitch angle max angular speed
 Ac.omega_min = convangvel(0,'rpm', 'rad/s');
@@ -105,6 +105,7 @@ Ac.omega_max = convangvel(10,'rpm', 'rad/s');
 Ac.Pe_min = 0;
 Ac.Pe_opt = 15*10^6;
 Ac.Pe_max = Ac.Tg_max*Ac.omega_max;
+Ac.Pe_max = Ac.Pe_opt*1.1;
 % Ac.Pe_max = 0;
 
 var.Ac = Ac;
@@ -178,43 +179,43 @@ Hw = 1; % Window parameter
 Z_c.omega_min = Ac.omega_min;
 Z_c.omega_max = -Ac.omega_max;
 
-Z_c.xtd_min = To.xd_min;
-Z_c.xtd_max = -To.xd_max;
-Z_c.ytd_min = To.yd_min;
-Z_c.ytd_max = -To.yd_max;
-
-Z_c.xbid_min1 = B.xd_min;
-Z_c.xbid_max1 = -B.xd_max;
-Z_c.xbid_min2 = B.xd_min;
-Z_c.xbid_max2 = -B.xd_max;
-Z_c.xbid_min3 = B.xd_min;
-Z_c.xbid_max3 = -B.xd_max;
-
-Z_c.ybid_min1 = B.yd_min;
-Z_c.ybid_max1 = -B.yd_max;
-Z_c.ybid_min2 = B.yd_min;
-Z_c.ybid_max2 = -B.yd_max;
-Z_c.ybid_min3 = B.yd_min;
-Z_c.ybid_max3 = -B.yd_max;
-
-% Z_c.xt_min = To.x_min;
-% Z_c.xt_max = -To.x_max;
-% Z_c.yt_min = To.y_min;
-% Z_c.yt_max = -To.y_max;
+% Z_c.xtd_min = To.xd_min;
+% Z_c.xtd_max = -To.xd_max;
+% Z_c.ytd_min = To.yd_min;
+% Z_c.ytd_max = -To.yd_max;
 % 
-% Z_c.xbi_min1 = B.x_min;
-% Z_c.xbi_max1 = -B.x_max;
-% Z_c.xbi_min2 = B.x_min;
-% Z_c.xbi_max2 = -B.x_max;
-% Z_c.xbi_min3 = B.x_min;
-% Z_c.xbi_max3 = -B.x_max;
+% Z_c.xbid_min1 = B.xd_min;
+% Z_c.xbid_max1 = -B.xd_max;
+% Z_c.xbid_min2 = B.xd_min;
+% Z_c.xbid_max2 = -B.xd_max;
+% Z_c.xbid_min3 = B.xd_min;
+% Z_c.xbid_max3 = -B.xd_max;
 % 
-% Z_c.ybi_min1 = B.y_min;
-% Z_c.ybi_max1 = -B.y_max;
-% Z_c.ybi_min2 = B.y_min;
-% Z_c.ybi_max2 = -B.y_max;
-% Z_c.ybi_min3 = B.y_min;
-% Z_c.ybi_max3 = -B.y_max;
+% Z_c.ybid_min1 = B.yd_min;
+% Z_c.ybid_max1 = -B.yd_max;
+% Z_c.ybid_min2 = B.yd_min;
+% Z_c.ybid_max2 = -B.yd_max;
+% Z_c.ybid_min3 = B.yd_min;
+% Z_c.ybid_max3 = -B.yd_max;
+
+Z_c.xtd_min = 0;
+Z_c.xtd_max = 0;
+Z_c.ytd_min = 0;
+Z_c.ytd_max = 0;
+
+Z_c.xbid_min1 = 0;
+Z_c.xbid_max1 = 0;
+Z_c.xbid_min2 = 0;
+Z_c.xbid_max2 = 0;
+Z_c.xbid_min3 = 0;
+Z_c.xbid_max3 = 0;
+
+Z_c.ybid_min1 = 0;
+Z_c.ybid_max1 = 0;
+Z_c.ybid_min2 = 0;
+Z_c.ybid_max2 = 0;
+Z_c.ybid_min3 = 0;
+Z_c.ybid_max3 = 0;
 
 % Z_c.lambda_min1 = W.lambda_min;
 % Z_c.lambda_max1 = -W.lambda_max;

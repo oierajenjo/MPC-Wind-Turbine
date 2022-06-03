@@ -28,7 +28,7 @@ e_L = blkdiag(e_rep{:});
 e_L = repmat({e_L}, 1, Hu);
 E_L = blkdiag(e_L{:});
 du_cons = [Ac.pitchd_min; -Ac.pitchd_max; Ac.pitchd_min; ...
-    -Ac.pitchd_max; Ac.pitchd_min; -Ac.pitchd_max; zeros(2,1)];
+    -Ac.pitchd_max; Ac.pitchd_min; -Ac.pitchd_max; zeros(2,1)].*Ts;
 dU_L = du_cons;
 for i=1:Hu-1
     dU_L = [dU_L; du_cons];
@@ -38,9 +38,9 @@ E = [E_L dU_L];
 % Constraints in Actuator Variables
 g = [-1;1];
 g_rep = repmat({g}, 1, Zk);
-% for i=0:7
-%     g_rep{2+i} = zeros(2,1);
-% end
+for i=0:7
+    g_rep{2+i} = zeros(2,1);
+end
 % for i=0:2
 %     g_rep{14+i} = zeros(2,1);
 % end
@@ -71,27 +71,13 @@ deltaU = sdpvar(Uk*Hu,1);   % DeltaU
 %%% Lifting %%%
 %%%%%%%%%%%%%%%
 % Unchanging matrixes
-delta_rs = [(Ac.pitch_max-Ac.pitch_min)*ones(1,3) (Ac.Tg_max-Ac.Tg_min)];
-
-% 3 lambdas
-% qs = [(Ac.omega_opt-Ac.omega_min) (To.xd_max-To.xd_min) (To.yd_max-To.yd_min)...
-%     (B.xd_max-B.xd_min)*ones(1,3) (B.yd_max-B.yd_min)*ones(1,3) ...
-%     (W.lambda_max-W.lambda_min)*ones(1,3) (Ac.pitch_max-Ac.pitch_min)*ones(1,3)...
-%     (Ac.pitchd_max-Ac.pitchd_min)*ones(1,3) (Ac.Pe_opt-Ac.Pe_min)]; % 3 lambda + xd&yd
-% qs = [(Ac.omega_opt-Ac.omega_min) (To.x_max-To.xd_min) (To.y_max-To.yd_min)...
-%     (B.x_max-B.x_min)*ones(1,3) (B.y_max-B.y_min)*ones(1,3) ...
-%     (W.lambda_max-W.lambda_min)*ones(1,3) (Ac.pitch_max-Ac.pitch_min)*ones(1,3)...
-%     (Ac.pitchd_max-Ac.pitchd_min)*ones(1,3) (Ac.Pe_opt-Ac.Pe_min)]; % 3 lambda + x&y
+delta_rs = [(Ac.pitch_max-Ac.pitch_min)*ones(1,3) (Ac.Tg_opt-Ac.Tg_min)];
 
 % 1 lambdas
-qs = [(Ac.omega_opt-Ac.omega_min) (To.xd_max-To.xd_min) (To.yd_max-To.yd_min)...
+qs = [(Ac.omega_max-Ac.omega_min) (To.xd_max-To.xd_min) (To.yd_max-To.yd_min)...
     (B.xd_max-B.xd_min)*ones(1,3) (B.yd_max-B.yd_min)*ones(1,3) ...
     (W.lambda_max-W.lambda_min) (Ac.pitch_max-Ac.pitch_min)*ones(1,3)...
-    (Ac.pitchd_max-Ac.pitchd_min)*ones(1,3) (Ac.Pe_opt-Ac.Pe_min)]; % 1 lambda + xd&yd
-% qs = [(Ac.omega_opt-Ac.omega_min) (To.x_max-To.x_min) (To.y_max-To.y_min)...
-%     (B.x_max-B.x_min)*ones(1,3) (B.y_max-B.y_min)*ones(1,3) ...
-%     (W.lambda_max-W.lambda_min) (Ac.pitch_max-Ac.pitch_min)*ones(1,3)...
-%     (Ac.pitchd_max-Ac.pitchd_min)*ones(1,3) (Ac.Pe_opt-Ac.Pe_min)]; % 1 lambda + x&y
+    (Ac.pitchd_max-Ac.pitchd_min)*ones(1,3) (Ac.Pe_opt-Ac.Pe_min)]; % 1 lambda
 
 R_c = 0.1; % Input Weight
 Rmpc = R_c*eye(Uk);
