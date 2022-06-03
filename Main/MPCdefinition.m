@@ -92,7 +92,7 @@ if xeq(Lk-1)<= W.rate_point*0.9 % 1 lambdas
 elseif W.rate_point*0.9 < xeq(Lk-1) && xeq(Lk-1)<= W.rate_point*1.1
     Q_c = [20 1 1 1*ones(1,3) 1*ones(1,3) 1 20*ones(1,3) zeros(1,3) 0]./qs; % Error Weight (lambda)
 else
-    Q_c = [20 1 1 1*ones(1,3) 1*ones(1,3) 0 zeros(1,3) zeros(1,3) 20]./qs; % Error Weight (omega_r)
+    Q_c = [20 1 1 1*ones(1,3) 1*ones(1,3) 0 zeros(1,3) zeros(1,3) 10]./qs; % Error Weight (omega_r)
 end
 Qmpc = diag(Q_c);
 

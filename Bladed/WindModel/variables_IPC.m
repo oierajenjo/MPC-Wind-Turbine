@@ -56,7 +56,7 @@ theta_dot = data.Data(1,37:39);
 vt = 0;
 vm = mean(data.Data(:,59));
 
-x_i = [omega_r(1) xt xt_dot yt yt_dot xb xb_dot yb yb_dot zeros(1,3) theta_dot...
+x_i = [omega_r(1) xt xt_dot yt yt_dot xb xb_dot yb yb_dot theta_ref(1,:) theta_dot...
     tg_ref(1) vt vm psi(1)]';
 
 % 1 lambda
