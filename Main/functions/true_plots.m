@@ -9,6 +9,7 @@ ylabel('$Watt [W]$', 'Interpreter', 'latex', 'FontSize', 14);
 legend('Non-linear');
 title(['$Estimation $' tl(1)], 'Interpreter', 'latex', 'FontSize', 15);
 
+
 figure
 % plot(t,y(14,:), t,(xk(26,:)+xk(25,:)), t,(xm(26,:)+xm(25,:)));
 plot(t,(xk(26,:)+xk(25,:)), t,(xm(26,:)+xm(25,:)));
@@ -30,7 +31,7 @@ title(['$Estimation $' tl(3)], 'Interpreter', 'latex', 'FontSize', 15);
 filename = sprintf('plots/MPC_%s', var_names(1));
 set(gcf, 'PaperPosition', [0 0 14.5 9.4]); %Position plot at left hand corner with width 25 and height 20.
 set(gcf, 'PaperSize', [14.5 9.4]); %Set the paper to have width 25 and height 20.
-% saveas(gcf, filename, 'pdf') %Save figure
+saveas(gcf, filename, 'pdf') %Save figure
 
 for i = 1:Lk
     figure
@@ -45,7 +46,7 @@ for i = 1:Lk
     filename = sprintf('plots/MPC_%s', var_names(1+i));
     set(gcf, 'PaperPosition', [0 0 14.5 9.4]); %Position plot at left hand corner with width 25 and height 20.
     set(gcf, 'PaperSize', [14.5 9.4]); %Set the paper to have width 25 and height 20.
-%     saveas(gcf, filename, 'pdf') %Save figure
+    saveas(gcf, filename, 'pdf') %Save figure
 end
 end
 
